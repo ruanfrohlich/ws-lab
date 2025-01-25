@@ -6,3 +6,20 @@
   scrollbar-width: thin;
   scrollbar-color: black transparent;
 }
+
+@keyframes slidein {
+  from {
+    margin-left: 100%;
+    width: 300%;
+  }
+
+  to {
+    margin-left: 0%;
+    width: 100%;
+  }
+}
+
+.chat-message {
+  animation-duration: 200ms;
+  animation-name: slidein;
+}
