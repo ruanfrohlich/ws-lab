@@ -119,40 +119,54 @@ export function App() {
       const data = JSON.parse(String(e.data)) as ISocketData;
 
       setState((state) => {
-        if (data.receiverId !== state.username) {
-          return { ...state, message: '' };
-        }
-
-        const oldMessages = state.receivedMessages.find(
-          (user) => user.id === data.senderId,
-        );
-
-        if (oldMessages) {
+        if (data.senderId === state.username) {
           return {
             ...state,
-            message: '',
             receivedMessages: [
               ...state.receivedMessages,
               {
-                ...oldMessages,
+                id: data.senderId,
+                avatarColor: '#0fef21',
                 messages: [data.message],
               },
             ],
           };
         }
 
-        return {
-          ...state,
-          message: '',
-          receivedMessages: [
-            ...state.receivedMessages,
-            {
-              id: data.senderId,
-              avatarColor: generateRandomColor(),
-              messages: [data.message],
-            },
-          ],
-        };
+        if (data.receiverId === state.username) {
+          const oldMessages = state.receivedMessages.find(
+            (user) => user.id === data.senderId,
+          );
+
+          if (oldMessages) {
+            return {
+              ...state,
+              message: '',
+              receivedMessages: [
+                ...state.receivedMessages,
+                {
+                  ...oldMessages,
+                  messages: [data.message],
+                },
+              ],
+            };
+          }
+
+          return {
+            ...state,
+            message: '',
+            receivedMessages: [
+              ...state.receivedMessages,
+              {
+                id: data.senderId,
+                avatarColor: generateRandomColor(),
+                messages: [data.message],
+              },
+            ],
+          };
+        }
+
+        return { ...state, message: '' };
       });
     };
   };
@@ -294,7 +308,7 @@ export function App() {
       >
         <div className='absolut t-0 bg-slate-900'>
           <button className='text-white w-full h-[30px]' onClick={hideChat}>
-            <span>Chat</span>
+            Chat
           </button>
         </div>
         <div
