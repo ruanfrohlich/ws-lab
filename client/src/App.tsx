@@ -12,6 +12,7 @@ interface IState {
   connected: boolean;
   username?: string;
   message?: string;
+  messagesHistory?: string[];
   error?: Error;
   hideChat?: boolean;
   receivedMessages: Array<{
@@ -32,6 +33,7 @@ export function App() {
     connected: false,
     receivedMessages: [],
     hideChat: false,
+    messagesHistory: [],
   });
 
   const isValid =
@@ -60,6 +62,13 @@ export function App() {
         message: state.message,
       };
       state.socket.send(JSON.stringify(data));
+
+      setState((state) => {
+        return {
+          ...state,
+          messagesHistory: [...state.messagesHistory, state.message],
+        };
+      });
     }
   };
 
@@ -110,6 +119,10 @@ export function App() {
       const data = JSON.parse(String(e.data)) as ISocketData;
 
       setState((state) => {
+        if (data.receiverId !== state.username) {
+          return { ...state, message: '' };
+        }
+
         const oldMessages = state.receivedMessages.find(
           (user) => user.id === data.senderId,
         );
@@ -310,9 +323,9 @@ export function App() {
                 <p>{el.id}</p>
               </div>
               <div className='flex flex-col items-start'>
-                {el.messages.map((message, index) => (
+                {el.messages.map((message, j) => (
                   <p
-                    key={index}
+                    key={j}
                     className={`mb-2 rounded-ss-xl rounded-se-xl ${el.id === state.username ? 'rounded-bl-xl' : 'rounded-br-xl'} bg-slate-500 text-white p-2`}
                   >
                     {message}
