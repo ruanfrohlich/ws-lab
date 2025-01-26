@@ -1,30 +1,30 @@
-const WebSocketServer = require('websocket').server;
-const http = require('http');
+import { connection, server as wsServer } from 'websocket';
+import { createServer } from 'http';
 
 const acceptedOrigins = ['http://localhost:3000'];
 
 // HTTP Server
-const server = http.createServer(function (request, response) {
+const httpServer = createServer(function (request, response) {
   console.log(new Date() + ' Received request for ' + request.url);
   response.writeHead(404);
   response.end();
 });
 
-server.listen(3001, function () {
+httpServer.listen(3001, function () {
   console.log(new Date() + ' Server is listening on port 3001');
 });
 
 // WS Server
-const ws = new WebSocketServer({
-  httpServer: server,
+const ws = new wsServer({
+  httpServer,
   autoAcceptConnections: false,
 });
 
-function originIsAllowed(origin) {
+function originIsAllowed(origin: string) {
   if (acceptedOrigins.includes(origin)) return true;
 }
 
-const connections = [];
+const connections: connection[] = [];
 
 ws.on('request', function (socket) {
   if (!originIsAllowed(socket.origin)) {
@@ -42,7 +42,8 @@ ws.on('request', function (socket) {
 
     connections.push(connection);
 
-    connection.on('message', function (message) {
+    connection.on('message', (message) => {
+      //@ts-expect-error bug on typecheck
       connections.forEach((conn) => conn.send(message.utf8Data));
     });
 

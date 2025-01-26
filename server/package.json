@@ -1,13 +1,17 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon index.js"
+    "dev": "nodemon --watch index.ts --exec ts-node index.ts"
   },
   "devDependencies": {
+    "@types/node": "^22.10.10",
+    "@types/websocket": "^1.0.10",
     "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
     "websocket": "^1.0.35"
   }
 }
