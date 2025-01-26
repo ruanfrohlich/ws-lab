@@ -46,8 +46,15 @@ function originIsAllowed(origin: string) {
 const connections: connection[] = [];
 
 ws.on('request', function (socket) {
-  if (!originIsAllowed(socket.origin)) {
-    socket.reject();
+  const {
+    origin,
+    httpRequest: { url },
+  } = socket;
+
+  console.log(url);
+
+  if (!originIsAllowed(origin) || url !== '/') {
+    socket.reject(401, 'Unauthorized');
     log(`Connection from origin ${socket.origin} rejected`);
     return;
   }
