@@ -242,7 +242,7 @@ export function App() {
               Qual seu nome? {state.username && `(Atual: ${state.username})`}
             </label>
             <input
-              className='px-2 py-1 rounded border border-black'
+              className='px-2 py-1 rounded border border-black bg-gray-800 text-white'
               type='text'
               id='username'
               onChange={(e) =>
@@ -258,7 +258,7 @@ export function App() {
           <div className='flex flex-col'>
             <label htmlFor='receiverName'>Pra quem vai a mensagem?</label>
             <input
-              className='px-2 py-1 rounded border border-black'
+              className='px-2 py-1 rounded border border-black bg-gray-800 text-white'
               type='text'
               id='receiverName'
               onChange={(e) =>
@@ -277,7 +277,7 @@ export function App() {
             <label htmlFor='message'>Mensagem:</label>
             <input
               type='text'
-              className='px-2 py-1 rounded border border-black'
+              className='px-2 py-1 rounded border border-black bg-gray-800 text-white'
               id='message'
               value={state.message ?? ''}
               onChange={(e) =>
