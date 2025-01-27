@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { w3cwebsocket } from 'websocket';
 
 interface ISocketData {
+  type: 'mouseMove' | 'message';
   senderId: string;
   receiverId: string;
   message: string;
@@ -15,6 +16,17 @@ interface IState {
   messagesHistory?: string[];
   error?: Error;
   hideChat?: boolean;
+  myMouse?: {
+    x: number;
+    y: number;
+  };
+  mouses?: {
+    id: string;
+    coordinates: {
+      x: number;
+      y: number;
+    };
+  };
   receivedMessages: Array<{
     id: string;
     avatarColor?: string;
@@ -57,10 +69,12 @@ export function App() {
 
     if (state.socket && formRef.current) {
       const data: ISocketData = {
+        type: 'message',
         senderId: state.username,
         receiverId: state.receiver.id,
         message: state.message,
       };
+
       state.socket.send(JSON.stringify(data));
 
       setState((state) => {
@@ -118,55 +132,69 @@ export function App() {
     wsClient.onmessage = function (e) {
       const data = JSON.parse(String(e.data)) as ISocketData;
 
+      console.log(data);
+
       setState((state) => {
-        if (data.senderId === state.username) {
-          return {
-            ...state,
-            receivedMessages: [
-              ...state.receivedMessages,
-              {
-                id: data.senderId,
-                avatarColor: '#0fef21',
-                messages: [data.message],
-              },
-            ],
-          };
-        }
+        switch (data.type) {
+          case 'message': {
+            if (data.senderId === state.username) {
+              return {
+                ...state,
+                receivedMessages: [
+                  ...state.receivedMessages,
+                  {
+                    id: data.senderId,
+                    avatarColor: '#0fef21',
+                    messages: [data.message],
+                  },
+                ],
+              };
+            }
 
-        if (data.receiverId === state.username) {
-          const oldMessages = state.receivedMessages.find(
-            (user) => user.id === data.senderId,
-          );
+            if (data.receiverId === state.username) {
+              const oldMessages = state.receivedMessages.find(
+                (user) => user.id === data.senderId,
+              );
 
-          if (oldMessages) {
+              if (oldMessages) {
+                return {
+                  ...state,
+                  message: '',
+                  receivedMessages: [
+                    ...state.receivedMessages,
+                    {
+                      ...oldMessages,
+                      messages: [data.message],
+                    },
+                  ],
+                };
+              }
+
+              return {
+                ...state,
+                message: '',
+                receivedMessages: [
+                  ...state.receivedMessages,
+                  {
+                    id: data.senderId,
+                    avatarColor: generateRandomColor(),
+                    messages: [data.message],
+                  },
+                ],
+              };
+            }
+
+            break;
+          }
+          case 'mouseMove': {
             return {
               ...state,
-              message: '',
-              receivedMessages: [
-                ...state.receivedMessages,
-                {
-                  ...oldMessages,
-                  messages: [data.message],
-                },
-              ],
             };
           }
-
-          return {
-            ...state,
-            message: '',
-            receivedMessages: [
-              ...state.receivedMessages,
-              {
-                id: data.senderId,
-                avatarColor: generateRandomColor(),
-                messages: [data.message],
-              },
-            ],
-          };
+          default: {
+            return { ...state, message: '' };
+          }
         }
-
-        return { ...state, message: '' };
       });
     };
   };
@@ -207,11 +235,14 @@ export function App() {
     (async () => {
       while (!state.connected && reconnectionCount <= 3) {
         await new Promise((res) => {
-          timer = setTimeout(() => {
-            webSocketHandler();
-            reconnectionCount++;
-            res('ok');
-          }, 3000);
+          timer = setTimeout(
+            () => {
+              webSocketHandler();
+              reconnectionCount++;
+              res('ok');
+            },
+            Math.floor(Math.random() * 3000),
+          );
         });
       }
     })();

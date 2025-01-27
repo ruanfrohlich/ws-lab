@@ -1,6 +1,11 @@
 import { connection, server as wsServer } from 'websocket';
 import { createServer } from 'http';
+import { randomUUID } from 'crypto';
 import 'dotenv/config';
+
+interface IMapConnection {
+  id: string;
+}
 
 const acceptedOrigins = ['http://localhost:3000'];
 const port = process.env.PORT ?? 3001;
@@ -13,7 +18,6 @@ const log = (message: string) => {
 
   return console.log(message);
 };
-
 // HTTP Server
 const httpServer = createServer((request, response) => {
   log(`Received request for ${request.url}`);
@@ -29,9 +33,7 @@ const httpServer = createServer((request, response) => {
     response.write(url);
     response.end();
   }
-});
-
-httpServer.listen(port, () => log(`Server is listening on port ${port}`));
+}).listen(port, () => log(`Server is listening on port ${port}`));
 
 // WS Server
 const ws = new wsServer({
@@ -43,15 +45,13 @@ function originIsAllowed(origin: string) {
   if (acceptedOrigins.includes(origin)) return true;
 }
 
-const connections: connection[] = [];
+const connections = new Map<connection, IMapConnection>();
 
 ws.on('request', function (socket) {
   const {
     origin,
     httpRequest: { url },
   } = socket;
-
-  console.log(url);
 
   if (!originIsAllowed(origin) || url !== '/') {
     socket.reject(401, 'Unauthorized');
@@ -64,15 +64,20 @@ ws.on('request', function (socket) {
   if (connection.connected) {
     log('Connection accepted');
 
-    connections.push(connection);
+    connections.set(connection, { id: randomUUID() });
 
-    connection.on('message', (message) => {
-      //@ts-expect-error bug on typecheck
-      connections.forEach((conn) => conn.send(message.utf8Data));
+    connection.on('message', (incomingMessage) => {
+      // const metadata = connections.get(connection);
+
+      [...connections.keys()].forEach((conn) =>
+        //@ts-expect-error type bug
+        conn.send(JSON.stringify(incomingMessage.utf8Data)),
+      );
     });
 
     connection.on('close', function () {
       log(`Peer ${connection.remoteAddress} disconnected`);
+      connections.delete(connection);
     });
   }
 });
