@@ -10,16 +10,29 @@
 @keyframes slidein {
   from {
     margin-left: 100%;
-    width: 300%;
   }
 
   to {
     margin-left: 0%;
-    width: 100%;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
   }
 }
 
 .chat-message {
   animation-duration: 200ms;
   animation-name: slidein;
+}
+
+.chat-box {
+  animation-duration: 200ms;
+  animation-name: slideUp;
 }

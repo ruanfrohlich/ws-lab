@@ -1,21 +1,27 @@
 import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { w3cwebsocket } from 'websocket';
 
 interface ISocketData {
-  type: 'mouseMove' | 'message';
-  senderId: string;
-  receiverId: string;
-  message: string;
+  type: 'other' | 'chatMessage' | 'updateClientId';
+  clientId: string;
+  content: {
+    from: string;
+    to: string;
+    user: {
+      name: string;
+    };
+    message: string;
+  };
 }
 
 interface IState {
-  socket?: w3cwebsocket;
+  socket?: WebSocket;
   connected: boolean;
   username?: string;
+  clientId: string;
   message?: string;
   messagesHistory?: string[];
-  error?: Error;
   hideChat?: boolean;
+  openChats: string[];
   myMouse?: {
     x: number;
     y: number;
@@ -30,9 +36,12 @@ interface IState {
   receivedMessages: Array<{
     id: string;
     avatarColor?: string;
+    user?: {
+      name: string;
+    };
     messages: string[];
   }>;
-  receiver?: {
+  receiver: {
     id: string;
   };
 }
@@ -44,8 +53,13 @@ export function App() {
   const [state, setState] = useState<IState>({
     connected: false,
     receivedMessages: [],
-    hideChat: false,
+    hideChat: true,
     messagesHistory: [],
+    clientId: '',
+    openChats: [],
+    receiver: {
+      id: '',
+    },
   });
 
   const isValid =
@@ -69,10 +83,16 @@ export function App() {
 
     if (state.socket && formRef.current) {
       const data: ISocketData = {
-        type: 'message',
-        senderId: state.username,
-        receiverId: state.receiver.id,
-        message: state.message,
+        type: 'chatMessage',
+        clientId: state.clientId,
+        content: {
+          from: state.clientId,
+          to: state.receiver.id,
+          message: state.message,
+          user: {
+            name: state.username,
+          },
+        },
       };
 
       state.socket.send(JSON.stringify(data));
@@ -87,7 +107,7 @@ export function App() {
   };
 
   const webSocketHandler = () => {
-    const wsClient = state.socket ?? new w3cwebsocket('ws://localhost:3001/');
+    const wsClient = state.socket ?? new WebSocket('ws://localhost:3001/');
 
     setState((state) => {
       return {
@@ -96,7 +116,7 @@ export function App() {
       };
     });
 
-    wsClient.onerror = function (info) {
+    wsClient.onerror = function (event) {
       console.log('Connection Error');
 
       setState((state) => {
@@ -104,7 +124,6 @@ export function App() {
           ...state,
           connected: false,
           socket: null,
-          error: info,
         };
       });
     };
@@ -136,24 +155,25 @@ export function App() {
 
       setState((state) => {
         switch (data.type) {
-          case 'message': {
-            if (data.senderId === state.username) {
+          case 'chatMessage': {
+            if (data.content.from === state.clientId) {
               return {
                 ...state,
                 receivedMessages: [
                   ...state.receivedMessages,
                   {
-                    id: data.senderId,
+                    id: data.content.from,
                     avatarColor: '#0fef21',
-                    messages: [data.message],
+                    user: data.content.user,
+                    messages: [data.content.message],
                   },
                 ],
               };
             }
 
-            if (data.receiverId === state.username) {
+            if (data.content.to === state.clientId) {
               const oldMessages = state.receivedMessages.find(
-                (user) => user.id === data.senderId,
+                (user) => user.id === data.content.from,
               );
 
               if (oldMessages) {
@@ -164,7 +184,7 @@ export function App() {
                     ...state.receivedMessages,
                     {
                       ...oldMessages,
-                      messages: [data.message],
+                      messages: [data.content.message],
                     },
                   ],
                 };
@@ -176,19 +196,24 @@ export function App() {
                 receivedMessages: [
                   ...state.receivedMessages,
                   {
-                    id: data.senderId,
+                    id: data.content.from,
                     avatarColor: generateRandomColor(),
-                    messages: [data.message],
+                    user: data.content.user,
+                    messages: [data.content.message],
                   },
                 ],
               };
             }
 
-            break;
-          }
-          case 'mouseMove': {
             return {
               ...state,
+              message: '',
+            };
+          }
+          case 'updateClientId': {
+            return {
+              ...state,
+              clientId: data.clientId,
             };
           }
           default: {
@@ -220,6 +245,27 @@ export function App() {
     }
   };
 
+  // useEffect(() => {
+  //   const chatBox = document.querySelector('.chat-box:last-child');
+
+  //   if (chatBox && state.openChats.length > 0) {
+  //     (chatBox as HTMLElement).style.transform =
+  //       `translateX(-${430 * state.openChats.length}px)`;
+  //   }
+
+  //   if (
+  //     !state.openChats.includes(state.receiver.id) &&
+  //     state.receiver.id !== ''
+  //   ) {
+  //     setState((state) => {
+  //       return {
+  //         ...state,
+  //         openChats: [...state.openChats, state.receiver.id],
+  //       };
+  //     });
+  //   }
+  // }, [state.receiver.id]);
+
   useEffect(() => {
     const messages = chatMessages.current;
 
@@ -247,11 +293,17 @@ export function App() {
       }
     })();
 
+    hideChat();
     return () => clearTimeout(timer);
   }, [state.connected]);
 
   return (
     <div className='p-3 max-w-[600px] my-0 mx-auto'>
+      {state.clientId && (
+        <p className='fixed bottom-4 left-4 z-[999999]'>
+          Seu id de cliente: {state.clientId}
+        </p>
+      )}
       <h1 className='text-3xl font-bold underline'>
         Olá, {state.username ?? 'Anônimo'}!
       </h1>
@@ -265,13 +317,10 @@ export function App() {
         .
       </p>
 
-      {/* FORM */}
       <form className='my-4 border border-black p-3' noValidate ref={formRef}>
         <div className='flex flex-col gap-[20px] mb-3'>
           <div className='flex flex-col'>
-            <label htmlFor='username'>
-              Qual seu nome? {state.username && `(Atual: ${state.username})`}
-            </label>
+            <label htmlFor='username'>Qual seu nome?</label>
             <input
               className='px-2 py-1 rounded border border-black bg-gray-800 text-white'
               type='text'
@@ -287,7 +336,9 @@ export function App() {
             />
           </div>
           <div className='flex flex-col'>
-            <label htmlFor='receiverName'>Pra quem vai a mensagem?</label>
+            <label htmlFor='receiverName'>
+              Pra quem vai a mensagem? (Client ID)
+            </label>
             <input
               className='px-2 py-1 rounded border border-black bg-gray-800 text-white'
               type='text'
@@ -332,14 +383,13 @@ export function App() {
         </button>
       </form>
 
-      {/* CHATBOX */}
       <div
         ref={chatRef}
-        className='fixed z-[99999] bottom-0 right-[20px] w-full max-w-[400px] h-[300px] overflow-hidden border-t border-r border-l border-black rounded-t-lg transition-transform duration-200'
+        className='chat-box fixed z-[99999] bottom-0 right-[20px] w-[400px] h-[300px] overflow-hidden border-t border-r border-l border-black rounded-t-lg transition-transform duration-200'
       >
         <div className='absolut t-0 bg-slate-900'>
           <button className='text-white w-full h-[30px]' onClick={hideChat}>
-            Chat
+            Chat {state.receiver.id && `(${state.receiver.id})`}
           </button>
         </div>
         <div
@@ -348,8 +398,8 @@ export function App() {
         >
           {state.receivedMessages.map((el, i) => (
             <div
-              key={i}
-              className={`chat-message flex gap-[15px] py-1 px-4 ${el.id === state.username && 'flex-row-reverse'}`}
+              key={el.id + i}
+              className={`chat-message flex gap-[15px] py-1 px-4 ${el.id === state.clientId && 'flex-row-reverse'}`}
             >
               <div className='flex flex-col items-center'>
                 <span
@@ -358,20 +408,20 @@ export function App() {
                   }}
                   className={`relative rounded-full flex justify-center items-center text-lg font-bold p-2 w-[60px] h-[60px]`}
                 >
-                  {el.id === state.username && (
+                  {el.id === state.clientId && (
                     <span className='absolute leading-4 px-2 shadow-sm t-0 left-[50%] translate-x-[-52%] translate-y-[-30px] line bg-green-700 text-white rounded text-[12px]'>
                       Você
                     </span>
                   )}
-                  {el.id.charAt(0)}
+                  {el.user.name.charAt(0)}
                 </span>
-                <p>{el.id}</p>
+                <p>{el.user.name}</p>
               </div>
               <div className='flex flex-col items-start'>
                 {el.messages.map((message, j) => (
                   <p
-                    key={j}
-                    className={`mb-2 rounded-ss-xl rounded-se-xl ${el.id === state.username ? 'rounded-bl-xl' : 'rounded-br-xl'} bg-slate-500 text-white p-2`}
+                    key={el.id + j}
+                    className={`mb-2 rounded-ss-xl rounded-se-xl ${el.id === state.clientId ? 'rounded-bl-xl' : 'rounded-br-xl'} bg-slate-500 text-white p-2`}
                   >
                     {message}
                   </p>

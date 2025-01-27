@@ -1,15 +1,32 @@
-import { connection, server as wsServer } from 'websocket';
-import { createServer } from 'http';
+import { createServer, IncomingMessage } from 'http';
 import { randomUUID } from 'crypto';
+import WebSocket from 'ws';
 import 'dotenv/config';
 
-interface IMapConnection {
-  id: string;
+type TDataType = 'chatMessage' | 'updateClientId';
+
+interface IReturnData {
+  type: TDataType;
+  clientId?: string;
+  content?: {
+    [key: string]: string;
+  };
+}
+
+interface IIncomingData {
+  type: TDataType;
+  clientId: string;
+  content: {
+    [key: string]: string;
+  };
 }
 
 const acceptedOrigins = ['http://localhost:3000'];
 const port = process.env.PORT ?? 3001;
 const logHistory: string[] = [];
+const connections: {
+  [key: string]: WebSocket;
+} = {};
 
 const log = (message: string) => {
   message = `(${new Date().toLocaleString('pt-BR')}) - ${message}.`;
@@ -18,11 +35,16 @@ const log = (message: string) => {
 
   return console.log(message);
 };
-// HTTP Server
-const httpServer = createServer((request, response) => {
-  log(`Received request for ${request.url}`);
 
+const originIsAllowed = (origin: string) => {
+  if (acceptedOrigins.includes(origin)) return true;
+};
+
+// HTTP Server
+const server = createServer((request, response) => {
   const { url, method } = request;
+
+  log(`Received request for ${url}`);
 
   if (url === '/history' && method === 'GET') {
     response.writeHead(200);
@@ -30,54 +52,59 @@ const httpServer = createServer((request, response) => {
     response.end();
   } else {
     response.writeHead(404);
-    response.write(url);
     response.end();
   }
 }).listen(port, () => log(`Server is listening on port ${port}`));
 
 // WS Server
-const ws = new wsServer({
-  httpServer,
-  autoAcceptConnections: false,
+const wss = new WebSocket.Server({
+  server,
 });
 
-function originIsAllowed(origin: string) {
-  if (acceptedOrigins.includes(origin)) return true;
-}
+const sendMessage = (clients: WebSocket[], message: IReturnData) => {
+  if (message.type !== 'updateClientId') delete message.clientId;
 
-const connections = new Map<connection, IMapConnection>();
+  clients.forEach((client) => {
+    if (client) {
+      client.send(JSON.stringify(message));
+    }
+  });
+};
 
-ws.on('request', function (socket) {
-  const {
-    origin,
-    httpRequest: { url },
-  } = socket;
+wss.on('connection', (ws: WebSocket, request: IncomingMessage) => {
+  const { headers, url } = request;
+  const origin = headers['origin'] ?? '';
 
   if (!originIsAllowed(origin) || url !== '/') {
-    socket.reject(401, 'Unauthorized');
-    log(`Connection from origin ${socket.origin} rejected`);
-    return;
+    log(`Connection from origin ${origin} rejected`);
+
+    ws.close(1008, 'Unauthorized');
   }
 
-  const connection = socket.accept(null, socket.origin);
+  if (ws.readyState === WebSocket.OPEN) {
+    const clientId = randomUUID();
 
-  if (connection.connected) {
-    log('Connection accepted');
+    connections[clientId] = ws;
 
-    connections.set(connection, { id: randomUUID() });
+    sendMessage([ws], { type: 'updateClientId', clientId });
 
-    connection.on('message', (incomingMessage) => {
-      // const metadata = connections.get(connection);
+    log('Connection accepted, client: ' + clientId);
 
-      [...connections.keys()].forEach((conn) =>
-        //@ts-expect-error type bug
-        conn.send(JSON.stringify(incomingMessage.utf8Data)),
-      );
+    ws.on('message', (data) => {
+      const message = JSON.parse(data.toString()) as IIncomingData;
+
+      sendMessage([connections[message.content.to], ws], message);
     });
 
-    connection.on('close', function () {
-      log(`Peer ${connection.remoteAddress} disconnected`);
-      connections.delete(connection);
+    ws.on('close', function () {
+      log(`Client ${clientId} disconnected`);
+
+      delete connections[clientId];
+
+      console.log(
+        'Connected clients: ',
+        JSON.stringify(Object.keys(connections)),
+      );
     });
   }
 });
