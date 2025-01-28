@@ -1,7 +1,8 @@
 import { createServer, IncomingMessage } from 'http';
-import { randomUUID } from 'crypto';
 import WebSocket from 'ws';
 import 'dotenv/config';
+import * as Cookies from 'cookie';
+import database from './database';
 
 type TDataType = 'chatMessage' | 'updateClientId';
 
@@ -71,27 +72,30 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
   });
 };
 
-wss.on('connection', (ws: WebSocket, request: IncomingMessage) => {
-  const { headers, url } = request;
-  const origin = headers['origin'] ?? '';
+wss.on('connection', async (ws: WebSocket, { headers }: IncomingMessage) => {
+  const { cookie, origin } = headers;
+  const clientId = Cookies.parse(cookie ?? '')['USER_TOKEN'] ?? '';
+  const { getUser } = database();
 
-  if (!originIsAllowed(origin) || url !== '/') {
-    log(`Connection from origin ${origin} rejected`);
+  if (!clientId || !originIsAllowed(origin ?? '')) {
+    !clientId
+      ? log(`ClientID not provided!`)
+      : log(`Connection refused for origin ${origin}`);
 
     ws.close(1008, 'Unauthorized');
   }
 
   if (ws.readyState === WebSocket.OPEN) {
-    const clientId = randomUUID();
+    const { user } = await getUser(clientId);
 
-    connections[clientId] = ws;
+    connections[user.username] = ws;
 
     sendMessage([ws], { type: 'updateClientId', clientId });
 
-    log('Connection accepted, client: ' + clientId);
+    log('Connection accepted, client: ' + user.id);
 
     ws.on('message', (data) => {
-      const message = JSON.parse(data.toString()) as IIncomingData;
+      const message = JSON.parse(data.toString()) as IIncomingData; //NOSONAR
 
       sendMessage([connections[message.content.to], ws], message);
     });
@@ -101,10 +105,7 @@ wss.on('connection', (ws: WebSocket, request: IncomingMessage) => {
 
       delete connections[clientId];
 
-      console.log(
-        'Connected clients: ',
-        JSON.stringify(Object.keys(connections)),
-      );
+      log(`Connected clients: ${JSON.stringify(Object.keys(connections))}`);
     });
   }
 });

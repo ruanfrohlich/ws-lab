@@ -1,4 +1,9 @@
+import Cookies = require('js-cookie');
 import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
+
+export enum cookies {
+  userToken = 'USER_TOKEN',
+}
 
 interface ISocketData {
   type: 'other' | 'chatMessage' | 'updateClientId';
@@ -274,9 +279,37 @@ export function App() {
     }
   }, [state.receivedMessages]);
 
+  useEffect(() => {
+    const actualToken = Cookies.get(cookies.userToken);
+
+    if (state.username?.length > 3 && state.username !== actualToken) {
+      Cookies.set(cookies.userToken, state.username);
+
+      state.socket?.close();
+
+      setTimeout(() => {
+        console.log('Enviando novo token para o server.');
+
+        webSocketHandler();
+      }, 2000);
+    }
+  }, [state.username]);
+
   useLayoutEffect(() => {
     let timer: NodeJS.Timeout;
     let reconnectionCount = 0;
+    const userToken = Cookies.get(cookies.userToken);
+
+    if (!userToken) {
+      return;
+    }
+
+    setState((state) => {
+      return {
+        ...state,
+        username: userToken,
+      };
+    });
 
     (async () => {
       while (!state.connected && reconnectionCount <= 3) {
@@ -293,7 +326,6 @@ export function App() {
       }
     })();
 
-    hideChat();
     return () => clearTimeout(timer);
   }, [state.connected]);
 

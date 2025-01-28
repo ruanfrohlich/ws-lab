@@ -14,10 +14,12 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.10",
-    "@types/websocket": "^1.0.10",
     "@types/ws": "^8.5.14",
+    "cookie": "^1.0.2",
     "dotenv": "^16.4.7",
     "nodemon": "^3.1.9",
+    "sequelize": "^6.37.5",
+    "sqlite3": "^5.1.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "ws": "^8.18.0"
