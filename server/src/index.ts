@@ -48,6 +48,7 @@ const server = createServer((request, response) => {
   log(`Received request for ${url}`);
 
   if (url === '/history' && method === 'GET') {
+    response.setHeader('content-type', 'application/json');
     response.writeHead(200);
     response.write(JSON.stringify(logHistory));
     response.end();
@@ -89,8 +90,6 @@ wss.on('connection', async (ws: WebSocket, { headers }: IncomingMessage) => {
     const { user } = await getUser(clientId);
 
     connections[user.username] = ws;
-
-    sendMessage([ws], { type: 'updateClientId', clientId });
 
     log('Connection accepted, client: ' + user.id);
 
