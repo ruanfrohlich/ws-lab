@@ -2,7 +2,25 @@
   "name": "web-socket-lab",
   "version": "1.0.0",
   "license": "MIT",
+  "scripts": {
+    "dev": "nodemon"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/node_modules/**",
+      "**/docs/**",
+      "**/test/**"
+    ],
+    "watch": [
+      "server/src",
+      "server/.env",
+      "client/src"
+    ],
+    "ext": "ts,tsx,js,jsx,html",
+    "exec": "client/node_modules/.bin/parcel build client/src/index.html --public-url /app && server/node_modules/.bin/ts-node server/src/index.ts"
+  },
   "devDependencies": {
+    "nodemon": "^3.1.9",
     "prettier": "^3.4.2"
   }
 }

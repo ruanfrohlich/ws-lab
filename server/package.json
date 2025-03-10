@@ -3,21 +3,11 @@
   "version": "1.0.0",
   "main": "index.ts",
   "license": "MIT",
-  "scripts": {
-    "dev": "nodemon -w ./src -w .env -x ts-node ./src/index.ts"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "node_modules"
-    ],
-    "verbose": false
-  },
   "devDependencies": {
     "@types/node": "^22.10.10",
     "@types/ws": "^8.5.14",
     "cookie": "^1.0.2",
     "dotenv": "^16.4.7",
-    "nodemon": "^3.1.9",
     "sequelize": "^6.37.5",
     "sqlite3": "^5.1.7",
     "ts-node": "^10.9.2",

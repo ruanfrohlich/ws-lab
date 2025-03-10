@@ -1,8 +1,12 @@
-import { createServer, IncomingMessage } from 'http';
+import { createServer } from 'https';
 import WebSocket from 'ws';
 import 'dotenv/config';
 import * as Cookies from 'cookie';
 import database from './database';
+import { IncomingMessage } from 'http';
+import { readFile, readFileSync } from 'fs';
+import { cwd } from 'process';
+import { extname, relative } from 'path';
 
 type TDataType = 'chatMessage' | 'updateClientId';
 
@@ -22,7 +26,7 @@ interface IIncomingData {
   };
 }
 
-const acceptedOrigins = ['http://localhost:3000'];
+const acceptedOrigins = ['https://localhost:3001'];
 const port = process.env.PORT ?? 3001;
 const logHistory: string[] = [];
 const connections: {
@@ -42,7 +46,12 @@ const originIsAllowed = (origin: string) => {
 };
 
 // HTTP Server
-const server = createServer((request, response) => {
+const serverOptions = {
+  key: readFileSync(process.env.LOCALHOST_SSL_KEY ?? ''),
+  cert: readFileSync(process.env.LOCALHOST_SSL_CERT ?? ''),
+};
+
+const server = createServer(serverOptions, (request, response) => {
   const { url, method } = request;
 
   log(`Received request for ${url}`);
@@ -52,11 +61,50 @@ const server = createServer((request, response) => {
     response.writeHead(200);
     response.write(JSON.stringify(logHistory));
     response.end();
+  } else if (url?.startsWith('/app') && method === 'GET') {
+    const appRoot = relative(cwd(), 'client/public');
+    let contentType = '';
+    let filePath = appRoot + request.url;
+
+    if (url === '/app') filePath = appRoot + '/index.html';
+    else filePath = filePath.replace('/app', '');
+
+    const extName = extname(filePath);
+
+    switch (extName) {
+      case '.js':
+        contentType = 'text/javascript';
+        break;
+      case '.css':
+        contentType = 'text/css';
+        break;
+      case '.json':
+        contentType = 'application/json';
+        break;
+      case '.png':
+        contentType = 'image/png';
+        break;
+      case '.jpg':
+        contentType = 'image/jpg';
+        break;
+      case '.wav':
+        contentType = 'audio/wav';
+        break;
+      default:
+        contentType = 'text/html';
+    }
+
+    readFile(filePath, function (error, content) {
+      response.writeHead(200, { 'Content-Type': contentType });
+      response.end(content, 'utf-8');
+    });
   } else {
     response.writeHead(404);
     response.end();
   }
-}).listen(port, () => log(`Server is listening on port ${port}`));
+}).listen(port, () =>
+  log(`Server is listening on port https://localhost:${port}`),
+);
 
 // WS Server
 const wss = new WebSocket.Server({

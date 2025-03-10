@@ -1,4 +1,4 @@
-import Cookies = require('js-cookie');
+import * as Cookies from 'js-cookie';
 import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 export enum cookies {
@@ -6,7 +6,7 @@ export enum cookies {
 }
 
 interface ISocketData {
-  type: 'other' | 'chatMessage' | 'updateClientId';
+  type: 'chatMessage' | 'updateClientId';
   clientId: string;
   content: {
     from: string;
@@ -112,7 +112,7 @@ export function App() {
   };
 
   const webSocketHandler = () => {
-    const wsClient = state.socket ?? new WebSocket('ws://localhost:3001/');
+    const wsClient = state.socket ?? new WebSocket('wss://localhost:3001/');
 
     setState((state) => {
       return {
@@ -121,8 +121,10 @@ export function App() {
       };
     });
 
-    wsClient.onerror = function (event) {
+    wsClient.onerror = function (error) {
       console.log('Connection Error');
+
+      console.log(error);
 
       setState((state) => {
         return {
@@ -250,27 +252,6 @@ export function App() {
     }
   };
 
-  // useEffect(() => {
-  //   const chatBox = document.querySelector('.chat-box:last-child');
-
-  //   if (chatBox && state.openChats.length > 0) {
-  //     (chatBox as HTMLElement).style.transform =
-  //       `translateX(-${430 * state.openChats.length}px)`;
-  //   }
-
-  //   if (
-  //     !state.openChats.includes(state.receiver.id) &&
-  //     state.receiver.id !== ''
-  //   ) {
-  //     setState((state) => {
-  //       return {
-  //         ...state,
-  //         openChats: [...state.openChats, state.receiver.id],
-  //       };
-  //     });
-  //   }
-  // }, [state.receiver.id]);
-
   useEffect(() => {
     const messages = chatMessages.current;
 
@@ -318,7 +299,7 @@ export function App() {
             () => {
               webSocketHandler();
               reconnectionCount++;
-              res('ok');
+              res('connecting');
             },
             Math.floor(Math.random() * 3000),
           );
