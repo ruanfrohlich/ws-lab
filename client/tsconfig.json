@@ -4,6 +4,7 @@
     "checkJs": true,
     "noEmit": true,
     "jsx": "preserve",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "module": "Preserve"
   }
 }
