@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Helmet } from 'react-helmet';
+import { AppHelmet } from '../components';
 
 export enum cookies {
   userToken = 'USER_TOKEN',
@@ -320,10 +320,7 @@ export function Home() {
 
   return (
     <Fragment>
-      <Helmet>
-        <title>Websocket Lab</title>
-        <meta name='description' content='Estudos com websocket + webRTC' />
-      </Helmet>
+      <AppHelmet title='Home' description='Estudos com websocket + webRTC' />
       <div className='p-3 max-w-[600px] my-0 mx-auto'>
         {state.clientId && (
           <p className='fixed bottom-4 left-4 z-[999999]'>
