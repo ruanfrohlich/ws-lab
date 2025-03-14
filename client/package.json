@@ -6,7 +6,8 @@
   "targets": {
     "*": {
       "sourceMap": false,
-      "distDir": "public"
+      "distDir": "public",
+      "publicUrl": "/app"
     }
   },
   "scripts": {

@@ -1,6 +1,7 @@
 import { Sequelize } from 'sequelize';
 import { User } from './models';
 import { cwd } from 'process';
+import { log } from '../utils';
 
 const database = async () => {
   const sequelize = new Sequelize({
@@ -18,8 +19,8 @@ const database = async () => {
 
   await sequelize
     .sync({ alter: true, force: true })
+    .then(() => log('All models were synchronized successfully.'))
     .catch((err) => console.log(err));
-  console.log('All models were synchronized successfully.');
 
   const close = () => sequelize.close();
 

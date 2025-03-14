@@ -10,6 +10,11 @@ export const clientRoutes = (
   const appRoot = relative(cwd(), 'client/public');
   let contentType = '';
   let filePath = appRoot + url?.replace('/app', '');
+
+  filePath = filePath.replace(/\?\d*/g, '');
+
+  console.log(filePath);
+
   const extName = extname(filePath);
 
   switch (extName) {

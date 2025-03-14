@@ -5,8 +5,6 @@ export const User = (sequelize: Sequelize) => {
   const User = sequelize.define('User', ModelTypes.User);
 
   const getUser = async (username: string) => {
-    console.log(username);
-
     const user = await User.findOne({
       where: { username },
     });

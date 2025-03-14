@@ -13,15 +13,20 @@
     ],
     "watch": [
       "server/src",
-      "server/.env",
-      "client/src"
+      "server/.env"
     ],
     "ext": "ts,tsx,js,jsx,html",
-    "exec": "rimraf -rf client/.parcel-cache client/public && client/node_modules/.bin/parcel build client/src/index.html --public-url /app && server/node_modules/.bin/ts-node server/src/index.ts"
+    "exec": "ts-node server/src/index.ts"
   },
   "devDependencies": {
     "nodemon": "^3.1.9",
     "prettier": "^3.4.2",
-    "rimraf": "^6.0.1"
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@parcel/config-default": "^2.13.3",
+    "@parcel/core": "^2.13.3"
   }
 }

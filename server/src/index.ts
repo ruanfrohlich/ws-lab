@@ -8,6 +8,7 @@ import { readFileSync } from 'fs';
 import { router } from './routes';
 import { log, originIsAllowed } from './utils';
 import { IIncomingData, IReturnData } from './interfaces';
+import { BuildClient } from './buildClient';
 
 const port = process.env.PORT ?? 3001;
 const connections: {
@@ -20,15 +21,6 @@ const serverOptions = {
   cert: readFileSync(process.env.LOCALHOST_SSL_CERT ?? ''),
 };
 
-const server = createServer(serverOptions, router).listen(port, () =>
-  log(`Server is listening on port https://localhost:${port}`),
-);
-
-// WS Server
-const wss = new WebSocket.Server({
-  server,
-});
-
 const sendMessage = (clients: WebSocket[], message: IReturnData) => {
   if (message.type !== 'updateClientId') delete message.clientId;
 
@@ -39,42 +31,60 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
   });
 };
 
-wss.on('connection', async (ws: WebSocket, { headers }: IncomingMessage) => {
-  const { cookie, origin } = headers;
-  const clientId = Cookies.parse(cookie ?? '')['USER_TOKEN'] ?? '';
-  const { getUser } = await database();
+(async () => {
+  await BuildClient().then(() => {
+    const server = createServer(serverOptions, router).listen(port, () => {
+      log(`🌪️  Server is listening on port https://localhost:${port}/app`);
+    });
 
-  if (!clientId || !originIsAllowed(origin ?? '')) {
-    !clientId
-      ? log(`ClientID not provided!`)
-      : log(`Connection refused for origin ${origin}`);
+    // WS Server
+    const wss = new WebSocket.Server({
+      server,
+    });
 
-    ws.close(1008, 'Unauthorized');
-  }
+    wss.on(
+      'connection',
+      async (ws: WebSocket, { headers }: IncomingMessage) => {
+        const { cookie, origin } = headers;
+        const clientId = Cookies.parse(cookie ?? '')['USER_TOKEN'] ?? '';
+        const { getUser } = await database();
 
-  if (ws.readyState === WebSocket.OPEN) {
-    const { user } = await getUser(clientId);
+        if (!clientId || !originIsAllowed(origin ?? '')) {
+          !clientId
+            ? log(`ClientID not provided!`)
+            : log(`Connection refused for origin ${origin}`);
 
-    if (user) {
-      connections[user.username] = ws;
+          ws.close(1008, 'Unauthorized');
+        }
 
-      log('Connection accepted, client: ' + user.id);
+        if (ws.readyState === WebSocket.OPEN) {
+          const { user } = await getUser(clientId);
 
-      ws.on('message', (data) => {
-        const message = JSON.parse(data.toString()) as IIncomingData; //NOSONAR
+          if (user) {
+            connections[user.username] = ws;
 
-        sendMessage([connections[message.content.to], ws], message);
-      });
+            log('Connection accepted, client: ' + user.id);
 
-      ws.on('close', function () {
-        log(`Client ${clientId} disconnected`);
+            ws.on('message', (data) => {
+              const message = JSON.parse(data.toString()) as IIncomingData; //NOSONAR
 
-        delete connections[clientId];
+              sendMessage([connections[message.content.to], ws], message);
+            });
 
-        log(`Connected clients: ${JSON.stringify(Object.keys(connections))}`);
-      });
-    } else {
-      log(`User [${clientId}] não consta no banco de dados!`);
-    }
-  }
-});
+            ws.on('close', function () {
+              log(`Client ${clientId} disconnected`);
+
+              delete connections[clientId];
+
+              log(
+                `Connected clients: ${JSON.stringify(Object.keys(connections))}`,
+              );
+            });
+          } else {
+            log(`User [${clientId}] não consta no banco de dados!`);
+          }
+        }
+      },
+    );
+  });
+})();
