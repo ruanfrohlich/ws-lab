@@ -1,12 +1,13 @@
 import { SyntheticEvent } from 'react';
-// import logo from '../assets/logo.jpeg';
 import { NavLink, useNavigate } from 'react-router';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
 import { Home } from '@mui/icons-material';
+import { configProvider } from '../utils';
 
 export const Header = () => {
   const navigate = useNavigate();
+  const { appRoot } = configProvider();
 
   const handleChange = (event: SyntheticEvent, route: string) => {
     navigate(route);
@@ -28,8 +29,8 @@ export const Header = () => {
       }}
     >
       <BottomNavigation showLabels onChange={handleChange}>
-        <BottomNavigationAction label='Home' value={'/app'} icon={<Home />}>
-          <NavLink to='/app' end>
+        <BottomNavigationAction label='Home' value={appRoot} icon={<Home />}>
+          <NavLink to={appRoot} end>
             Home
           </NavLink>
         </BottomNavigationAction>

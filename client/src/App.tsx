@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box, Breadcrumbs, capitalize, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
+import { configProvider } from './utils';
 
 const appTheme = createTheme({
   palette: {
@@ -19,6 +20,7 @@ export function App() {
   const { pathname } = useLocation();
   const [breadItems, setBreadItems] = useState<string[]>([]);
   const ref = useRef<HTMLElement>(null);
+  const { appRoot } = configProvider();
 
   useEffect(() => {
     setBreadItems(pathname.split('/'));
@@ -49,13 +51,13 @@ export function App() {
           if (breadItems.length - 1 === i) {
             return (
               <Typography key={el} sx={{ color: 'text.primary' }}>
-                {el === 'app' ? 'Home' : capitalize(el)}
+                {el === appRoot.replace('/', '') ? 'Home' : capitalize(el)}
               </Typography>
             );
           }
 
-          return el === 'app' ? (
-            <AppLink key={el} to='/app'>
+          return el === appRoot.replace('/', '') ? (
+            <AppLink key={el} to={appRoot}>
               Home
             </AppLink>
           ) : (

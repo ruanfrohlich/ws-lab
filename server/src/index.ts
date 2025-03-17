@@ -34,7 +34,7 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
 (async () => {
   await BuildClient().then(() => {
     const server = createServer(serverOptions, router).listen(port, () => {
-      log(`🌪️  Server is listening on port https://localhost:${port}/app`);
+      log(`🌪️  Server is listening on port https://localhost:${port}`);
     });
 
     // WS Server
@@ -42,49 +42,42 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
       server,
     });
 
-    wss.on(
-      'connection',
-      async (ws: WebSocket, { headers }: IncomingMessage) => {
-        const { cookie, origin } = headers;
-        const clientId = Cookies.parse(cookie ?? '')['USER_TOKEN'] ?? '';
-        const { getUser } = await database();
+    wss.on('connection', async (ws: WebSocket, { headers }: IncomingMessage) => {
+      const { cookie, origin } = headers;
+      const clientId = Cookies.parse(cookie ?? '')['USER_TOKEN'] ?? '';
+      const { getUser } = await database();
 
-        if (!clientId || !originIsAllowed(origin ?? '')) {
-          !clientId
-            ? log(`ClientID not provided!`)
-            : log(`Connection refused for origin ${origin}`);
+      if (!clientId || !originIsAllowed(origin ?? '')) {
+        !clientId ? log(`ClientID not provided!`) : log(`Connection refused for origin ${origin}`);
 
-          ws.close(1008, 'Unauthorized');
+        ws.close(1008, 'Unauthorized');
+      }
+
+      if (ws.readyState === WebSocket.OPEN) {
+        const { user } = await getUser(clientId);
+
+        if (user) {
+          connections[user.username] = ws;
+
+          log('Connection accepted, client: ' + user.id);
+
+          ws.on('message', (data) => {
+            const message = JSON.parse(data.toString()) as IIncomingData; //NOSONAR
+
+            sendMessage([connections[message.content.to], ws], message);
+          });
+
+          ws.on('close', function () {
+            log(`Client ${clientId} disconnected`);
+
+            delete connections[clientId];
+
+            log(`Connected clients: ${JSON.stringify(Object.keys(connections))}`);
+          });
+        } else {
+          log(`User [${clientId}] não consta no banco de dados!`);
         }
-
-        if (ws.readyState === WebSocket.OPEN) {
-          const { user } = await getUser(clientId);
-
-          if (user) {
-            connections[user.username] = ws;
-
-            log('Connection accepted, client: ' + user.id);
-
-            ws.on('message', (data) => {
-              const message = JSON.parse(data.toString()) as IIncomingData; //NOSONAR
-
-              sendMessage([connections[message.content.to], ws], message);
-            });
-
-            ws.on('close', function () {
-              log(`Client ${clientId} disconnected`);
-
-              delete connections[clientId];
-
-              log(
-                `Connected clients: ${JSON.stringify(Object.keys(connections))}`,
-              );
-            });
-          } else {
-            log(`User [${clientId}] não consta no banco de dados!`);
-          }
-        }
-      },
-    );
+      }
+    });
   });
 })();
