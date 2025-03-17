@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "parcel --port 3000",
-    "build": "parcel build"
+    "build": "parcel build --public-url /ws-lab"
   },
   "devDependencies": {
     "@parcel/transformer-sass": "2.13.3",

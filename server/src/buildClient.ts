@@ -12,6 +12,9 @@ export const BuildClient = async () => {
     entries: clientRoot + '/src/index.html',
     defaultConfig: '@parcel/config-default',
     watchDir: clientRoot + '/src',
+    defaultTargetOptions: {
+      distDir: '/app',
+    },
     hmrOptions: {
       port: parseInt(process.env.PORT ?? '3000'),
     },
