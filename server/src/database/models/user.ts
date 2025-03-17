@@ -1,5 +1,7 @@
 import { Sequelize } from 'sequelize';
 import { IUser, ModelTypes } from '../types';
+import { IDBUser } from '../../interfaces';
+import { log } from '../../utils';
 
 export const User = (sequelize: Sequelize) => {
   const User = sequelize.define('User', ModelTypes.User);
@@ -8,6 +10,18 @@ export const User = (sequelize: Sequelize) => {
     const user = await User.findOne({
       where: { username },
     });
+
+    return {
+      user: user as unknown as IUser,
+    };
+  };
+
+  const createUser = async (userData: IDBUser) => {
+    const user = User.build({ ...userData });
+
+    await user.save();
+
+    log(`User [${userData.username}] was saved to the database.`);
 
     return {
       user: user as unknown as IUser,
@@ -23,5 +37,6 @@ export const User = (sequelize: Sequelize) => {
   return {
     getUser,
     getAllUsers,
+    createUser,
   };
 };

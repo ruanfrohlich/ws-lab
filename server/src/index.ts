@@ -47,7 +47,7 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
     wss.on('connection', async (ws: WebSocket, { headers }: IncomingMessage) => {
       const { cookie, origin } = headers;
       const clientId = Cookies.parse(cookie ?? '')['USER_TOKEN'] ?? '';
-      const { getUser } = await database();
+      const { getUser, createUser } = await database();
 
       if (!clientId || !originIsAllowed(origin ?? '')) {
         !clientId ? log(`ClientID not provided!`) : log(`Connection refused for origin ${origin}`);
@@ -77,7 +77,13 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
             log(`Connected clients: ${JSON.stringify(Object.keys(connections))}`);
           });
         } else {
-          log(`User [${clientId}] não consta no banco de dados!`);
+          log(`User [${clientId}] não consta no banco de dados! Criando novo...`);
+
+          await createUser({
+            username: clientId,
+            email: 'ruanteste@email.com',
+            password: 'teste123@@',
+          });
         }
       }
     });
