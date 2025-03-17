@@ -38,7 +38,7 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Move to client folder
-        run: cd client/
+        run: cd ./client/
       - name: Install dependencies
         run: yarn install
       - name: Build Parcel
