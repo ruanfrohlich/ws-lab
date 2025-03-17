@@ -1,13 +1,7 @@
-import * as Cookies from 'js-cookie';
-import {
-  FormEvent,
-  Fragment,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import Cookies from 'js-cookie';
+import { FormEvent, Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AppHelmet } from '../components';
+import { Box, Button, Container, TextField, Typography } from '@mui/material';
 
 export enum cookies {
   userToken = 'USER_TOKEN',
@@ -187,9 +181,7 @@ export function Home() {
             }
 
             if (data.content.to === state.clientId) {
-              const oldMessages = state.receivedMessages.find(
-                (user) => user.id === data.content.from,
-              );
+              const oldMessages = state.receivedMessages.find((user) => user.id === data.content.from);
 
               if (oldMessages) {
                 return {
@@ -271,7 +263,7 @@ export function Home() {
   useEffect(() => {
     const actualToken = Cookies.get(cookies.userToken);
 
-    if (state.username?.length > 3 && state.username !== actualToken) {
+    if (state.username && state.username?.length > 3 && state.username !== actualToken) {
       Cookies.set(cookies.userToken, state.username);
 
       state.socket?.close();
@@ -319,142 +311,120 @@ export function Home() {
   }, [state.connected]);
 
   return (
-    <Fragment>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        paddingBlock: 3,
+      }}
+    >
       <AppHelmet title='Home' description='Estudos com websocket + webRTC' />
-      <div className='p-3 max-w-[600px] my-0 mx-auto'>
-        {state.clientId && (
-          <p className='fixed bottom-4 left-4 z-[999999]'>
-            Seu id de cliente: {state.clientId}
-          </p>
-        )}
-        <h1 className='text-3xl font-bold underline'>
+      <Box>
+        {state.clientId && <p>Seu id de cliente: {state.clientId}</p>}
+        <Typography variant='h3' component='h1'>
           Olá, {state.username ?? 'Anônimo'}!
-        </h1>
-        <p>
+        </Typography>
+        <Typography variant='body1' mb={2}>
           Você está atualmente{' '}
           {state.connected ? (
-            <span className='text-green-600'>conectado(a)</span>
+            <Typography component={'span'} color='success'>
+              conectado(a)
+            </Typography>
           ) : (
-            <span className='text-red-600'>desconectado(a)</span>
+            <Typography component={'span'} color='error'>
+              desconectado(a)
+            </Typography>
           )}
           .
-        </p>
+        </Typography>
 
-        <form className='my-4 border border-black p-3' noValidate ref={formRef}>
-          <div className='flex flex-col gap-[20px] mb-3'>
-            <div className='flex flex-col'>
-              <label htmlFor='username'>Qual seu nome?</label>
-              <input
-                className='px-2 py-1 rounded border border-black bg-gray-800 text-white'
-                type='text'
-                id='username'
-                onChange={(e) =>
-                  setState((state) => {
-                    return {
-                      ...state,
-                      username: e.target.value,
-                    };
-                  })
-                }
-              />
-            </div>
-            <div className='flex flex-col'>
-              <label htmlFor='receiverName'>
-                Pra quem vai a mensagem? (Client ID)
-              </label>
-              <input
-                className='px-2 py-1 rounded border border-black bg-gray-800 text-white'
-                type='text'
-                id='receiverName'
-                onChange={(e) =>
-                  setState((state) => {
-                    return {
-                      ...state,
-                      receiver: {
-                        id: e.target.value,
-                      },
-                    };
-                  })
-                }
-              />
-            </div>
-            <div className='flex flex-col'>
-              <label htmlFor='message'>Mensagem:</label>
-              <input
-                type='text'
-                className='px-2 py-1 rounded border border-black bg-gray-800 text-white'
-                id='message'
-                value={state.message ?? ''}
-                onChange={(e) =>
-                  setState((state) => {
-                    return {
-                      ...state,
-                      message: e.target.value,
-                    };
-                  })
-                }
-              />
-            </div>
-          </div>
-          <button
-            type='submit'
-            className={`rounded-full disabled:bg-gray-500 uppercase bg-blue-500 hover:bg-slate-600 transition-all duration-100 text-white px-3 py-1 text-[14px] ${!isValid && 'pointer-events-none'}`}
-            onClick={handleClick}
-            disabled={!isValid}
+        <Box component={'form'} noValidate ref={formRef} width={400}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+            }}
           >
+            <TextField
+              type='text'
+              id='username'
+              label='Qual seu nome?'
+              fullWidth
+              onChange={(e) =>
+                setState((state) => {
+                  return {
+                    ...state,
+                    username: e.target.value,
+                  };
+                })
+              }
+            />
+            <TextField
+              type='text'
+              id='receiverName'
+              label='Pra quem vai a mensagem? (Client ID)'
+              fullWidth
+              onChange={(e) =>
+                setState((state) => {
+                  return {
+                    ...state,
+                    receiver: {
+                      id: e.target.value,
+                    },
+                  };
+                })
+              }
+            />
+            <TextField
+              type='text'
+              id='message'
+              label='Mensagem:'
+              value={state.message ?? ''}
+              fullWidth
+              onChange={(e) =>
+                setState((state) => {
+                  return {
+                    ...state,
+                    message: e.target.value,
+                  };
+                })
+              }
+            />
+          </Box>
+          <Button variant='outlined' type='submit' onClick={handleClick} disabled={!isValid}>
             Enviar mensagem
-          </button>
-        </form>
+          </Button>
+        </Box>
 
-        <div
-          ref={chatRef}
-          className='chat-box fixed z-[99999] bottom-0 right-[20px] w-[400px] h-[300px] overflow-hidden border-t border-r border-l border-black rounded-t-lg transition-transform duration-200'
-        >
-          <div className='absolut t-0 bg-slate-900'>
-            <button className='text-white w-full h-[30px]' onClick={hideChat}>
-              Chat {state.receiver.id && `(${state.receiver.id})`}
-            </button>
+        <div ref={chatRef}>
+          <div>
+            <button onClick={hideChat}>Chat {state.receiver.id && `(${state.receiver.id})`}</button>
           </div>
-          <div
-            ref={chatMessages}
-            className='p-3 h-[270px] overflow-y-scroll overflow-x-hidden'
-          >
+          <div ref={chatMessages}>
             {state.receivedMessages.map((el, i) => (
-              <div
-                key={el.id + i}
-                className={`chat-message flex gap-[15px] py-1 px-4 ${el.id === state.clientId && 'flex-row-reverse'}`}
-              >
-                <div className='flex flex-col items-center'>
+              <div key={el.id + i}>
+                <div>
                   <span
                     style={{
                       backgroundColor: el.avatarColor,
                     }}
-                    className={`relative rounded-full flex justify-center items-center text-lg font-bold p-2 w-[60px] h-[60px]`}
                   >
-                    {el.id === state.clientId && (
-                      <span className='absolute leading-4 px-2 shadow-sm t-0 left-[50%] translate-x-[-52%] translate-y-[-30px] line bg-green-700 text-white rounded text-[12px]'>
-                        Você
-                      </span>
-                    )}
+                    {el.id === state.clientId && <span>Você</span>}
                     {el.user.name.charAt(0)}
                   </span>
                   <p>{el.user.name}</p>
                 </div>
-                <div className='flex flex-col items-start'>
+                <div>
                   {el.messages.map((message, j) => (
-                    <p
-                      key={el.id + j}
-                      className={`mb-2 rounded-ss-xl rounded-se-xl ${el.id === state.clientId ? 'rounded-bl-xl' : 'rounded-br-xl'} bg-slate-500 text-white p-2`}
-                    >
-                      {message}
-                    </p>
+                    <p key={el.id + j}>{message}</p>
                   ))}
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
-    </Fragment>
+      </Box>
+    </Box>
   );
 }

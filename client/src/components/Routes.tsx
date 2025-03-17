@@ -7,8 +7,9 @@ export const AppRoutes = () => {
     <Routes>
       <Route path='/app' element={<App />}>
         <Route index element={<Home />} />
-        <Route path='login' element={<Login />} />
-        <Route path='test/:token' element={<Test />} />
+        <Route path='login' element={<Login />}>
+          <Route path='test' element={<Test />} />
+        </Route>
       </Route>
     </Routes>
   );

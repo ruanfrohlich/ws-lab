@@ -3,17 +3,12 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { extname, relative } from 'path';
 import { cwd } from 'process';
 
-export const clientRoutes = (
-  { url, method }: IncomingMessage,
-  res: ServerResponse<IncomingMessage>,
-) => {
+export const clientRoutes = ({ url, method }: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
   const appRoot = relative(cwd(), 'client/public');
   let contentType = '';
   let filePath = appRoot + url?.replace('/app', '');
 
   filePath = filePath.replace(/\?\d*/g, '');
-
-  console.log(filePath);
 
   const extName = extname(filePath);
 
