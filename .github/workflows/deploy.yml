@@ -37,12 +37,8 @@ jobs:
           node-version: '22'
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Move to client folder
-        run: cd client && ls
-      - name: Install dependencies
-        run: yarn install
-      - name: Build Parcel
-        run: yarn build
+      - name: Move to client folder and install/build
+        run: cd client && yarn install && yarn build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
