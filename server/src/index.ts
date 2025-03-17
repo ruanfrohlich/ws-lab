@@ -32,9 +32,11 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
 };
 
 (async () => {
-  await BuildClient().then(() => {
+  const { success, error } = await BuildClient();
+
+  if (success) {
     const server = createServer(serverOptions, router).listen(port, () => {
-      log(`🌪️  Server is listening on port https://localhost:${port}`);
+      log(`🌪️  Server is listening on port https://localhost:${port}/app`);
     });
 
     // WS Server
@@ -79,5 +81,7 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
         }
       }
     });
-  });
+  } else if (error) {
+    throw error;
+  }
 })();
