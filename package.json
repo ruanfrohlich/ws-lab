@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "nodemon"
   },
+  "engines": {
+    "node": "22"
+  },
   "nodemonConfig": {
     "ignore": [
       "**/node_modules/**",
