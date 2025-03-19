@@ -3,7 +3,7 @@ import { useWebsocketContext } from '../contexts';
 import { AppLink, Header } from '../components';
 import { Breadcrumbs, capitalize, Typography } from '@mui/material';
 import { configProvider } from '../utils';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 export const DefaultLayout = (props: { children: ReactNode }) => {
   const { websocket } = useWebsocketContext();
@@ -11,6 +11,15 @@ export const DefaultLayout = (props: { children: ReactNode }) => {
   const [breadItems, setBreadItems] = useState<string[]>([]);
   const ref = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
+  const navigator = useNavigate();
+
+  useEffect(() => {
+    if (pathname === '/') {
+      console.log('redirecionando');
+
+      navigator(appRoot);
+    }
+  }, []);
 
   useEffect(() => {
     setBreadItems(pathname.split('/'));

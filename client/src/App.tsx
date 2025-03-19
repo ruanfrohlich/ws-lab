@@ -23,12 +23,7 @@ export function App() {
       <WebsocketContext.Provider value={websocket}>
         <CssBaseline />
         <DefaultLayout>
-          <Box
-            component='main'
-            sx={{
-              height: 1500,
-            }}
-          >
+          <Box component='main' sx={{ position: 'relative' }}>
             <Outlet />
           </Box>
         </DefaultLayout>
