@@ -1,9 +1,9 @@
 import { Outlet } from 'react-router';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Box } from '@mui/material';
 import { useWebsocketContext } from './contexts';
-import { DefaultLayout } from './layouts/DefaultLayout';
+import { AppLayout } from './layouts/AppLayout';
+import { StrictMode } from 'react';
 
 const appTheme = createTheme({
   palette: {
@@ -19,15 +19,15 @@ export function App() {
   const { WebsocketContext, websocket } = useWebsocketContext();
 
   return (
-    <ThemeProvider theme={appTheme}>
-      <WebsocketContext.Provider value={websocket}>
-        <CssBaseline />
-        <DefaultLayout>
-          <Box component='main' sx={{ position: 'relative' }}>
+    <StrictMode>
+      <ThemeProvider theme={appTheme}>
+        <WebsocketContext.Provider value={websocket}>
+          <CssBaseline />
+          <AppLayout>
             <Outlet />
-          </Box>
-        </DefaultLayout>
-      </WebsocketContext.Provider>
-    </ThemeProvider>
+          </AppLayout>
+        </WebsocketContext.Provider>
+      </ThemeProvider>
+    </StrictMode>
   );
 }
