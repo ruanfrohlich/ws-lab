@@ -4,7 +4,7 @@ export { configProvider } from './configProvider';
 
 export const translatePathname = (path: string) => {
   switch (path) {
-    case 'login': {
+    case 'join': {
       return 'Entrar';
     }
     case 'test': {

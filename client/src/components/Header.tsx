@@ -1,10 +1,9 @@
 import { SyntheticEvent } from 'react';
-import { NavLink, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { BottomNavigation, BottomNavigationAction, Box, SxProps } from '@mui/material';
+import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
 import { Home } from '@mui/icons-material';
 import { configProvider } from '../utils';
-import { Theme } from '@emotion/react';
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -13,6 +12,26 @@ export const Header = () => {
   const handleChange = (event: SyntheticEvent, route: string) => {
     navigate(route);
   };
+
+  const actionStyles = () => ({
+    transition: 'transform 200ms ease',
+    ':hover': {
+      transform: 'scale(1.1)',
+    },
+  });
+
+  const actions = [
+    {
+      label: 'Início',
+      value: appRoot,
+      icon: <Home />,
+    },
+    {
+      label: 'Entrar',
+      value: 'join',
+      icon: <AccountCircleIcon />,
+    },
+  ];
 
   return (
     <Box
@@ -35,12 +54,15 @@ export const Header = () => {
           borderRadius: 4,
         }}
       >
-        <BottomNavigationAction label='Início' value={appRoot} icon={<Home />}>
-          <NavLink to={appRoot} end />
-        </BottomNavigationAction>
-        <BottomNavigationAction label='Entrar' value={'login'} icon={<AccountCircleIcon />}>
-          <NavLink to='/app/login' />
-        </BottomNavigationAction>
+        {actions.map((action) => (
+          <BottomNavigationAction
+            key={action.label}
+            label={action.label}
+            value={action.value}
+            icon={action.icon}
+            sx={actionStyles}
+          />
+        ))}
       </BottomNavigation>
     </Box>
   );

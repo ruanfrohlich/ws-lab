@@ -78,11 +78,6 @@ export const AppLayout = (props: { children: ReactNode }) => {
         })}
       >
         {props.children}
-        <Snackbar
-          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-          open
-          message='Projeto em desenvolvimento'
-        />
       </Box>
     </Fragment>
   );

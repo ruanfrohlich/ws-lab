@@ -1,8 +1,14 @@
-import { AppHelmet, AppLink, FormLogin } from '../components';
+import { AppHelmet, AppLink, FormLogin, FormRegister } from '../components';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import heroLogin from '../assets/images/hero-login.jpg';
+import { useLocation } from 'react-router';
+import { Fragment, useState } from 'react';
 
-export const Login = () => {
+export const LoginRegister = () => {
+  const [isRegister, setIsRegister] = useState<boolean>(false);
+
+  const handleRegister = () => setIsRegister(!isRegister);
+
   return (
     <Box>
       <AppHelmet title='Login' description='' />
@@ -23,7 +29,7 @@ export const Login = () => {
                 fontFamily: '"Boldonse", system-ui',
               }}
             >
-              Entrar
+              {isRegister ? 'Cadastre-se' : 'Entrar'}
             </Typography>
             <Typography
               sx={{
@@ -43,13 +49,27 @@ export const Login = () => {
               </Typography>{' '}
               agora mesmo!
             </Typography>
-            <FormLogin />
-            <Typography variant='body1'>
-              Não possui conta?{' '}
-              <AppLink to={'register'} hover>
-                Cadastre-se
-              </AppLink>
-            </Typography>
+            {isRegister ? (
+              <Fragment>
+                <FormRegister />
+                <Typography variant='body1'>
+                  Já possui conta?{' '}
+                  <AppLink to={''} hover onClick={handleRegister}>
+                    Entrar
+                  </AppLink>
+                </Typography>
+              </Fragment>
+            ) : (
+              <Fragment>
+                <FormLogin />
+                <Typography variant='body1'>
+                  Não possui conta?{' '}
+                  <AppLink to={''} hover onClick={handleRegister}>
+                    Cadastre-se
+                  </AppLink>
+                </Typography>
+              </Fragment>
+            )}
           </Box>
         </Grid>
         <Grid

@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { App } from '../App';
-import { Home, Login, NotFound, Test } from '../pages';
+import { Home, LoginRegister, NotFound } from '../pages';
 import { configProvider } from '../utils';
 
 export const AppRoutes = () => {
@@ -15,14 +15,8 @@ export const AppRoutes = () => {
           element: <Home />,
         },
         {
-          path: 'login',
-          element: <Login />,
-          children: [
-            {
-              path: 'test',
-              element: <Test />,
-            },
-          ],
+          path: 'join',
+          element: <LoginRegister />,
         },
         {
           path: '*',
