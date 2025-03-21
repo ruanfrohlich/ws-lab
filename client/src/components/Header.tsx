@@ -24,11 +24,6 @@ export const Header = () => {
         zIndex: 999,
         transform: 'translateX(-50%)',
         overflow: 'hidden',
-        transformOrigin: 'center center',
-        transition: `transform 350ms cubic-bezier(1,-0.50,0.15,1.12)`,
-        ':hover': {
-          transform: 'scale(1.2) translateX(-50%)',
-        },
       }}
     >
       <BottomNavigation

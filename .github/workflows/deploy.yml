@@ -1,11 +1,6 @@
-# Sample workflow for building and deploying a Next.js site to GitHub Pages
-#
-# To get started with Next.js see: https://nextjs.org/docs/getting-started
-#
 name: Deploy site to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ['master']
 
@@ -25,9 +20,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Build job
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,12 +34,16 @@ jobs:
           node-version: '22'
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Move to client folder and install/build
-        run: cd client && yarn install && yarn build
+      - name: Install dependencies and build
+        run: yarn install && yarn build
+      - name: Copy 404.html to public folder
+        run: cp -r src/404.html public
+      - name: Check public folder
+        run: ls -a public
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./client/public
+          path: public
 
   # Deployment job
   deploy:
