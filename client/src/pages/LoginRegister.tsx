@@ -1,7 +1,6 @@
 import { AppHelmet, AppLink, FormLogin, FormRegister } from '../components';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import heroLogin from '../assets/images/hero-login.jpg';
-import { useLocation } from 'react-router';
 import { Fragment, useState } from 'react';
 
 export const LoginRegister = () => {
