@@ -39,7 +39,7 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
       log(`🌪️  Server is listening on port https://localhost:${port}/app`);
     });
 
-    // WS Server
+    // WebSocket Server
     const wss = new WebSocket.Server({
       server,
     });
@@ -61,12 +61,23 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
         if (user) {
           connections[user.username] = ws;
 
-          log('Connection accepted, client: ' + user.id);
+          log('Connection accepted, client: ' + user.username);
 
           ws.on('message', (data) => {
-            const message = JSON.parse(data.toString()) as IIncomingData; //NOSONAR
+            try {
+              const message = JSON.parse(data.toString()) as IIncomingData; //NOSONAR
+              sendMessage([connections[message.content.to], ws], message);
+            } catch (e) {
+              console.log(e);
 
-            sendMessage([connections[message.content.to], ws], message);
+              sendMessage([ws], {
+                type: 'error',
+                content: {
+                  message: data.toString(), //NOSONAR
+                  error: (e as Error).message,
+                },
+              });
+            }
           });
 
           ws.on('close', function () {
