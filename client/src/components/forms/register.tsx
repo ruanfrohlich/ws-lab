@@ -1,7 +1,7 @@
-import { Theme } from '@emotion/react';
-import { Box, Button, CircularProgress, SxProps, TextField, Typography } from '@mui/material';
-import { FormEvent, useRef, useState } from 'react';
+import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
+import { ChangeEvent, FormEvent, useRef, useState } from 'react';
 import userMock from '../../data/user-mock.json';
+import { AppInput } from '../Input';
 
 interface IFormFields {
   username: string;
@@ -25,7 +25,7 @@ export const FormRegister = () => {
   const [registerFieldsHeight, setRegisterFieldsHeight] = useState<number>(0);
   const registerFields = useRef<HTMLElement>(null);
 
-  const [formState, setFormState] = useState<IFormState>({
+  const [state, setState] = useState<IFormState>({
     fields: {
       username: '',
       email: '',
@@ -33,27 +33,21 @@ export const FormRegister = () => {
     },
   });
 
-  const handleChange = (event: FormEvent) => {
-    const { id, value } = event.currentTarget as HTMLInputElement;
-    const field = id as unknown as keyof IFormFields;
+  const handleChange = ({ target }: ChangeEvent) => {
+    const { id, value } = target as HTMLInputElement;
+    const isValid = !/[^a-zA-Z0-9]/g.test(value);
 
-    // if (field === 'username' && value.length <= 3) {
-    //   setRegisterFieldsHeight(0);
-    // }
-
-    // if (field === 'username' && value.length > 3 && registerFields.current) {
+    // if (id === 'username' && value.length > 3 && registerFields.current) {
     //   setCheckingUsername(true);
 
     //   new Promise<string>((res) => {
-    //     const isValid = !/[^a-zA-Z0-9]/g.test(value);
-
     //     if (isValid) {
     //       const hasUser = userMock.find((el) => el.username === value);
 
     //       if (hasUser) {
     //         setRegisterFieldsHeight(0);
 
-    //         setFormState(({ errors, ...state }) => {
+    //         setState(({ errors, ...state }) => {
     //           return {
     //             ...state,
     //             errors: {
@@ -65,7 +59,7 @@ export const FormRegister = () => {
     //       } else {
     //         setRegisterFieldsHeight(registerFields.current?.getBoundingClientRect().height ?? 0);
 
-    //         setFormState(({ fields, ...state }) => {
+    //         setState(({ fields, ...state }) => {
     //           return {
     //             ...state,
     //             fields: {
@@ -83,23 +77,23 @@ export const FormRegister = () => {
     //     }, 2000);
     //   });
     // } else {
-    //   setFormState(({ fields, ...state }) => {
+    //   setState(({ fields, ...state }) => {
     //     return {
     //       ...state,
     //       fields: {
     //         ...fields,
-    //         [field]: value,
+    //         [id]: value,
     //       },
     //     };
     //   });
     // }
 
-    setFormState(({ fields, ...state }) => {
+    setState(({ fields, ...state }) => {
       return {
         ...state,
         fields: {
           ...fields,
-          [field]: value,
+          [id]: value,
         },
       };
     });
@@ -109,35 +103,6 @@ export const FormRegister = () => {
     display: 'flex',
     flexDirection: 'column',
     gap: 2,
-  };
-
-  const Field = ({ id, ...props }: IFieldProps) => {
-    const fieldName = id as keyof IFormFields;
-    const error = formState.errors?.[fieldName];
-
-    const inputStyles: SxProps<Theme> = {
-      backgroundColor: 'rgba(0,0,0,.6)',
-    };
-
-    return (
-      <Box>
-        <TextField
-          id={id}
-          variant='outlined'
-          label={props.label}
-          type={fieldName === 'password' ? 'password' : 'text'}
-          fullWidth
-          sx={inputStyles}
-          onChange={handleChange}
-          value={formState.fields[fieldName]}
-        />
-        {error && (
-          <Typography variant='caption' color='error'>
-            {error}
-          </Typography>
-        )}
-      </Box>
-    );
   };
 
   const handleSubmit = () => console.log('form enviado');
@@ -150,7 +115,13 @@ export const FormRegister = () => {
             position: 'relative',
           }}
         >
-          <Field id='username' label='Crie um username legal!' />
+          <AppInput
+            id='username'
+            value={state.fields.username}
+            onChange={handleChange}
+            label='Crie um username especial'
+            error={state.errors?.username ?? ''}
+          />
           <CircularProgress
             size={20}
             sx={{
@@ -169,8 +140,20 @@ export const FormRegister = () => {
           }}
         >
           <Box sx={flex} padding={0} ref={registerFields}>
-            <Field id='password' label='Senha' />
-            <Field id='email' label='E-mail' />
+            <AppInput
+              id='password'
+              label='Senha'
+              onChange={handleChange}
+              error={state.errors?.password ?? ''}
+              value={state.fields.password}
+            />
+            <AppInput
+              id='email'
+              label='E-mail'
+              onChange={handleChange}
+              value={state.fields.email}
+              error={state.errors?.email ?? ''}
+            />
             <Box
               sx={{
                 display: 'flex',
