@@ -11,9 +11,8 @@ interface IWatchResponse {
 export const BuildClient = async () => {
   const loadBuild = loading({
     text: ' Building the client',
-  });
+  }).start();
 
-  loadBuild.start();
   const clientRoot = cwd() + '/client';
 
   let bundler = new Parcel({
