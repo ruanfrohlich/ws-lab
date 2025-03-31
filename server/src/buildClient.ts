@@ -1,6 +1,7 @@
 import { Parcel } from '@parcel/core';
 import { cwd } from 'process';
 import { log } from './utils';
+import loading from 'loading-cli';
 
 interface IWatchResponse {
   success: boolean;
@@ -8,6 +9,11 @@ interface IWatchResponse {
 }
 
 export const BuildClient = async () => {
+  const loadBuild = loading({
+    text: ' Building the client',
+  });
+
+  loadBuild.start();
   const clientRoot = cwd() + '/client';
 
   let bundler = new Parcel({
@@ -32,8 +38,10 @@ export const BuildClient = async () => {
       }
 
       if (event?.type === 'buildSuccess') {
+        loadBuild.succeed();
+
         let bundles = event.bundleGraph.getBundles();
-        log(`✨ Built ${bundles.length} bundles in ${event.buildTime}ms!`);
+        console.log(`✨ Built ${bundles.length} bundles in ${event.buildTime}ms!`);
         res({
           success: true,
         });

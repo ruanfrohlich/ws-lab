@@ -36,7 +36,7 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
 
   if (success) {
     const server = createServer(serverOptions, router).listen(port, () => {
-      log(`🌪️  Server is listening on port https://localhost:${port}/app`);
+      console.log(`🌪️  Server is listening on port https://localhost:${port}/app`);
     });
 
     // WebSocket Server
