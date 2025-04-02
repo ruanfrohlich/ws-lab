@@ -1,31 +1,19 @@
-import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
-import { ChangeEvent, FormEvent, useRef, useState } from 'react';
+import { Box, Button, CircularProgress } from '@mui/material';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import userMock from '../../data/user-mock.json';
 import { AppInput } from '../Input';
-
-interface IFormFields {
-  username: string;
-  email: string;
-  password: string;
-}
-
-interface IFormState {
-  fields: IFormFields;
-  errors?: {
-    [key: string]: string;
-  };
-}
-interface IFieldProps {
-  id: string;
-  label: string;
-}
+import { useValidate } from '../../hooks';
+import { IRegisterFormFields, IRegisterFormState } from '../../interfaces';
 
 export const FormRegister = () => {
   const [checkingUsername, setCheckingUsername] = useState<boolean>(false);
   const [registerFieldsHeight, setRegisterFieldsHeight] = useState<number>(0);
   const registerFields = useRef<HTMLElement>(null);
 
-  const [state, setState] = useState<IFormState>({
+  const [state, setState] = useState<IRegisterFormState>({
+    isValid: false,
+    checkingEmail: false,
+    checkingUsername: false,
     fields: {
       username: '',
       email: '',
@@ -33,70 +21,62 @@ export const FormRegister = () => {
     },
   });
 
-  const handleChange = ({ target }: ChangeEvent) => {
+  const updateState = (el: keyof IRegisterFormState, value: any) => {
+    setState((state) => {
+      switch (el) {
+        case 'errors': {
+          return {
+            ...state,
+            errors: {
+              ...state.errors,
+              ...value,
+            },
+          };
+        }
+        case 'fields': {
+          return {
+            ...state,
+            fields: {
+              ...state.fields,
+              ...value,
+            },
+          };
+        }
+        default: {
+          return {
+            ...state,
+            [el]: value,
+          };
+        }
+      }
+    });
+  };
+
+  const { validate } = useValidate(updateState);
+
+  const handleChange = async ({ target }: ChangeEvent) => {
     const { id, value } = target as HTMLInputElement;
-    const isValid = !/[^a-zA-Z0-9]/g.test(value);
-
-    // if (id === 'username' && value.length > 3 && registerFields.current) {
-    //   setCheckingUsername(true);
-
-    //   new Promise<string>((res) => {
-    //     if (isValid) {
-    //       const hasUser = userMock.find((el) => el.username === value);
-
-    //       if (hasUser) {
-    //         setRegisterFieldsHeight(0);
-
-    //         setState(({ errors, ...state }) => {
-    //           return {
-    //             ...state,
-    //             errors: {
-    //               ...errors,
-    //               username: 'Opa! Esse nome de usuário já foi parceiro(a) :(',
-    //             },
-    //           };
-    //         });
-    //       } else {
-    //         setRegisterFieldsHeight(registerFields.current?.getBoundingClientRect().height ?? 0);
-
-    //         setState(({ fields, ...state }) => {
-    //           return {
-    //             ...state,
-    //             fields: {
-    //               ...fields,
-    //             },
-    //           };
-    //         });
-    //       }
-    //     }
-
-    //     res('ok');
-    //   }).finally(() => {
-    //     setTimeout(() => {
-    //       setCheckingUsername(false);
-    //     }, 2000);
-    //   });
-    // } else {
-    //   setState(({ fields, ...state }) => {
-    //     return {
-    //       ...state,
-    //       fields: {
-    //         ...fields,
-    //         [id]: value,
-    //       },
-    //     };
-    //   });
-    // }
+    const field = id as keyof IRegisterFormFields;
 
     setState(({ fields, ...state }) => {
       return {
         ...state,
         fields: {
           ...fields,
-          [id]: value,
+          [field]: value,
         },
       };
     });
+
+    const isValid = await validate(field, value);
+
+    console.log(isValid);
+
+    if (field === 'username' && isValid) {
+      setRegisterFieldsHeight(registerFields.current?.getBoundingClientRect().height ?? 0);
+    } else {
+      setRegisterFieldsHeight(0);
+    }
   };
 
   const flex = {
@@ -128,7 +108,7 @@ export const FormRegister = () => {
               position: 'absolute',
               top: 17,
               right: 20,
-              opacity: checkingUsername ? '1' : '0',
+              opacity: state.checkingUsername ? '1' : '0',
             }}
           />
         </Box>
@@ -147,13 +127,30 @@ export const FormRegister = () => {
               error={state.errors?.password ?? ''}
               value={state.fields.password}
             />
-            <AppInput
-              id='email'
-              label='E-mail'
-              onChange={handleChange}
-              value={state.fields.email}
-              error={state.errors?.email ?? ''}
-            />
+
+            <Box
+              sx={{
+                position: 'relative',
+              }}
+            >
+              <AppInput
+                id='email'
+                label='E-mail'
+                onChange={handleChange}
+                value={state.fields.email}
+                error={state.errors?.email ?? ''}
+              />
+              <CircularProgress
+                size={20}
+                sx={{
+                  position: 'absolute',
+                  top: 17,
+                  right: 20,
+                  opacity: state.checkingEmail ? '1' : '0',
+                }}
+              />
+            </Box>
+
             <Box
               sx={{
                 display: 'flex',
@@ -161,7 +158,7 @@ export const FormRegister = () => {
               }}
               padding={0}
             >
-              <Button type='submit' variant='contained' fullWidth>
+              <Button type='submit' variant='contained' fullWidth disabled={!state.isValid}>
                 Cadastrar
               </Button>
               <Button
