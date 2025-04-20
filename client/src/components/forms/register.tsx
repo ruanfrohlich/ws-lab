@@ -72,9 +72,9 @@ export const FormRegister = () => {
 
     console.log(isValid);
 
-    if (field === 'username' && isValid) {
-      setRegisterFieldsHeight(registerFields.current?.getBoundingClientRect().height ?? 0);
-    } else {
+    setRegisterFieldsHeight(registerFields.current?.getBoundingClientRect().height ?? 0);
+
+    if (field === 'username' && !isValid) {
       setRegisterFieldsHeight(0);
     }
   };
@@ -89,7 +89,7 @@ export const FormRegister = () => {
 
   return (
     <form noValidate onSubmit={handleSubmit}>
-      <Box sx={{ ...flex, paddingBlock: 2 }}>
+      <Box sx={{ ...flex, paddingBlock: 2, gap: '28px' }}>
         <Box
           sx={{
             position: 'relative',
@@ -101,6 +101,10 @@ export const FormRegister = () => {
             onChange={handleChange}
             label='Crie um username especial'
             error={state.errors?.username ?? ''}
+            count={{
+              current: state.fields.username.length,
+              max: 24,
+            }}
           />
           <CircularProgress
             size={20}

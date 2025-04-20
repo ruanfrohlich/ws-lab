@@ -1,9 +1,10 @@
+import { isEmpty } from 'lodash';
 import mockDB from '../data/user-mock.json';
 import { IRegisterFormState } from '../interfaces';
 
 export const useValidate = (updateState: (el: keyof IRegisterFormState, value: unknown) => void) => {
   const validate = async (field: string, value: string) => {
-    if (value !== '') {
+    if (value !== '' && value.length > 3) {
       switch (field) {
         case 'email': {
           if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
@@ -48,11 +49,7 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
           return false;
         }
         case 'username': {
-          if (value.length < 3) {
-            return false;
-          }
-
-          if (!/[^a-zA-Z0-9\_]/g.test(value)) {
+          if (!/[^\W_]{,24}$/gm.test(value)) {
             updateState('checkingUsername', true);
 
             const checkUsername = new Promise((res) => {
@@ -85,11 +82,15 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
           }
 
           updateState('errors', {
-            username: 'Opa, parece que tem caracteres especiais no seu username :/',
+            username: 'Opa, verifica teu username ai :/',
           });
 
           return false;
         }
+        // case 'password': {
+        //   if (/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,16}$/.test(value)) {
+        //   }
+        // }
       }
     } else {
       updateState('errors', { [field]: '' });
