@@ -49,7 +49,7 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
           return false;
         }
         case 'username': {
-          if (!/[^\W_]{,24}$/gm.test(value)) {
+          if (/^[aA-zZ0-9_-]{3,24}$/g.test(value)) {
             updateState('checkingUsername', true);
 
             const checkUsername = new Promise((res) => {
@@ -87,10 +87,11 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
 
           return false;
         }
-        // case 'password': {
-        //   if (/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,16}$/.test(value)) {
-        //   }
-        // }
+        case 'password': {
+          if (/^(?=.*\d)(?=.*[aA-zZ])(?=.*[^\w\d\s:])([^\s]){8,}$/gm.test(value)) {
+            console.log('passou a senha');
+          }
+        }
       }
     } else {
       updateState('errors', { [field]: '' });

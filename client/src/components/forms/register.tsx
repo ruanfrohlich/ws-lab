@@ -89,7 +89,7 @@ export const FormRegister = () => {
 
   return (
     <form noValidate onSubmit={handleSubmit}>
-      <Box sx={{ ...flex, paddingBlock: 2, gap: '28px' }}>
+      <Box sx={{ ...flex, paddingBlock: 2, gap: '0' }}>
         <Box
           sx={{
             position: 'relative',
@@ -119,7 +119,8 @@ export const FormRegister = () => {
         <Box
           sx={{
             transition: '600ms ease-in-out',
-            maxHeight: registerFieldsHeight,
+            maxHeight: registerFieldsHeight + 32,
+            paddingTop: '32px',
             overflow: 'hidden',
           }}
         >

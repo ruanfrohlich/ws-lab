@@ -1,6 +1,9 @@
 import { Theme } from '@emotion/react';
-import { Box, SxProps, TextField, Typography } from '@mui/material';
-import { ChangeEvent } from 'react';
+import { Box, Button, SxProps, TextField, Typography } from '@mui/material';
+import { red } from '@mui/material/colors';
+import { ChangeEvent, useState } from 'react';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 interface IAppInputProps {
   id: string;
@@ -19,13 +22,8 @@ export const AppInput = (props: IAppInputProps) => {
   const inputStyles: SxProps<Theme> = {
     position: 'relative',
     backgroundColor: 'rgba(0,0,0,.6)',
-    '::before': {
-      position: 'absolute',
-      content: 'test',
-      top: 6,
-      left: 0,
-    },
   };
+  const [pwVisible, setPwVisible] = useState<boolean>(false);
 
   const attributes: { [key: string]: unknown } = {
     id,
@@ -33,6 +31,10 @@ export const AppInput = (props: IAppInputProps) => {
     value,
     onChange,
   };
+
+  if (id === 'password') {
+    attributes.type = pwVisible ? 'text' : 'password';
+  }
 
   return (
     <Box>
@@ -45,6 +47,7 @@ export const AppInput = (props: IAppInputProps) => {
               right: '2px',
               bottom: '-20px',
               fontSize: '12px',
+              color: count.current > count.max ? red[500] : 'white',
             }}
           >
             {count.current} / {count.max}
@@ -58,6 +61,20 @@ export const AppInput = (props: IAppInputProps) => {
           aria-invalid={!!error}
           {...attributes}
         />
+        {id === 'password' && (
+          <Button
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              right: 8,
+              transform: 'translateY(-50%)',
+            }}
+            onClick={() => setPwVisible(!pwVisible)}
+            title={pwVisible ? 'Esconder senha' : 'Exibir senha'}
+          >
+            {pwVisible ? <VisibilityOffIcon /> : <VisibilityIcon />}
+          </Button>
+        )}
       </Box>
       {error && (
         <Typography variant='caption' color='error'>
