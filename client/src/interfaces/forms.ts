@@ -1,3 +1,5 @@
+import { JSX } from 'react';
+
 export interface ILoginFormFields {
   username: string;
   password: string;
@@ -13,8 +15,9 @@ export interface IRegisterFormState {
   isValid: boolean;
   checkingEmail: boolean;
   checkingUsername: boolean;
+  validatedFields: string[];
   errors?: {
-    [key: string]: string;
+    [key: string]: string & JSX.Element;
   };
 }
 

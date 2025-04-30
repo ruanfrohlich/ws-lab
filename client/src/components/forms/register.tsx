@@ -1,25 +1,26 @@
 import { Box, Button, CircularProgress } from '@mui/material';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import userMock from '../../data/user-mock.json';
 import { AppInput } from '../Input';
 import { useValidate } from '../../hooks';
 import { IRegisterFormFields, IRegisterFormState } from '../../interfaces';
+import { pull } from 'lodash';
 
 export const FormRegister = () => {
-  const [checkingUsername, setCheckingUsername] = useState<boolean>(false);
   const [registerFieldsHeight, setRegisterFieldsHeight] = useState<number>(0);
   const registerFields = useRef<HTMLElement>(null);
-
   const [state, setState] = useState<IRegisterFormState>({
     isValid: false,
     checkingEmail: false,
     checkingUsername: false,
+    validatedFields: [],
     fields: {
       username: '',
       email: '',
       password: '',
     },
   });
+
+  const validatedFields: string[] = [];
 
   const updateState = (el: keyof IRegisterFormState, value: any) => {
     setState((state) => {
@@ -42,6 +43,12 @@ export const FormRegister = () => {
             },
           };
         }
+        case 'validatedFields': {
+          return {
+            ...state,
+            validatedFields: [...value],
+          };
+        }
         default: {
           return {
             ...state,
@@ -58,19 +65,21 @@ export const FormRegister = () => {
     const { id, value } = target as HTMLInputElement;
     const field = id as keyof IRegisterFormFields;
 
-    setState(({ fields, ...state }) => {
-      return {
-        ...state,
-        fields: {
-          ...fields,
-          [field]: value,
-        },
-      };
+    updateState('fields', {
+      [field]: value,
     });
 
     const isValid = await validate(field, value);
 
-    console.log(isValid);
+    if (isValid) {
+      if (state.validatedFields.includes(field)) return;
+
+      updateState('validatedFields', [...state.validatedFields, field]);
+    } else if (state.validatedFields.includes(field)) {
+      const updatedInvalid = pull(state.validatedFields, field);
+
+      updateState('validatedFields', [...updatedInvalid]);
+    }
 
     setRegisterFieldsHeight(registerFields.current?.getBoundingClientRect().height ?? 0);
 
@@ -78,6 +87,13 @@ export const FormRegister = () => {
       setRegisterFieldsHeight(0);
     }
   };
+
+  useEffect(() => {
+    updateState(
+      'isValid',
+      Object.keys(state.fields).every((key) => state.validatedFields.includes(key)),
+    );
+  }, [state.validatedFields]);
 
   const flex = {
     display: 'flex',

@@ -1,6 +1,7 @@
-import { isEmpty } from 'lodash';
+import { Box } from '@mui/material';
 import mockDB from '../data/user-mock.json';
 import { IRegisterFormState } from '../interfaces';
+import { Fragment } from 'react';
 
 export const useValidate = (updateState: (el: keyof IRegisterFormState, value: unknown) => void) => {
   const validate = async (field: string, value: string) => {
@@ -78,6 +79,7 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
             }
 
             updateState('errors', { username: '' });
+
             return true;
           }
 
@@ -89,8 +91,26 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
         }
         case 'password': {
           if (/^(?=.*\d)(?=.*[aA-zZ])(?=.*[^\w\d\s:])([^\s]){8,}$/gm.test(value)) {
-            console.log('passou a senha');
+            updateState('errors', { password: '' });
+            return true;
           }
+
+          updateState('errors', {
+            password: (
+              <Fragment>
+                Por favor, verifique a senha digitada. Precisa cumprir as seguintes regras:
+                <Box component={'ul'}>
+                  <li>Ter no mínimo 8 caracteres</li>
+                  <li>1 letra maiúscula</li>
+                  <li>1 letra minúscula</li>
+                  <li>1 número</li>
+                  <li>1 caractere especial</li>
+                </Box>
+              </Fragment>
+            ),
+          });
+
+          return false;
         }
       }
     } else {
