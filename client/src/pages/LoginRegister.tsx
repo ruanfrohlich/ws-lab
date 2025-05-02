@@ -1,7 +1,7 @@
 import { AppHelmet, AppLink, FormLogin, FormRegister } from '../components';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import heroLogin from '../assets/images/hero-login.jpg';
 import { Fragment, useState } from 'react';
+import hero from 'url:../assets/images/hero-login.jpg';
 
 export const LoginRegister = () => {
   const [isRegister, setIsRegister] = useState<boolean>(false);
@@ -50,10 +50,10 @@ export const LoginRegister = () => {
             </Typography>
             {isRegister ? (
               <Fragment>
-                <FormRegister />
+                <FormRegister onCancel={() => setIsRegister(false)} />
                 <Typography variant='body1'>
                   Já possui conta?{' '}
-                  <AppLink to={''} hover onClick={handleRegister}>
+                  <AppLink to={''} onClick={handleRegister}>
                     Entrar
                   </AppLink>
                 </Typography>
@@ -63,7 +63,7 @@ export const LoginRegister = () => {
                 <FormLogin />
                 <Typography variant='body1'>
                   Não possui conta?{' '}
-                  <AppLink to={''} hover onClick={handleRegister}>
+                  <AppLink to={''} onClick={handleRegister}>
                     Cadastre-se
                   </AppLink>
                 </Typography>
@@ -89,7 +89,7 @@ export const LoginRegister = () => {
           >
             <Box
               component={'img'}
-              src={heroLogin}
+              src={hero}
               alt={'Imagem divulgação'}
               sx={{
                 width: '100%',

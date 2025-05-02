@@ -1,10 +1,10 @@
 import { Fragment, ReactNode, useEffect, useState } from 'react';
 import { useWebsocketContext } from '../contexts';
 import { AppLink, Header } from '../components';
-import { Box, Breadcrumbs, Snackbar, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Typography } from '@mui/material';
 import { configProvider, translatePathname } from '../utils';
 import { useLocation, useNavigate } from 'react-router';
-import texture from '../assets/images/texture.png';
+import texture from 'url:../assets/images/texture.png';
 
 export const AppLayout = (props: { children: ReactNode }) => {
   const { websocket } = useWebsocketContext();

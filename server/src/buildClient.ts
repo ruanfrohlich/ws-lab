@@ -19,6 +19,7 @@ export const BuildClient = async () => {
     entries: clientRoot + '/src/index.html',
     defaultConfig: '@parcel/config-default',
     watchDir: clientRoot + '/src',
+    shouldAutoInstall: true,
     defaultTargetOptions: {
       publicUrl: '/app',
     },

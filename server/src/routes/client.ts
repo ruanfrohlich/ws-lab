@@ -39,6 +39,8 @@ export const clientRoutes = ({ url, method }: IncomingMessage, res: ServerRespon
       contentType = 'text/html';
   }
 
+  console.log(filePath);
+
   readFile(filePath, function (error, content) {
     res.writeHead(200, { 'Content-Type': contentType });
     res.end(content, 'utf-8');

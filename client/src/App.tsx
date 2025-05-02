@@ -4,6 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { useWebsocketContext } from './contexts';
 import { AppLayout } from './layouts/AppLayout';
 import { StrictMode } from 'react';
+import 'dotenv/config';
 
 const appTheme = createTheme({
   palette: {

@@ -1,11 +1,12 @@
 import { Box, Button, CircularProgress } from '@mui/material';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import { AppInput } from '../Input';
 import { useValidate } from '../../hooks';
 import { IRegisterFormFields, IRegisterFormState } from '../../interfaces';
 import { pull } from 'lodash';
+import { userService } from '../../services';
 
-export const FormRegister = () => {
+export const FormRegister = (props: { onCancel: () => void }) => {
   const [registerFieldsHeight, setRegisterFieldsHeight] = useState<number>(0);
   const registerFields = useRef<HTMLElement>(null);
   const [state, setState] = useState<IRegisterFormState>({
@@ -19,8 +20,7 @@ export const FormRegister = () => {
       password: '',
     },
   });
-
-  const validatedFields: string[] = [];
+  const { registerUser } = userService();
 
   const updateState = (el: keyof IRegisterFormState, value: any) => {
     setState((state) => {
@@ -101,7 +101,13 @@ export const FormRegister = () => {
     gap: 2,
   };
 
-  const handleSubmit = () => console.log('form enviado');
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+
+    const res = await registerUser(state.fields);
+
+    console.log(res);
+  };
 
   return (
     <form noValidate onSubmit={handleSubmit}>
@@ -188,6 +194,7 @@ export const FormRegister = () => {
                 sx={({ palette }) => ({
                   backgroundColor: palette.error.dark,
                 })}
+                onClick={props.onCancel}
               >
                 Cancelar
               </Button>
