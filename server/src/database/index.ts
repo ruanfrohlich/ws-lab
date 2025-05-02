@@ -15,7 +15,7 @@ const database = async () => {
     },
   });
 
-  const { getAllUsers, getUser, createUser } = User(sequelize);
+  const { getAllUsers, getUser, createUser, checkUserExists } = User(sequelize);
 
   await sequelize
     .sync()
@@ -28,6 +28,7 @@ const database = async () => {
     getUser,
     getAllUsers,
     createUser,
+    checkUserExists,
     close,
   };
 };

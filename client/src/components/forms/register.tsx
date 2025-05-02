@@ -10,6 +10,7 @@ export const FormRegister = (props: { onCancel: () => void }) => {
   const [registerFieldsHeight, setRegisterFieldsHeight] = useState<number>(0);
   const registerFields = useRef<HTMLElement>(null);
   const [state, setState] = useState<IRegisterFormState>({
+    loading: false,
     isValid: false,
     checkingEmail: false,
     checkingUsername: false,
@@ -103,10 +104,15 @@ export const FormRegister = (props: { onCancel: () => void }) => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    try {
+      updateState('loading', true);
 
-    const res = await registerUser(state.fields);
+      const res = await registerUser(state.fields);
 
-    console.log(res);
+      console.log(res);
+    } finally {
+      updateState('loading', false);
+    }
   };
 
   return (

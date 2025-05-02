@@ -15,6 +15,8 @@ const connections: {
   [key: string]: WebSocket;
 } = {};
 
+const onlyAPI = process.argv.includes('--api');
+
 // HTTP Server
 const serverOptions = {
   key: readFileSync(process.env.LOCALHOST_SSL_KEY ?? ''),
@@ -32,11 +34,15 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
 };
 
 (async () => {
-  const { success, error } = await BuildClient();
+  const { success, error } = onlyAPI
+    ? {
+        success: true,
+      }
+    : await BuildClient();
 
   if (success) {
     const server = createServer(serverOptions, router).listen(port, () => {
-      console.log(`🌪️  Server is listening on port https://localhost:${port}/app`);
+      console.log(`🌪️  Server is listening on port https://localhost:${port}/${onlyAPI ? 'api' : 'app'}`);
     });
 
     // WebSocket Server

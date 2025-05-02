@@ -11,6 +11,7 @@ export interface IRegisterFormFields {
 }
 
 export interface IRegisterFormState {
+  loading: boolean;
   fields: IRegisterFormFields;
   isValid: boolean;
   checkingEmail: boolean;

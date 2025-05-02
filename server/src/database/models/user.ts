@@ -1,7 +1,8 @@
-import { Sequelize } from 'sequelize';
+import { QueryTypes, Sequelize } from 'sequelize';
 import { IUser, ModelTypes } from '../types';
 import { IDBUser } from '../../interfaces';
 import { log } from '../../utils';
+import { isEmpty } from 'lodash';
 
 export const User = (sequelize: Sequelize) => {
   const User = sequelize.define('User', ModelTypes.User);
@@ -14,6 +15,27 @@ export const User = (sequelize: Sequelize) => {
     return {
       user: user as unknown as IUser,
     };
+  };
+
+  const checkUserExists = async (data: IDBUser): Promise<boolean> => {
+    try {
+      const query = await sequelize.query(
+        `SELECT * FROM User WHERE username="${data.username}" OR email="${data.email}"`,
+        {
+          type: QueryTypes.SELECT,
+        },
+      );
+
+      if (isEmpty(query)) {
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      console.log(e);
+
+      return false;
+    }
   };
 
   const createUser = async (userData: IDBUser) => {
@@ -38,5 +60,6 @@ export const User = (sequelize: Sequelize) => {
     getUser,
     getAllUsers,
     createUser,
+    checkUserExists,
   };
 };
