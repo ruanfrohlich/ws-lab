@@ -15,7 +15,9 @@
     "ws": "^8.18.0"
   },
   "dependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/lodash": "^4.17.16",
+    "crypto-js": "^4.2.0",
     "lodash": "^4.17.21"
   }
 }

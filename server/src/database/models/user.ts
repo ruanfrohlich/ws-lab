@@ -17,7 +17,7 @@ export const User = (sequelize: Sequelize) => {
     };
   };
 
-  const checkUserExists = async (data: IDBUser): Promise<boolean> => {
+  const checkUserExists = async (data: Omit<IDBUser, 'password'>): Promise<boolean> => {
     try {
       const query = await sequelize.query(
         `SELECT * FROM User WHERE username="${data.username}" OR email="${data.email}"`,

@@ -24,7 +24,7 @@ export const BuildClient = async () => {
       publicUrl: '/app',
     },
     hmrOptions: {
-      port: parseInt(process.env.PORT ?? '3000'),
+      port: parseInt(process.env.HMR_PORT ?? '3000'),
     },
   });
 

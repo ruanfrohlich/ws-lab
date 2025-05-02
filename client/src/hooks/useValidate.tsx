@@ -1,34 +1,21 @@
 import { Box } from '@mui/material';
-import mockDB from '../data/user-mock.json';
 import { IRegisterFormState } from '../interfaces';
 import { Fragment } from 'react';
+import { userService } from '../services';
+import { debounce } from 'lodash';
 
 export const useValidate = (updateState: (el: keyof IRegisterFormState, value: unknown) => void) => {
+  const { findUser } = userService();
+
   const validate = async (field: string, value: string) => {
     if (value !== '' && value.length > 3) {
       switch (field) {
         case 'email': {
           if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
             updateState('checkingEmail', true);
+            const hasUser = await findUser({ username: '', email: value });
 
-            const alreadyRegistered = new Promise((res) => {
-              let exists = false;
-
-              const timer = setTimeout(() => {
-                try {
-                  if (mockDB.find((el) => el.email === value)) {
-                    exists = true;
-                  }
-                } finally {
-                  clearTimeout(timer);
-                  res(exists);
-                }
-              }, 2000);
-            });
-
-            const res = await alreadyRegistered;
-
-            if (res) {
+            if (hasUser) {
               updateState('checkingEmail', false);
               updateState('errors', {
                 email: 'O e-mail digitado já tem cadastro ≧◠‿◠≦✌',
@@ -43,6 +30,7 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
             return true;
           }
 
+          updateState('checkingEmail', false);
           updateState('errors', {
             email: 'A gente precisa do seu e-mail válido pra seguir com o cadastro.',
           });
@@ -53,24 +41,10 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
           if (/^[aA-zZ0-9_-]{3,24}$/g.test(value)) {
             updateState('checkingUsername', true);
 
-            const checkUsername = new Promise((res) => {
-              const timer = setTimeout(() => {
-                try {
-                  if (mockDB.find((el) => el.username === value)) {
-                    res(true);
-                  }
+            const hasUser = await findUser({ username: value, email: '' });
 
-                  res(false);
-                } finally {
-                  updateState('checkingUsername', false);
-                  clearTimeout(timer);
-                }
-              }, 1000);
-            });
-
-            const res = await checkUsername;
-
-            if (res) {
+            if (hasUser) {
+              updateState('checkingUsername', false);
               updateState('errors', {
                 username: 'Opa! Esse username já foi abocanhado ( ͡╥ ͜ʖ ͡╥)',
               });
@@ -78,6 +52,7 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
               return false;
             }
 
+            updateState('checkingUsername', false);
             updateState('errors', { username: '' });
 
             return true;

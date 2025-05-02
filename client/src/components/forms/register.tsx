@@ -3,7 +3,7 @@ import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import { AppInput } from '../Input';
 import { useValidate } from '../../hooks';
 import { IRegisterFormFields, IRegisterFormState } from '../../interfaces';
-import { pull } from 'lodash';
+import { debounce, pull } from 'lodash';
 import { userService } from '../../services';
 
 export const FormRegister = (props: { onCancel: () => void }) => {
@@ -109,7 +109,7 @@ export const FormRegister = (props: { onCancel: () => void }) => {
 
       const res = await registerUser(state.fields);
 
-      console.log(res);
+      if (res.success) console.log('user registrado');
     } finally {
       updateState('loading', false);
     }
@@ -192,7 +192,7 @@ export const FormRegister = (props: { onCancel: () => void }) => {
               padding={0}
             >
               <Button type='submit' variant='contained' fullWidth disabled={!state.isValid}>
-                Cadastrar
+                {state.loading ? <CircularProgress size={20} /> : 'Cadastrar'}
               </Button>
               <Button
                 type='button'

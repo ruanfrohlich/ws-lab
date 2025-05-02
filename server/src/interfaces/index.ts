@@ -15,6 +15,11 @@ export interface IDBUser {
   email: string;
   password: string;
 }
+
+export interface IFindUser {
+  username: string;
+  email: string;
+}
 export interface IIncomingData {
   type: TDataType;
   clientId: string;

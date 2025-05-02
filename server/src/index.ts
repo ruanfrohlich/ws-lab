@@ -1,6 +1,6 @@
 import { createServer } from 'https';
 import WebSocket from 'ws';
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import * as Cookies from 'cookie';
 import database from './database';
 import { IncomingMessage } from 'http';
@@ -9,6 +9,13 @@ import { router } from './routes';
 import { log, originIsAllowed } from './utils';
 import { IIncomingData, IReturnData } from './interfaces';
 import { BuildClient } from './buildClient';
+import { cwd } from 'process';
+
+const isDev = process.env.NODE_ENV !== 'production';
+
+dotenv.config({
+  path: cwd() + `/server/.env.${isDev ? 'dev' : 'prd'}`,
+});
 
 const port = process.env.PORT ?? 3001;
 const connections: {
@@ -53,7 +60,7 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
     wss.on('connection', async (ws: WebSocket, { headers }: IncomingMessage) => {
       const { cookie, origin } = headers;
       const clientId = Cookies.parse(cookie ?? '')['USER_TOKEN'] ?? '';
-      const { getUser, createUser } = await database();
+      const { getUser } = await database();
 
       if (!clientId || !originIsAllowed(origin ?? '')) {
         !clientId ? log(`ClientID not provided!`) : log(`Connection refused for origin ${origin}`);
@@ -95,12 +102,6 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
           });
         } else {
           log(`User [${clientId}] não consta no banco de dados! Criando novo...`);
-
-          await createUser({
-            username: clientId,
-            email: 'ruanteste@email.com',
-            password: 'teste123@@',
-          });
         }
       }
     });

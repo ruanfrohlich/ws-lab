@@ -1,16 +1,64 @@
-import axios, { isAxiosError } from 'axios';
-import { IUserRegister } from '../interfaces';
+import axios, { AxiosResponse, isAxiosError } from 'axios';
+import { IUser, IUserRegister } from '../interfaces';
 
 const handler = axios.create({
   baseURL: process.env.ACCOUNT_API,
 });
 
 export const userService = () => {
+  const fetchUser = async (userId: number, token: string): Promise<{ user: IUser | null }> => {
+    try {
+      const res: AxiosResponse<IUser> = await handler.get(`/user/${userId}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      if (res.status === 200) {
+        return {
+          user: res.data,
+        };
+      }
+
+      return {
+        user: null,
+      };
+    } catch (e) {
+      console.log(e);
+
+      return {
+        user: null,
+      };
+    }
+  };
+
+  const findUser = async (user: { username: string; email: string }): Promise<boolean> => {
+    try {
+      const { username, email } = user;
+      const { data }: AxiosResponse<{ exists: boolean }> = await handler.post('/user', {
+        username,
+        email,
+      });
+
+      console.log(data);
+
+      if (data.exists) {
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      console.log(e);
+
+      return false;
+    }
+  };
+
   const registerUser = async (fields: IUserRegister): Promise<{ success: boolean }> => {
     try {
-      const req = await handler.post('/register', fields);
+      const res = await handler.post('/register', fields);
 
-      if (req.status === 200) {
+      if (res.status === 201) {
         return {
           success: true,
         };
@@ -33,6 +81,8 @@ export const userService = () => {
   };
 
   return {
+    fetchUser,
+    findUser,
     registerUser,
   };
 };

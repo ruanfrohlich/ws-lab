@@ -17,7 +17,7 @@
     ],
     "watch": [
       "server/src",
-      "server/.env"
+      "server/.env.dev"
     ],
     "ext": "ts,tsx,js,jsx,html",
     "exec": "ts-node server/src/index.ts"
