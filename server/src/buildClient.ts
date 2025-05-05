@@ -11,7 +11,7 @@ interface IWatchResponse {
 
 export const BuildClient = async (isDev: boolean) => {
   const loadBuild = loading({
-    text: `[${isDev ? 'DEV' : 'PRD'}] Building the client`,
+    text: 'Building the client',
   }).start();
 
   const clientRoot = cwd() + '/client';
