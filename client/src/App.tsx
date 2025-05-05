@@ -4,7 +4,15 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { useWebsocketContext } from './contexts';
 import { AppLayout } from './layouts/AppLayout';
 import { StrictMode } from 'react';
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import { cwd } from 'process';
+import { configProvider } from './utils';
+
+const { isDev } = configProvider();
+
+dotenv.config({
+  path: cwd() + `/client/.env.${isDev ? 'development' : 'production'}`,
+});
 
 const appTheme = createTheme({
   palette: {

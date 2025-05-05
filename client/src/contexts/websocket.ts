@@ -36,7 +36,7 @@ export const useWebsocketContext = () => {
   // };
 
   const webSocketHandler = () => {
-    const wsClient = state.socket ?? new WebSocket('wss://localhost:3001/');
+    const wsClient = state.socket ?? new WebSocket(`wss://${process.env.WS_SERVER}/`);
 
     setState((state) => {
       return {

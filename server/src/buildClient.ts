@@ -1,4 +1,5 @@
 import { Parcel } from '@parcel/core';
+import type { InitialParcelOptions } from '@parcel/types';
 import { cwd } from 'process';
 import { log } from './utils';
 import loading from 'loading-cli';
@@ -8,25 +9,33 @@ interface IWatchResponse {
   error?: unknown;
 }
 
-export const BuildClient = async () => {
+export const BuildClient = async (isDev: boolean) => {
   const loadBuild = loading({
-    text: ' Building the client',
+    text: `[${isDev ? 'DEV' : 'PRD'}] Building the client`,
   }).start();
 
   const clientRoot = cwd() + '/client';
 
-  let bundler = new Parcel({
+  let parcelConfig: InitialParcelOptions = {
     entries: clientRoot + '/src/index.html',
     defaultConfig: '@parcel/config-default',
-    watchDir: clientRoot + '/src',
-    shouldAutoInstall: true,
     defaultTargetOptions: {
       publicUrl: '/app',
     },
-    hmrOptions: {
-      port: parseInt(process.env.HMR_PORT ?? '3000'),
-    },
-  });
+  };
+
+  if (isDev) {
+    parcelConfig = {
+      ...parcelConfig,
+      watchDir: clientRoot + '/src',
+      shouldAutoInstall: true,
+      hmrOptions: {
+        port: parseInt(process.env.HMR_PORT ?? '3000'),
+      },
+    };
+  }
+
+  let bundler = new Parcel(parcelConfig);
 
   return new Promise<IWatchResponse>((res, rej) => {
     bundler.watch((err, event) => {

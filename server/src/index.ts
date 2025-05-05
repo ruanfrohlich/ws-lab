@@ -45,7 +45,7 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
     ? {
         success: true,
       }
-    : await BuildClient();
+    : await BuildClient(isDev);
 
   if (success) {
     const server = createServer(serverOptions, router).listen(port, () => {

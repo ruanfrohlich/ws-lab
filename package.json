@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon",
-    "dev:api": "nodemon --api"
+    "dev:api": "nodemon --api",
+    "start": "rimraf -rf client/.parcel-cache client/public && NODE_ENV=production ts-node server/src/index.ts"
   },
   "engines": {
     "node": "22"
