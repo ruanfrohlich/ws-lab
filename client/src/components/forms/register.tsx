@@ -1,20 +1,24 @@
-import { Box, Button, CircularProgress } from '@mui/material';
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
+import { ChangeEvent, FormEvent, Fragment, useEffect, useRef, useState } from 'react';
 import { AppInput } from '../Input';
 import { useValidate } from '../../hooks';
 import { IRegisterFormFields, IRegisterFormState } from '../../interfaces';
-import { debounce, pull } from 'lodash';
+import { pull } from 'lodash';
 import { userService } from '../../services';
+import { Link } from 'react-router';
+import { configProvider } from '../../utils';
 
 export const FormRegister = (props: { onCancel: () => void }) => {
   const [registerFieldsHeight, setRegisterFieldsHeight] = useState<number>(0);
   const registerFields = useRef<HTMLElement>(null);
+  const { appRoot } = configProvider();
   const [state, setState] = useState<IRegisterFormState>({
     loading: false,
     isValid: false,
     checkingEmail: false,
     checkingUsername: false,
     validatedFields: [],
+    registerSuccess: false,
     fields: {
       username: '',
       email: '',
@@ -107,107 +111,142 @@ export const FormRegister = (props: { onCancel: () => void }) => {
     try {
       updateState('loading', true);
 
+      await Promise.resolve(() => {
+        setTimeout(() => console.log('Timeout finalizado'), 2000);
+      });
+
       const res = await registerUser(state.fields);
 
-      if (res.success) console.log('user registrado');
+      if (res.success) return updateState('registerSuccess', true);
+
+      if (res.error) {
+        return updateState('errors', {
+          register: res.error,
+        });
+      }
+
+      return updateState('errors', {
+        register: 'Tivemos um probleminha ao tentar realizar seu cadastro. Tente novamente em alguns minutos.',
+      });
     } finally {
       updateState('loading', false);
     }
   };
 
   return (
-    <form noValidate onSubmit={handleSubmit}>
-      <Box sx={{ ...flex, paddingBlock: 2, gap: '0' }}>
-        <Box
-          sx={{
-            position: 'relative',
-          }}
-        >
-          <AppInput
-            id='username'
-            value={state.fields.username}
-            onChange={handleChange}
-            label='Crie um username especial'
-            error={state.errors?.username ?? ''}
-            count={{
-              current: state.fields.username.length,
-              max: 24,
-            }}
-          />
-          <CircularProgress
-            size={20}
+    <Fragment>
+      {state.registerSuccess && (
+        <Alert severity='success'>
+          Cadastro efetuado com sucesso! Você já pode acessar sua conta clicando{' '}
+          <Typography
+            component={'span'}
+            fontSize={10}
             sx={{
-              position: 'absolute',
-              top: 17,
-              right: 20,
-              opacity: state.checkingUsername ? '1' : '0',
+              fontFamily: '"Boldonse", system-ui',
+              textDecoration: 'underline',
             }}
-          />
-        </Box>
-        <Box
-          sx={{
-            transition: '600ms ease-in-out',
-            maxHeight: registerFieldsHeight + 32,
-            paddingTop: '32px',
-            overflow: 'hidden',
-          }}
-        >
-          <Box sx={flex} padding={0} ref={registerFields}>
+          >
+            <Link style={{ textDecoration: 'none', color: 'inherit' }} to={'/app/account'}>
+              aqui
+            </Link>
+          </Typography>
+          .
+        </Alert>
+      )}
+      {state.errors?.register && <Alert severity='error'>{state.errors?.register}</Alert>}
+      <form noValidate onSubmit={handleSubmit}>
+        <Box sx={{ ...flex, paddingBlock: 2, gap: '0' }}>
+          <Box
+            sx={{
+              position: 'relative',
+            }}
+          >
             <AppInput
-              id='password'
-              label='Senha'
+              id='username'
+              value={state.fields.username}
               onChange={handleChange}
-              error={state.errors?.password ?? ''}
-              value={state.fields.password}
+              label='Crie um username especial'
+              error={state.errors?.username ?? ''}
+              count={{
+                current: state.fields.username.length,
+                max: 24,
+              }}
             />
-
-            <Box
+            <CircularProgress
+              size={20}
               sx={{
-                position: 'relative',
+                position: 'absolute',
+                top: 17,
+                right: 20,
+                opacity: state.checkingUsername ? '1' : '0',
               }}
-            >
+            />
+          </Box>
+          <Box
+            sx={{
+              transition: '600ms ease-in-out',
+              maxHeight: registerFieldsHeight + 32,
+              paddingTop: '32px',
+              overflow: 'hidden',
+            }}
+          >
+            <Box sx={flex} padding={0} ref={registerFields}>
               <AppInput
-                id='email'
-                label='E-mail'
+                id='password'
+                label='Senha'
                 onChange={handleChange}
-                value={state.fields.email}
-                error={state.errors?.email ?? ''}
+                error={state.errors?.password ?? ''}
+                value={state.fields.password}
               />
-              <CircularProgress
-                size={20}
-                sx={{
-                  position: 'absolute',
-                  top: 17,
-                  right: 20,
-                  opacity: state.checkingEmail ? '1' : '0',
-                }}
-              />
-            </Box>
 
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 2,
-              }}
-              padding={0}
-            >
-              <Button type='submit' variant='contained' fullWidth disabled={!state.isValid}>
-                {state.loading ? <CircularProgress size={20} /> : 'Cadastrar'}
-              </Button>
-              <Button
-                type='button'
-                variant='contained'
-                sx={({ palette }) => ({
-                  backgroundColor: palette.error.dark,
-                })}
-                onClick={props.onCancel}
+              <Box
+                sx={{
+                  position: 'relative',
+                }}
               >
-                Cancelar
-              </Button>
+                <AppInput
+                  id='email'
+                  label='E-mail'
+                  onChange={handleChange}
+                  value={state.fields.email}
+                  error={state.errors?.email ?? ''}
+                />
+                <CircularProgress
+                  size={20}
+                  sx={{
+                    position: 'absolute',
+                    top: 17,
+                    right: 20,
+                    opacity: state.checkingEmail ? '1' : '0',
+                  }}
+                />
+              </Box>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 2,
+                }}
+                padding={0}
+              >
+                <Button type='submit' variant='contained' fullWidth disabled={!state.isValid}>
+                  {state.loading ? <CircularProgress size={20} /> : 'Cadastrar'}
+                </Button>
+                <Button
+                  type='button'
+                  variant='contained'
+                  sx={({ palette }) => ({
+                    backgroundColor: palette.error.dark,
+                  })}
+                  onClick={props.onCancel}
+                >
+                  Cancelar
+                </Button>
+              </Box>
             </Box>
           </Box>
         </Box>
-      </Box>
-    </form>
+      </form>
+    </Fragment>
   );
 };

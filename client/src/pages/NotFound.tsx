@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import CodeOffIcon from '@mui/icons-material/CodeOff';
-import notFound from '../assets/images/404.jpg';
+import notFound from 'url:../assets/images/404.jpg';
 
 export const NotFound = () => {
   return (
@@ -18,6 +18,7 @@ export const NotFound = () => {
       }}
     >
       <Box
+        mb={8}
         sx={{
           width: 150,
           height: 150,
@@ -38,10 +39,10 @@ export const NotFound = () => {
           textAlign: 'center',
           borderRadius: 6,
           padding: 2,
-          backgroundColor: 'black',
+          backgroundColor: 'rgba(0,0,0,0.6)',
         }}
       >
-        Ops! Essa página ainda não foi criada (esses devs viu...)
+        Opa! Essa página ainda não foi criada (ᴗ˳ᴗ)
       </Typography>
     </Box>
   );

@@ -2,7 +2,6 @@ import { Box } from '@mui/material';
 import { IRegisterFormState } from '../interfaces';
 import { Fragment } from 'react';
 import { userService } from '../services';
-import { debounce } from 'lodash';
 
 export const useValidate = (updateState: (el: keyof IRegisterFormState, value: unknown) => void) => {
   const { findUser } = userService();
@@ -13,6 +12,7 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
         case 'email': {
           if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
             updateState('checkingEmail', true);
+
             const hasUser = await findUser({ username: '', email: value });
 
             if (hasUser) {
@@ -65,6 +65,8 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
           return false;
         }
         case 'password': {
+          if (value.length < 8) return false;
+
           if (/^(?=.*\d)(?=.*[aA-zZ])(?=.*[^\w\d\s:])([^\s]){8,}$/gm.test(value)) {
             updateState('errors', { password: '' });
             return true;

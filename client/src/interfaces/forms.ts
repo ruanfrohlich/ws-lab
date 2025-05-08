@@ -17,6 +17,7 @@ export interface IRegisterFormState {
   checkingEmail: boolean;
   checkingUsername: boolean;
   validatedFields: string[];
+  registerSuccess: boolean;
   errors?: {
     [key: string]: string & JSX.Element;
   };

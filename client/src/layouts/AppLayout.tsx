@@ -33,8 +33,8 @@ export const AppLayout = (props: { children: ReactNode }) => {
     <Fragment>
       <Header />
       <Breadcrumbs
-        sx={(theme) => ({
-          backgroundColor: theme.palette.primary.dark,
+        sx={({ palette }) => ({
+          backgroundColor: palette.primary.dark,
           display: 'flex',
           alignItems: 'center',
           position: 'fixed',

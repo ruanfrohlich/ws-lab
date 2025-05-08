@@ -1,5 +1,6 @@
 import axios, { AxiosResponse, isAxiosError } from 'axios';
 import { IUser, IUserRegister } from '../interfaces';
+import { translateError } from '../utils';
 
 const handler = axios.create({
   baseURL: process.env.ACCOUNT_API,
@@ -40,8 +41,6 @@ export const userService = () => {
         email,
       });
 
-      console.log(data);
-
       if (data.exists) {
         return true;
       }
@@ -54,7 +53,7 @@ export const userService = () => {
     }
   };
 
-  const registerUser = async (fields: IUserRegister): Promise<{ success: boolean }> => {
+  const registerUser = async (fields: IUserRegister): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await handler.post('/register', fields);
 
@@ -70,6 +69,11 @@ export const userService = () => {
     } catch (e) {
       if (isAxiosError(e)) {
         console.error(e.response?.data);
+
+        return {
+          success: false,
+          error: translateError(e.response?.data.message),
+        };
       } else {
         console.error(e);
       }

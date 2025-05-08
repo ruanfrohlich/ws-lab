@@ -67,7 +67,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         }
       } else {
         return sendResponse(405, {
-          message: 'Metodo não aceito!',
+          message: 'Invalid method!',
         });
       }
     }
