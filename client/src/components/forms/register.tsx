@@ -111,10 +111,6 @@ export const FormRegister = (props: { onCancel: () => void }) => {
     try {
       updateState('loading', true);
 
-      await Promise.resolve(() => {
-        setTimeout(() => console.log('Timeout finalizado'), 2000);
-      });
-
       const res = await registerUser(state.fields);
 
       if (res.success) return updateState('registerSuccess', true);

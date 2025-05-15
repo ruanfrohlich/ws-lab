@@ -36,12 +36,12 @@ export const userService = () => {
   const findUser = async (user: { username: string; email: string }): Promise<boolean> => {
     try {
       const { username, email } = user;
-      const { data }: AxiosResponse<{ exists: boolean }> = await handler.post('/user', {
+      const { data }: AxiosResponse<{ found: boolean }> = await handler.post('/user', {
         username,
         email,
       });
 
-      if (data.exists) {
+      if (data.found) {
         return true;
       }
 

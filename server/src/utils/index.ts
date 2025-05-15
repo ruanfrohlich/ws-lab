@@ -11,7 +11,7 @@ export const originIsAllowed = (origin: string) => {
   if (acceptedOrigins.includes(origin)) return true;
 };
 
-export const getBody = (req: IncomingMessage): Promise<object> => {
+export const getBody = (req: IncomingMessage): Promise<object | null> => {
   return new Promise((resolve) => {
     const data: Buffer[] = [];
 
@@ -21,7 +21,9 @@ export const getBody = (req: IncomingMessage): Promise<object> => {
       })
       .on('end', () => {
         const body = Buffer.concat(data).toString();
-        resolve(JSON.parse(body));
+
+        if (body) resolve(JSON.parse(body));
+        else resolve(null);
       });
   });
 };

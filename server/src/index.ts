@@ -49,7 +49,7 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
 
   if (success) {
     const server = createServer(serverOptions, router).listen(port, () => {
-      console.log(`🌪️  Server is listening on port https://localhost:${port}/${onlyAPI ? 'api' : 'app'}`);
+      console.log(`🌪️  Server is listening on https://localhost:${port}/${onlyAPI ? 'api' : 'app'}`);
     });
 
     // WebSocket Server
@@ -69,7 +69,7 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
       }
 
       if (ws.readyState === WebSocket.OPEN) {
-        const { user } = await getUser(clientId);
+        const user = await getUser({ username: clientId, email: '' });
 
         if (user) {
           connections[user.username] = ws;
