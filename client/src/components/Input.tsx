@@ -14,7 +14,7 @@ interface IAppInputProps {
     current: number;
     max: number;
   };
-  onChange: (evt: ChangeEvent) => void;
+  onChange: (evt: ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const AppInput = (props: IAppInputProps) => {

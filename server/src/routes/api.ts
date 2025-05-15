@@ -87,7 +87,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const body = (await getBody(req)) as IDBUser;
+      const body = await getBody(req);
 
       if (!body) {
         return sendResponse(403, {
@@ -95,7 +95,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const credential = body.username ?? body.email;
+      const credential = body.credential;
       const password = body.password;
 
       if (!credential || !password) {

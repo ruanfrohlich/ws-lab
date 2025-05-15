@@ -4,6 +4,12 @@ export interface ILoginFormFields {
   username: string;
   password: string;
 }
+
+export interface ILoginFormState {
+  fields: ILoginFormFields;
+  showPassword: boolean;
+  isValid: boolean;
+}
 export interface IRegisterFormFields {
   username: string;
   email: string;

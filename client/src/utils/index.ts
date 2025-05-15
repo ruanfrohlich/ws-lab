@@ -28,3 +28,9 @@ export const translatePathname = (path: string) => {
     }
   }
 };
+
+export const commonRegEx = {
+  email: /^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/,
+  username: /^[aA-zZ0-9_-]{3,24}$/,
+  password: /^(?=.*\d)(?=.*[aA-zZ])(?=.*[^\w\d\s:])([^\s]){8,}$/,
+};

@@ -84,9 +84,33 @@ export const userService = () => {
     }
   };
 
+  const userLogin = async (credentials: {
+    username_email: string;
+    password: string;
+  }): Promise<{ logged: boolean; token?: string }> => {
+    try {
+      const res = await handler.post('/login', {
+        credential: credentials.username_email,
+        password: credentials.password,
+      });
+
+      return {
+        logged: true,
+        token: res.data.token,
+      };
+    } catch (e) {
+      console.error(e);
+
+      return {
+        logged: false,
+      };
+    }
+  };
+
   return {
     fetchUser,
     findUser,
     registerUser,
+    userLogin,
   };
 };
