@@ -1,11 +1,11 @@
-import { createBrowserRouter, RouterProvider } from 'react-router';
+import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router';
 import { App } from '../App';
 import { Home, LoginRegister, NotFound } from '../pages';
 import { configProvider } from '../utils';
 
 export const AppRoutes = () => {
   const { appRoot } = configProvider();
-  const routes = [
+  const routes: RouteObject[] = [
     {
       path: appRoot,
       element: <App />,

@@ -1,8 +1,7 @@
-import { SyntheticEvent } from 'react';
+import { Fragment, SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { AccountCircle, Home } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
-import { Home } from '@mui/icons-material';
 import { configProvider } from '../utils';
 
 export const Header = () => {
@@ -29,10 +28,9 @@ export const Header = () => {
     {
       label: 'Entrar',
       value: 'join',
-      icon: <AccountCircleIcon />,
+      icon: <AccountCircle />,
     },
   ];
-
   return (
     <Box
       component='header'

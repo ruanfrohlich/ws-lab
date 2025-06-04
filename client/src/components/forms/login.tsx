@@ -1,11 +1,15 @@
-import { Box, Button } from '@mui/material';
+import { Alert, Box, Button } from '@mui/material';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { Form } from 'react-router';
+import { Form, useNavigate } from 'react-router';
 import { ILoginFormState } from '../../interfaces';
 import { AppInput } from '../Input';
 import { commonRegEx } from '../../utils';
+import { userService } from '../../services';
+import { useUserDispatch } from '../../contexts';
 
 export const FormLogin = () => {
+  const { login } = userService();
+  const nav = useNavigate();
   const [state, setState] = useState<ILoginFormState>({
     fields: {
       password: '',
@@ -13,7 +17,10 @@ export const FormLogin = () => {
     },
     showPassword: false,
     isValid: false,
+    loginError: false,
   });
+
+  const userDispatch = useUserDispatch();
 
   const handleChange = (evt: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = evt.target;
@@ -31,8 +38,33 @@ export const FormLogin = () => {
 
   const handleSubmit = async (evt: FormEvent) => {
     evt.preventDefault();
+    const {
+      fields: { username, password },
+    } = state;
 
-    console.log('Login submitted');
+    const res = await login({
+      username,
+      password,
+    });
+
+    if (res.logged && res.user) {
+      userDispatch({
+        type: 'setUser',
+        payload: {
+          logged: true,
+          user: res.user,
+        },
+      });
+
+      return nav('/app');
+    }
+
+    return setState((state) => {
+      return {
+        ...state,
+        loginError: true,
+      };
+    });
   };
 
   useEffect(() => {
@@ -52,6 +84,12 @@ export const FormLogin = () => {
 
   return (
     <Form noValidate onSubmit={handleSubmit}>
+      {state.loginError && (
+        <Alert severity='error'>
+          Opa! Parece que tivemos um problema ao conectar você, dá uma checada no seus dados de acesso ou tente
+          novamente em alguns minutos.
+        </Alert>
+      )}
       <Box
         sx={{
           display: 'flex',

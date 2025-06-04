@@ -110,6 +110,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         if (password === AES.decrypt(user.password, appKey).toString(enc.Utf8)) {
           return sendResponse(200, {
             message: 'Logged successfully',
+            user,
             token: user.password,
           });
         }

@@ -1,13 +1,12 @@
 import { Fragment, ReactNode, useEffect, useState } from 'react';
-import { useWebsocketContext } from '../contexts';
 import { AppLink, Header } from '../components';
 import { Box, Breadcrumbs, Typography } from '@mui/material';
 import { configProvider, translatePathname } from '../utils';
 import { useLocation, useNavigate } from 'react-router';
 import texture from 'url:../assets/images/texture.png';
+import { useUserContext } from '../contexts';
 
 export const AppLayout = (props: { children: ReactNode }) => {
-  const { websocket } = useWebsocketContext();
   const { appRoot } = configProvider();
   const [breadItems, setBreadItems] = useState<string[]>([]);
   const { pathname } = useLocation();
@@ -23,10 +22,6 @@ export const AppLayout = (props: { children: ReactNode }) => {
 
   useEffect(() => {
     setBreadItems(pathname.split('/'));
-
-    console.log('#### Websocket State ####');
-
-    console.log(JSON.stringify(websocket, null, 2));
   }, [pathname]);
 
   return (

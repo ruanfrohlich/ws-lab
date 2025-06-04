@@ -101,7 +101,9 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
             log(`Connected clients: ${JSON.stringify(Object.keys(connections))}`);
           });
         } else {
-          log(`User [${clientId}] não consta no banco de dados! Criando novo...`);
+          log(`User [${clientId}] não consta no banco de dados. Desconectando`);
+
+          ws.close(1008, 'Unauthorized');
         }
       }
     });

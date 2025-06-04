@@ -1,12 +1,24 @@
 import { AppHelmet, AppLink, FormLogin, FormRegister } from '../components';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import hero from 'url:../assets/images/hero-login.jpg';
+import { useUser } from '../contexts';
+import { useNavigate } from 'react-router';
 
 export const LoginRegister = () => {
   const [isRegister, setIsRegister] = useState<boolean>(false);
+  const { logged } = useUser();
+  const nav = useNavigate();
 
   const handleRegister = () => setIsRegister(!isRegister);
+
+  useEffect(() => {
+    if (logged) nav('/app');
+  }, [logged]);
+
+  if (logged) {
+    return;
+  }
 
   return (
     <Box>

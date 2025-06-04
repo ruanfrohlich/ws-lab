@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import CodeOffIcon from '@mui/icons-material/CodeOff';
 import notFound from 'url:../assets/images/404.jpg';
+import { AppHelmet } from '../components';
 
 export const NotFound = () => {
   return (
@@ -17,6 +18,10 @@ export const NotFound = () => {
         backgroundRepeat: 'no-repeat',
       }}
     >
+      <AppHelmet
+        title='Página não encontrada'
+        description='A página solicitada não existe ou não está mais disponível.'
+      />
       <Box
         mb={8}
         sx={{

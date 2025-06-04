@@ -1,10 +1,10 @@
 import { Outlet } from 'react-router';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { useWebsocketContext } from './contexts';
 import { AppLayout } from './layouts/AppLayout';
 import { StrictMode } from 'react';
 import 'dotenv/config';
+import { UserProvider } from './providers';
 
 const appTheme = createTheme({
   palette: {
@@ -17,17 +17,15 @@ const appTheme = createTheme({
 });
 
 export function App() {
-  const { WebsocketContext, websocket } = useWebsocketContext();
-
   return (
     <StrictMode>
       <ThemeProvider theme={appTheme}>
-        <WebsocketContext.Provider value={websocket}>
+        <UserProvider>
           <CssBaseline />
           <AppLayout>
             <Outlet />
           </AppLayout>
-        </WebsocketContext.Provider>
+        </UserProvider>
       </ThemeProvider>
     </StrictMode>
   );

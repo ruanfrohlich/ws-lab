@@ -1,6 +1,7 @@
 import axios, { AxiosResponse, isAxiosError } from 'axios';
 import { IUser, IUserRegister } from '../interfaces';
-import { translateError } from '../utils';
+import { configProvider, COOKIES, translateError } from '../utils';
+import Cookies from 'js-cookie';
 
 const handler = axios.create({
   baseURL: process.env.ACCOUNT_API,
@@ -84,19 +85,30 @@ export const userService = () => {
     }
   };
 
-  const userLogin = async (credentials: {
-    username_email: string;
+  const login = async (credentials: {
+    username: string;
     password: string;
-  }): Promise<{ logged: boolean; token?: string }> => {
+  }): Promise<{ logged: boolean; user?: IUser; token?: string }> => {
+    const { isDev } = configProvider();
+
     try {
-      const res = await handler.post('/login', {
-        credential: credentials.username_email,
+      const { data } = await handler.post('/login', {
+        credential: credentials.username,
         password: credentials.password,
+      });
+
+      Cookies.set(COOKIES.userToken, data.token, {
+        domain: isDev ? 'localhost' : process.env.COOKIE_DOMAIN,
+        sameSite: 'None',
+        path: '/',
+        secure: true,
+        expires: 365,
       });
 
       return {
         logged: true,
-        token: res.data.token,
+        user: data.user,
+        token: data.token,
       };
     } catch (e) {
       console.error(e);
@@ -107,10 +119,15 @@ export const userService = () => {
     }
   };
 
+  const logout = async () => {
+    Cookies.remove(COOKIES.userToken);
+  };
+
   return {
     fetchUser,
     findUser,
     registerUser,
-    userLogin,
+    login,
+    logout,
   };
 };

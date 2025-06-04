@@ -9,6 +9,7 @@ export interface ILoginFormState {
   fields: ILoginFormFields;
   showPassword: boolean;
   isValid: boolean;
+  loginError?: 
 }
 export interface IRegisterFormFields {
   username: string;

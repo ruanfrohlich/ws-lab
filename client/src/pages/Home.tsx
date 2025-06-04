@@ -1,7 +1,10 @@
 import { AppHelmet } from '../components';
 import { Box, Typography } from '@mui/material';
+import { useUser } from '../contexts';
 
 export function Home() {
+  const { user } = useUser();
+
   return (
     <Box
       sx={{
@@ -10,9 +13,9 @@ export function Home() {
         paddingBlock: 3,
       }}
     >
-      <AppHelmet title='Home' description='Estudos com websocket + webRTC' />
+      <AppHelmet description='Estudos com websocket + webRTC' />
       <Typography variant='h3' component={'h1'}>
-        Home
+        Bem vindo {user?.username ?? ''}
       </Typography>
     </Box>
   );

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { ISocketData, IWSState } from '../interfaces';
+import { COOKIES } from '../utils';
 
 export const useWebsocketContext = () => {
   const [state, setState] = useState<IWSState>({
@@ -15,10 +16,6 @@ export const useWebsocketContext = () => {
   });
 
   const WebsocketContext = createContext<IWSState>(state);
-
-  enum cookies {
-    userToken = 'USER_TOKEN',
-  }
 
   // const isValid =
   //   state.connected &&
@@ -78,7 +75,7 @@ export const useWebsocketContext = () => {
       });
     };
 
-    wsClient.onmessage = function (e) {
+    wsClient.onmessage = function (e: MessageEvent<any>) {
       const data = JSON.parse(String(e.data)) as ISocketData;
 
       console.log(data);
@@ -104,11 +101,13 @@ export const useWebsocketContext = () => {
     };
   };
 
+  /*
+
   useEffect(() => {
-    const actualToken = Cookies.get(cookies.userToken);
+    const actualToken = Cookies.get(COOKIES.userToken);
 
     if (state.username && state.username?.length > 3 && state.username !== actualToken) {
-      Cookies.set(cookies.userToken, state.username);
+      Cookies.set(COOKIES.userToken, state.username);
 
       state.socket?.close();
 
@@ -123,7 +122,7 @@ export const useWebsocketContext = () => {
   useEffect(() => {
     let timer: NodeJS.Timeout;
     let reconnectionCount = 0;
-    const userToken = Cookies.get(cookies.userToken);
+    const userToken = Cookies.get(COOKIES.userToken);
 
     if (!userToken) {
       return;
@@ -154,6 +153,7 @@ export const useWebsocketContext = () => {
     return () => clearTimeout(timer);
   }, [state.connected]);
 
+  */
   return {
     WebsocketContext,
     websocket: useContext(WebsocketContext),

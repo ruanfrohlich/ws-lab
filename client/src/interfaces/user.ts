@@ -9,3 +9,15 @@ export interface IUser {
   username: string;
   email: string;
 }
+
+export interface IUserContext {
+  user?: IUser;
+  logged: boolean;
+}
+
+export type TUserActions = 'setUser' | 'updateUser' | 'removeUser';
+
+export interface IUserAction {
+  type: TUserActions;
+  payload?: IUserContext;
+}

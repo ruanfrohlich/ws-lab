@@ -1,7 +1,7 @@
 import { capitalize } from '@mui/material';
 
 export { configProvider } from './configProvider';
-
+export * from './enums';
 export const translateError = (error: string) => {
   console.log(error);
 

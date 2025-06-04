@@ -1,6 +1,6 @@
 import { IncomingMessage } from 'http';
 
-const acceptedOrigins = ['https://localhost:3001'];
+const acceptedOrigins = ['https://localhost:3005'];
 
 export const log = (message: string) => {
   message = `(${new Date().toLocaleString('pt-BR')}) - ${message}.`;
