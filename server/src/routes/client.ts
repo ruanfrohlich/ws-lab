@@ -2,11 +2,12 @@ import { readFile } from 'fs';
 import { IncomingMessage, ServerResponse } from 'http';
 import { extname, relative } from 'path';
 import { cwd } from 'process';
+import { publicUrl } from '../utils';
 
 export const clientRoutes = ({ url, method }: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
   const appRoot = relative(cwd(), 'client/public');
   let contentType = '';
-  let filePath = appRoot + url?.replace('/app', '');
+  let filePath = appRoot + url?.replace(publicUrl, '');
 
   filePath = filePath.replace(/\?\d*/g, '');
 
@@ -38,8 +39,6 @@ export const clientRoutes = ({ url, method }: IncomingMessage, res: ServerRespon
       filePath = appRoot + '/index.html';
       contentType = 'text/html';
   }
-
-  console.log(filePath);
 
   readFile(filePath, function (error, content) {
     res.writeHead(200, { 'Content-Type': contentType });

@@ -27,3 +27,7 @@ export const getBody = (req: IncomingMessage): Promise<{ [key: string]: any } | 
       });
   });
 };
+
+export const onlyAPI = process.argv.includes('--api');
+export const isProd = process.argv.includes('--prod');
+export const publicUrl = isProd ? '/ws-lab' : '/app';

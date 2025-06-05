@@ -1,15 +1,16 @@
 import { Parcel } from '@parcel/core';
 import type { InitialParcelOptions } from '@parcel/types';
 import { cwd } from 'process';
-import { log } from './utils';
+import { isProd, log } from './utils';
 import loading from 'loading-cli';
+import { publicUrl } from './utils';
 
 interface IWatchResponse {
   success: boolean;
   error?: unknown;
 }
 
-export const BuildClient = async (isProd: boolean) => {
+export const BuildClient = async () => {
   const loadBuild = loading({
     text: 'Building the client',
   }).start();
@@ -20,7 +21,7 @@ export const BuildClient = async (isProd: boolean) => {
     entries: clientRoot + '/src/index.html',
     defaultConfig: '@parcel/config-default',
     defaultTargetOptions: {
-      publicUrl: '/app',
+      publicUrl,
     },
     mode: isProd ? 'production' : 'development',
     env: {

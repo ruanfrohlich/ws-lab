@@ -6,13 +6,10 @@ import database from './database';
 import { IncomingMessage } from 'http';
 import { readFileSync } from 'fs';
 import { router } from './routes';
-import { log, originIsAllowed } from './utils';
+import { isProd, log, onlyAPI, originIsAllowed, publicUrl } from './utils';
 import { IIncomingData, IReturnData } from './interfaces';
 import { BuildClient } from './buildClient';
 import { cwd } from 'process';
-
-const onlyAPI = process.argv.includes('--api');
-const isProd = process.argv.includes('--prod');
 
 dotenv.config({
   path: cwd() + `/server/.env.${!isProd ? 'dev' : 'prd'}`,
@@ -44,11 +41,11 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
     ? {
         success: true,
       }
-    : await BuildClient(isProd);
+    : await BuildClient();
 
   if (success) {
     const server = createServer(serverOptions, router).listen(port, () => {
-      console.log(`🌪️  Server is listening on https://localhost:${port}/${onlyAPI ? 'api' : 'app'}`);
+      console.log(`🌪️  Server is listening on https://localhost:${port}${onlyAPI ? '/api' : publicUrl}`);
     });
 
     // WebSocket Server

@@ -9,7 +9,7 @@ export const UserAccount = () => {
     <Box component={'main'}>
       <AppHelmet title='Minha Conta' description='Gerencie sua conta' />
       <pre>
-        <code className='language-javascript'>{JSON.stringify(user, null, 2).toString()}</code>
+        <code>{JSON.stringify(user, null, 2)}</code>
       </pre>
     </Box>
   );

@@ -1,18 +1,15 @@
 import { IncomingMessage, ServerResponse } from 'http';
-import { log } from '../utils';
+import { log, publicUrl } from '../utils';
 import { clientRoutes } from './client';
 import { apiRoutes } from './api';
 
-export const router = (
-  req: IncomingMessage,
-  res: ServerResponse<IncomingMessage>,
-) => {
+export const router = (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
   const { url } = req;
 
   log(`Request received for ${url}`);
 
   const path = () => {
-    if (url?.startsWith('/app')) return 'client';
+    if (url?.startsWith(publicUrl)) return 'client';
     if (url?.startsWith('/api')) return 'api';
   };
 
