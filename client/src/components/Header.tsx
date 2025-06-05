@@ -1,12 +1,32 @@
-import { Fragment, SyntheticEvent } from 'react';
+import { ReactNode, SyntheticEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { AccountCircle, Home } from '@mui/icons-material';
+import { AccountCircle, Home, Person } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
 import { configProvider } from '../utils';
+import { useUser } from '../contexts';
+
+interface IActionsState {
+  label: string;
+  value: string;
+  icon: ReactNode;
+}
 
 export const Header = () => {
   const navigate = useNavigate();
   const { appRoot } = configProvider();
+  const { logged, user } = useUser();
+  const [actions, setActions] = useState<IActionsState[]>([
+    {
+      label: 'Início',
+      value: appRoot,
+      icon: <Home />,
+    },
+    {
+      label: 'Entrar',
+      value: 'join',
+      icon: <AccountCircle />,
+    },
+  ]);
 
   const handleChange = (event: SyntheticEvent, route: string) => {
     navigate(route);
@@ -19,18 +39,21 @@ export const Header = () => {
     },
   });
 
-  const actions = [
-    {
-      label: 'Início',
-      value: appRoot,
-      icon: <Home />,
-    },
-    {
-      label: 'Entrar',
-      value: 'join',
-      icon: <AccountCircle />,
-    },
-  ];
+  useEffect(() => {
+    if (logged && user) {
+      setActions((actions) => {
+        return [
+          ...actions.filter((el) => el.value !== 'join'),
+          {
+            label: 'Minha Conta',
+            value: 'account',
+            icon: <Person />,
+          },
+        ];
+      });
+    }
+  }, [logged]);
+
   return (
     <Box
       component='header'

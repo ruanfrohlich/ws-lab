@@ -3,8 +3,8 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AppLayout } from './layouts/AppLayout';
 import { StrictMode } from 'react';
-import 'dotenv/config';
 import { UserProvider } from './providers';
+import 'dotenv/config';
 
 const appTheme = createTheme({
   palette: {

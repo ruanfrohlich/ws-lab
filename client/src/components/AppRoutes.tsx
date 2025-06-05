@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router';
 import { App } from '../App';
-import { Home, LoginRegister, NotFound } from '../pages';
+import { Home, LoginRegister, NotFound, UserAccount } from '../pages';
 import { configProvider } from '../utils';
 
 export const AppRoutes = () => {
@@ -8,19 +8,23 @@ export const AppRoutes = () => {
   const routes: RouteObject[] = [
     {
       path: appRoot,
-      element: <App />,
+      Component: App,
       children: [
         {
           index: true,
-          element: <Home />,
+          Component: Home,
         },
         {
           path: 'join',
-          element: <LoginRegister />,
+          Component: LoginRegister,
+        },
+        {
+          path: 'account',
+          Component: UserAccount,
         },
         {
           path: '*',
-          element: <NotFound />,
+          Component: NotFound,
         },
       ],
     },

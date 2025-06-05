@@ -104,8 +104,16 @@ export const FormLogin = () => {
           onChange={handleChange}
           error=''
           value={state.fields.username}
+          autoComplete='username'
         />
-        <AppInput id='password' label='Senha' error='' value={state.fields.password} onChange={handleChange} />
+        <AppInput
+          id='password'
+          label='Senha'
+          error=''
+          value={state.fields.password}
+          onChange={handleChange}
+          autoComplete='password'
+        />
         <Button type='submit' variant='contained' disabled={!state.isValid}>
           Entrar
         </Button>

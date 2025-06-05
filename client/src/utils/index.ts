@@ -20,8 +20,8 @@ export const translatePathname = (path: string) => {
     case 'join': {
       return 'Entrar';
     }
-    case 'test': {
-      return 'Teste';
+    case 'account': {
+      return 'Minha Conta';
     }
     default: {
       capitalize(path);

@@ -3,6 +3,7 @@ import { AES, enc } from 'crypto-js';
 import database from '../database';
 import { getBody } from '../utils';
 import { IDBUser, IFindUser } from '../interfaces';
+import { omit } from 'lodash';
 
 export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
   const { url, method } = req;
@@ -110,7 +111,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         if (password === AES.decrypt(user.password, appKey).toString(enc.Utf8)) {
           return sendResponse(200, {
             message: 'Logged successfully',
-            user,
+            user: omit(user, ['password']),
             token: user.password,
           });
         }

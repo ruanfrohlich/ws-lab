@@ -11,18 +11,17 @@ import { IIncomingData, IReturnData } from './interfaces';
 import { BuildClient } from './buildClient';
 import { cwd } from 'process';
 
-const isDev = process.env.NODE_ENV !== 'production';
+const onlyAPI = process.argv.includes('--api');
+const isProd = process.argv.includes('--prod');
 
 dotenv.config({
-  path: cwd() + `/server/.env.${isDev ? 'dev' : 'prd'}`,
+  path: cwd() + `/server/.env.${!isProd ? 'dev' : 'prd'}`,
 });
 
 const port = process.env.PORT ?? 3001;
 const connections: {
   [key: string]: WebSocket;
 } = {};
-
-const onlyAPI = process.argv.includes('--api');
 
 // HTTP Server
 const serverOptions = {
@@ -45,7 +44,7 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
     ? {
         success: true,
       }
-    : await BuildClient(isDev);
+    : await BuildClient(isProd);
 
   if (success) {
     const server = createServer(serverOptions, router).listen(port, () => {

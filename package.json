@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon",
     "dev:api": "nodemon --api",
-    "start": "rimraf -rf client/.parcel-cache client/public && NODE_ENV=production ts-node server/src/index.ts",
+    "start": "rimraf -rf client/.parcel-cache client/public && ts-node server/src/index.ts --prod",
     "start:api": "ts-node server/src/index.ts --api"
   },
   "engines": {
@@ -25,7 +25,7 @@
     "exec": "ts-node server/src/index.ts"
   },
   "devDependencies": {
-    "loading-cli": "^1.1.2",
+    "@types/node": "^22.15.29",
     "nodemon": "^3.1.9",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",

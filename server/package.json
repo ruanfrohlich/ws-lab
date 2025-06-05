@@ -4,6 +4,7 @@
   "main": "index.ts",
   "license": "MIT",
   "devDependencies": {
+    "loading-cli": "^1.1.2",
     "@types/node": "^22.10.10",
     "@types/ws": "^8.5.14",
     "cookie": "^1.0.2",

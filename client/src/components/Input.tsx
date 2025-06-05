@@ -10,6 +10,7 @@ interface IAppInputProps {
   label: string;
   error: string;
   value: string;
+  autoComplete?: string;
   count?: {
     current: number;
     max: number;
@@ -18,7 +19,7 @@ interface IAppInputProps {
 }
 
 export const AppInput = (props: IAppInputProps) => {
-  const { id, error, label, value, onChange, count } = props;
+  const { id, error, label, value, onChange, count, autoComplete } = props;
   const inputStyles: SxProps<Theme> = {
     position: 'relative',
     backgroundColor: 'rgba(0,0,0,.6)',
@@ -30,6 +31,7 @@ export const AppInput = (props: IAppInputProps) => {
     label,
     value,
     onChange,
+    autoComplete,
   };
 
   if (id === 'password') {

@@ -4,7 +4,6 @@ import { Box, Breadcrumbs, Typography } from '@mui/material';
 import { configProvider, translatePathname } from '../utils';
 import { useLocation, useNavigate } from 'react-router';
 import texture from 'url:../assets/images/texture.png';
-import { useUserContext } from '../contexts';
 
 export const AppLayout = (props: { children: ReactNode }) => {
   const { appRoot } = configProvider();

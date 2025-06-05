@@ -9,7 +9,7 @@ interface IWatchResponse {
   error?: unknown;
 }
 
-export const BuildClient = async (isDev: boolean) => {
+export const BuildClient = async (isProd: boolean) => {
   const loadBuild = loading({
     text: 'Building the client',
   }).start();
@@ -22,9 +22,13 @@ export const BuildClient = async (isDev: boolean) => {
     defaultTargetOptions: {
       publicUrl: '/app',
     },
+    mode: isProd ? 'production' : 'development',
+    env: {
+      NODE_ENV: isProd ? 'production' : 'development',
+    },
   };
 
-  if (isDev) {
+  if (!isProd) {
     parcelConfig = {
       ...parcelConfig,
       watchDir: clientRoot + '/src',
