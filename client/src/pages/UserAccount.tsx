@@ -5,12 +5,16 @@ import { AppHelmet } from '../components';
 export const UserAccount = () => {
   const { user } = useUser();
 
-  return (
-    <Box component={'main'}>
-      <AppHelmet title='Minha Conta' description='Gerencie sua conta' />
-      <pre>
-        <code>{JSON.stringify(user, null, 2)}</code>
-      </pre>
-    </Box>
-  );
+  if (user) {
+    return (
+      <Box component={'main'}>
+        <AppHelmet title='Minha Conta' description='Gerencie sua conta' />
+        <pre>
+          <code>{JSON.stringify(user, null, 2)}</code>
+        </pre>
+      </Box>
+    );
+  }
+
+  return <></>;
 };

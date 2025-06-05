@@ -6,9 +6,9 @@ import { IDBUser, IFindUser } from '../interfaces';
 import { omit } from 'lodash';
 
 export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
-  const { url, method } = req;
+  const { url, method, headers } = req;
   const endpoint = url?.split('/api')[1];
-  const { createUser, getUser } = await database();
+  const { createUser, getUser, getUserByToken } = await database();
   const appKey = process.env.APP_KEY ?? '';
 
   const sendResponse = (status: number, message: object) => {
@@ -114,6 +114,32 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
       return sendResponse(401, {
         message: 'User not found',
+      });
+    }
+    case endpoint === '/user/find': {
+      if (method !== 'GET') {
+        return sendResponse(405, {
+          message: 'Invalid method',
+        });
+      }
+
+      if (!headers.authorization) {
+        return sendResponse(401, {
+          message: 'Token not provided!',
+        });
+      }
+
+      const user = await getUserByToken(headers.authorization);
+
+      if (user) {
+        return sendResponse(200, {
+          found: true,
+          user: omit(user, ['password']),
+        });
+      }
+
+      return sendResponse(200, {
+        found: false,
       });
     }
     default: {

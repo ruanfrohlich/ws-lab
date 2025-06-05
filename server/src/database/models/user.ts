@@ -40,6 +40,26 @@ export const User = (sequelize: Sequelize) => {
     };
   };
 
+  const getUserByToken = async (token: string): Promise<IDBUser | null> => {
+    try {
+      const user = await User.findOne({
+        where: {
+          password: token,
+        },
+      });
+
+      if (user) {
+        return user.dataValues as unknown as IDBUser;
+      }
+
+      return null;
+    } catch (e) {
+      console.log(e);
+
+      return null;
+    }
+  };
+
   const getAllUsers = async () => {
     const users = await User.findAll();
 
@@ -48,6 +68,7 @@ export const User = (sequelize: Sequelize) => {
 
   return {
     getUser,
+    getUserByToken,
     getAllUsers,
     createUser,
   };

@@ -8,29 +8,27 @@ const handler = axios.create({
 });
 
 export const userService = () => {
-  const fetchUser = async (userId: number, token: string): Promise<{ user: IUser | null }> => {
+  const fetchUser = async (token: string) => {
     try {
-      const res: AxiosResponse<IUser> = await handler.get(`/user/${userId}`, {
+      const res: AxiosResponse<{ found: boolean; user: IUser }> = await handler.get(`/user/find`, {
         headers: {
           Authorization: token,
         },
       });
 
       if (res.status === 200) {
+        const { user } = res.data;
+
         return {
-          user: res.data,
+          user,
         };
       }
 
-      return {
-        user: null,
-      };
+      return null;
     } catch (e) {
       console.log(e);
 
-      return {
-        user: null,
-      };
+      return null;
     }
   };
 
