@@ -16,8 +16,8 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
     res.end(JSON.stringify(message), 'utf-8');
   };
 
-  switch (/**NOSONAR */ endpoint) {
-    case '/user': {
+  switch (true) {
+    case endpoint === '/user': {
       if (method !== 'POST') {
         return sendResponse(405, {
           message: 'Invalid method',
@@ -37,16 +37,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         found: false,
       });
     }
-    case '/user/get': {
-      if (method !== 'GET') {
-        return sendResponse(405, {
-          message: 'Invalid method',
-        });
-      }
-
-      break;
-    }
-    case '/register': {
+    case endpoint === '/register': {
       if (method !== 'POST') {
         return sendResponse(405, {
           message: 'Invalid method',
@@ -81,7 +72,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
     }
-    case '/login': {
+    case endpoint === '/login': {
       if (method !== 'POST') {
         return sendResponse(405, {
           message: 'Invalid method',
