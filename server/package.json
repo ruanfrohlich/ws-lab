@@ -13,12 +13,12 @@
     "sqlite3": "^5.1.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
-    "ws": "^8.18.0"
-  },
-  "dependencies": {
+    "ws": "^8.18.0",
     "@types/crypto-js": "^4.2.2",
     "@types/lodash": "^4.17.16",
     "crypto-js": "^4.2.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "@parcel/config-default": "^2.x",
+    "@parcel/core": "^2.x"
   }
 }
