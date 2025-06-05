@@ -6,8 +6,6 @@ import { configProvider } from '../utils';
 export const AppRoutes = () => {
   const { appRoot } = configProvider();
 
-  console.log('appRoot:', appRoot);
-
   const routes: RouteObject[] = [
     {
       path: appRoot,
@@ -32,8 +30,6 @@ export const AppRoutes = () => {
       ],
     },
   ];
-
-  console.log('Routes:', routes);
 
   const router = createBrowserRouter(routes);
 
