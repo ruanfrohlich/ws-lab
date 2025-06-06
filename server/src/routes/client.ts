@@ -32,6 +32,9 @@ export const clientRoutes = ({ url, method }: IncomingMessage, res: ServerRespon
     case '.jpeg':
       contentType = 'image/jpg';
       break;
+    case '.webp':
+      contentType = 'image/webp';
+      break;
     case '.wav':
       contentType = 'audio/wav';
       break;

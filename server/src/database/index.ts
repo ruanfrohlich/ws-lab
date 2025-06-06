@@ -15,10 +15,10 @@ const database = async () => {
     },
   });
 
-  const { getAllUsers, getUser, createUser, getUserByToken } = User(sequelize);
+  const { getAllUsers, getUser, createUser, getUserByToken, updateUser } = User(sequelize);
 
   await sequelize
-    .sync()
+    .sync({ alter: true })
     .then(() => log('All models were synchronized successfully.'))
     .catch((err) => console.log(err));
 
@@ -29,6 +29,7 @@ const database = async () => {
     getUserByToken,
     getAllUsers,
     createUser,
+    updateUser,
     close,
   };
 };

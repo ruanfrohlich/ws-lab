@@ -1,15 +1,26 @@
 import { JSX } from 'react';
+import { IUser } from './user';
 
 export interface ILoginFormFields {
   username: string;
   password: string;
 }
 
+export interface IUserDataFormProps {
+  image?: string;
+  cover?: string;
+}
+
+export interface IUserDataForm {
+  fields: Pick<IUser, 'username' | 'email' | 'profilePic' | 'coverImage'>;
+  loading: boolean;
+}
+
 export interface ILoginFormState {
   fields: ILoginFormFields;
   showPassword: boolean;
   isValid: boolean;
-  loginError?: 
+  loginError?: boolean;
 }
 export interface IRegisterFormFields {
   username: string;

@@ -9,7 +9,10 @@ const userReducer = (user: IUserContext, action: IUserAction): IUserContext => {
   switch (action.type) {
     case 'setUser': {
       if (action.payload) {
-        return action.payload;
+        return {
+          ...user,
+          ...action.payload,
+        };
       }
 
       return user;

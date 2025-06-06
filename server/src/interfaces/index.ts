@@ -14,6 +14,8 @@ export interface IDBUser {
   username: string;
   email: string;
   password: string;
+  profilePic: string;
+  coverImage: string;
 }
 
 export interface IFindUser {

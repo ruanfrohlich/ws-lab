@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, isAxiosError } from 'axios';
-import { IUser, IUserRegister } from '../interfaces';
+import { IUser, IUserDataForm, IUserRegister } from '../interfaces';
 import { configProvider, COOKIES, translateError } from '../utils';
 import Cookies from 'js-cookie';
 
@@ -49,6 +49,30 @@ export const userService = () => {
       console.log(e);
 
       return false;
+    }
+  };
+
+  const updateUser = async (userData: IUserDataForm['fields']) => {
+    console.log(userData);
+
+    try {
+      const res = await handler.post('/user/update', userData, {
+        headers: {
+          Authorization: Cookies.get(COOKIES.userToken),
+        },
+      });
+
+      console.log(res);
+
+      return {
+        success: true,
+      };
+    } catch (e) {
+      console.log(e);
+
+      return {
+        success: false,
+      };
     }
   };
 
@@ -125,6 +149,7 @@ export const userService = () => {
     fetchUser,
     findUser,
     registerUser,
+    updateUser,
     login,
     logout,
   };

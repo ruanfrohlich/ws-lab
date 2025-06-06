@@ -1,13 +1,13 @@
-import { QueryTypes, Sequelize } from 'sequelize';
+import { Model, QueryTypes, Sequelize } from 'sequelize';
 import { IUser, ModelTypes } from '../types';
 import { IDBUser } from '../../interfaces';
 import { log } from '../../utils';
-import { first, isEmpty } from 'lodash';
+import { first, forEach, isEmpty } from 'lodash';
 
 export const User = (sequelize: Sequelize) => {
   const User = sequelize.define('User', ModelTypes.User);
 
-  const getUser = async (data: Omit<IDBUser, 'password'>): Promise<IDBUser | null> => {
+  const getUser = async (data: Omit<IDBUser, 'password' | 'coverImage' | 'profilePic'>): Promise<IDBUser | null> => {
     try {
       const query = await sequelize.query(
         `SELECT * FROM User WHERE username="${data.username}" OR email="${data.email}"`,
@@ -66,10 +66,27 @@ export const User = (sequelize: Sequelize) => {
     return users as unknown as IUser[];
   };
 
+  const updateUser = async (data: Omit<IDBUser, 'password'>, token: string) => {
+    try {
+      const updatedUser = await User.update(data, {
+        where: {
+          password: token,
+        },
+      });
+
+      return updatedUser[0];
+    } catch (e) {
+      console.log(e);
+
+      return 0;
+    }
+  };
+
   return {
     getUser,
     getUserByToken,
     getAllUsers,
     createUser,
+    updateUser,
   };
 };

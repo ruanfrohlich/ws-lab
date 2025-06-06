@@ -14,5 +14,7 @@ export const ModelTypes = {
     username: { type: DataTypes.STRING, allowNull: false },
     email: DataTypes.STRING,
     password: { type: DataTypes.STRING, allowNull: false },
+    profilePic: { type: DataTypes.STRING, allowNull: true },
+    coverImage: { type: DataTypes.STRING, allowNull: true },
   },
 };

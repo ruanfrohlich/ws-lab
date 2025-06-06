@@ -3,22 +3,25 @@
   "version": "1.0.0",
   "main": "index.ts",
   "license": "MIT",
+  "scripts": {
+    "sqz": "./node_modules/.bin/sequelize"
+  },
   "devDependencies": {
-    "loading-cli": "^1.1.2",
+    "@parcel/config-default": "^2.x",
+    "@parcel/core": "^2.x",
+    "@types/crypto-js": "^4.2.2",
+    "@types/lodash": "^4.17.16",
     "@types/node": "^22.10.10",
     "@types/ws": "^8.5.14",
     "cookie": "^1.0.2",
+    "crypto-js": "^4.2.0",
     "dotenv": "^16.4.7",
+    "loading-cli": "^1.1.2",
+    "lodash": "^4.17.21",
     "sequelize": "^6.37.5",
     "sqlite3": "^5.1.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
-    "ws": "^8.18.0",
-    "@types/crypto-js": "^4.2.2",
-    "@types/lodash": "^4.17.16",
-    "crypto-js": "^4.2.0",
-    "lodash": "^4.17.21",
-    "@parcel/config-default": "^2.x",
-    "@parcel/core": "^2.x"
+    "ws": "^8.18.0"
   }
 }

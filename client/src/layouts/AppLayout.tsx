@@ -39,6 +39,7 @@ export const AppLayout = (props: { children: ReactNode }) => {
           width: '100%',
           borderBottom: '1px solid white',
           height: '30px',
+          boxShadow: '0 4px 12px rgba(0,0,0,.3)',
         })}
       >
         {breadItems.map((el, i) => {

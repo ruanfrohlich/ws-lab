@@ -8,12 +8,20 @@ import { omit } from 'lodash';
 export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
   const { url, method, headers } = req;
   const endpoint = url?.split('/api')[1];
-  const { createUser, getUser, getUserByToken } = await database();
+  const { createUser, getUser, getUserByToken, updateUser } = await database();
   const appKey = process.env.APP_KEY ?? '';
 
   const sendResponse = (status: number, message: object) => {
     res.writeHead(status, { 'content-type': 'application/json' });
     res.end(JSON.stringify(message), 'utf-8');
+  };
+
+  const checkAuthorization = () => {
+    if (!headers.authorization) {
+      return sendResponse(401, {
+        message: 'Token not provided!',
+      });
+    }
   };
 
   switch (true) {
@@ -35,6 +43,54 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
       return sendResponse(200, {
         found: false,
+      });
+    }
+    case endpoint === '/user/find': {
+      if (method !== 'GET') {
+        return sendResponse(405, {
+          message: 'Invalid method',
+        });
+      }
+
+      if (!headers.authorization) {
+        return sendResponse(401, {
+          message: 'Token not provided!',
+        });
+      }
+
+      const user = await getUserByToken(headers.authorization);
+
+      if (user) {
+        return sendResponse(200, {
+          found: true,
+          user: omit(user, ['password']),
+        });
+      }
+
+      return sendResponse(200, {
+        found: false,
+      });
+    }
+    case endpoint === '/user/update': {
+      if (method !== 'POST') {
+        return sendResponse(405, {
+          message: 'Invalid method',
+        });
+      }
+
+      checkAuthorization();
+
+      const body = (await getBody(req)) as IDBUser;
+      const user = await updateUser(body, String(headers.authorization));
+
+      if (user) {
+        return sendResponse(200, {
+          success: true,
+        });
+      }
+
+      return sendResponse(200, {
+        success: false,
       });
     }
     case endpoint === '/register': {
@@ -114,32 +170,6 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
       return sendResponse(401, {
         message: 'User not found',
-      });
-    }
-    case endpoint === '/user/find': {
-      if (method !== 'GET') {
-        return sendResponse(405, {
-          message: 'Invalid method',
-        });
-      }
-
-      if (!headers.authorization) {
-        return sendResponse(401, {
-          message: 'Token not provided!',
-        });
-      }
-
-      const user = await getUserByToken(headers.authorization);
-
-      if (user) {
-        return sendResponse(200, {
-          found: true,
-          user: omit(user, ['password']),
-        });
-      }
-
-      return sendResponse(200, {
-        found: false,
       });
     }
     default: {
