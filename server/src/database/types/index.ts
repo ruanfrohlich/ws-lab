@@ -12,7 +12,7 @@ export interface IUser {
 export const ModelTypes = {
   User: {
     username: { type: DataTypes.STRING, allowNull: false },
-    email: DataTypes.STRING,
+    email: { type: DataTypes.STRING, allowNull: false },
     password: { type: DataTypes.STRING, allowNull: false },
     profilePic: { type: DataTypes.STRING, allowNull: true },
     coverImage: { type: DataTypes.STRING, allowNull: true },

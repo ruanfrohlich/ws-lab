@@ -22,6 +22,7 @@ export const BuildClient = async () => {
     defaultConfig: '@parcel/config-default',
     defaultTargetOptions: {
       publicUrl,
+      sourceMaps: !isProd,
     },
     mode: isProd ? 'production' : 'development',
     env: {
@@ -40,9 +41,9 @@ export const BuildClient = async () => {
     };
   }
 
-  let bundler = new Parcel(parcelConfig);
+  const bundler = new Parcel(parcelConfig);
 
-  return new Promise<IWatchResponse>((res, rej) => {
+  return new Promise<IWatchResponse>((res) => {
     bundler.watch((err, event) => {
       if (err) {
         res({
@@ -54,7 +55,7 @@ export const BuildClient = async () => {
       if (event?.type === 'buildSuccess') {
         loadBuild.succeed();
 
-        let bundles = event.bundleGraph.getBundles();
+        const bundles = event.bundleGraph.getBundles();
         console.log(`✨ Built ${bundles.length} bundles in ${event.buildTime}ms!`);
         res({
           success: true,

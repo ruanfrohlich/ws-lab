@@ -27,6 +27,7 @@ export const UserAccount = () => {
 
     if (!isNull(files)) {
       const file = /\.(jpe?g|png|webp)$/i.test(files[0].name) ? files[0] : null;
+      console.log(file);
 
       if (file) {
         try {
@@ -34,14 +35,16 @@ export const UserAccount = () => {
 
           reader.onloadend = function () {
             const result = reader.result?.toString() ?? '';
-            id === 'cover-input' ? setCoverImage(result) : setUserImage(result);
+
+            if (id === 'cover-input') setCoverImage(result);
+            else setUserImage(result);
+
             event.target.value = '';
           };
 
           reader.readAsDataURL(file);
         } catch (e) {
           console.log(e);
-        } finally {
         }
       }
     }

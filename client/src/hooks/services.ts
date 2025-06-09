@@ -14,6 +14,7 @@ export const useServices = () => {
   const userDispatch = useUserDispatch();
   const { isDev, appRoot } = configProvider();
   const nav = useNavigate();
+  const hasAuthCookie = !!Cookies.get(COOKIES.userToken);
 
   const fetchUser = async (token: string) => {
     try {
@@ -184,5 +185,6 @@ export const useServices = () => {
     login,
     logout,
     redirectHome,
+    hasAuthCookie,
   };
 };

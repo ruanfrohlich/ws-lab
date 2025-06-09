@@ -14,7 +14,8 @@ interface IActionsState {
 export const Header = () => {
   const navigate = useNavigate();
   const { appRoot } = configProvider();
-  const { logged, user } = useUser();
+  const { logged } = useUser();
+  let times = 0;
 
   const initialActions = [
     {
@@ -43,12 +44,14 @@ export const Header = () => {
   });
 
   const updateActions = () => {
-    if (logged && user) {
+    times++;
+
+    if (logged) {
       setActions((actions) => {
         return [
-          ...actions.filter((el) => el.value !== 'join'),
+          ...actions.filter((el) => el.value !== 'join' && el.value !== 'account'),
           {
-            label: 'Minha Conta',
+            label: 'Meu Perfil',
             value: 'account',
             icon: <Person />,
           },
@@ -57,6 +60,8 @@ export const Header = () => {
     } else {
       setActions(initialActions);
     }
+
+    console.log('chamou o logged %d vezes', times, logged);
   };
 
   useEffect(updateActions, [logged]);
