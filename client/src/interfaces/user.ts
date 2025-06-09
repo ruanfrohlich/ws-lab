@@ -15,7 +15,7 @@ export interface IUser {
 }
 
 export interface IUserContext {
-  user?: IUser;
+  user?: IUser | null;
   logged: boolean;
 }
 

@@ -2,8 +2,8 @@ import { ReactNode, useEffect, useReducer } from 'react';
 import { IUserAction, IUserContext } from '../interfaces';
 import { UserContext, UserDispatchContext } from '../contexts/user';
 import Cookies from 'js-cookie';
-import { userService } from '../services';
 import { COOKIES } from '../utils';
+import { useServices } from '../hooks';
 
 const userReducer = (user: IUserContext, action: IUserAction): IUserContext => {
   switch (action.type) {
@@ -27,7 +27,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, dispatch] = useReducer(userReducer, {
     logged: false,
   });
-  const { fetchUser } = userService();
+  const { fetchUser } = useServices();
 
   useEffect(() => {
     const userToken = Cookies.get(COOKIES.userToken);

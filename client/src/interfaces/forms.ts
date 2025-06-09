@@ -21,6 +21,7 @@ export interface ILoginFormState {
   showPassword: boolean;
   isValid: boolean;
   loginError?: boolean;
+  loading: boolean;
 }
 export interface IRegisterFormFields {
   username: string;

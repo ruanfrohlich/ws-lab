@@ -2,12 +2,12 @@ import { Box, Button } from '@mui/material';
 import { AppInput } from '../Input';
 import { useUser, useUserDispatch } from '../../contexts';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { IUser, IUserDataForm, IUserDataFormProps } from '../../interfaces';
-import { userService } from '../../services';
+import { IUserDataForm, IUserDataFormProps } from '../../interfaces';
+import { useServices } from '../../hooks';
 
 export const UserDataForm = (props: IUserDataFormProps) => {
   const { user } = useUser();
-  const dispatch = useUserDispatch();
+  const { updateUser } = useServices();
 
   const [formState, setFormState] = useState<IUserDataForm>({
     fields: {
@@ -41,20 +41,7 @@ export const UserDataForm = (props: IUserDataFormProps) => {
     });
 
     try {
-      const { success } = await userService().updateUser(formState.fields);
-
-      if (success) {
-        dispatch({
-          type: 'setUser',
-          payload: {
-            logged: true,
-            user: {
-              ...user,
-              ...(formState.fields as IUser),
-            },
-          },
-        });
-      }
+      await updateUser(formState.fields);
     } finally {
       setFormState((state) => {
         return { ...state, loading: false };

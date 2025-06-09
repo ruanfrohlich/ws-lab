@@ -3,16 +3,20 @@ import { AppHelmet, UserDataForm, Wrapper } from '../components';
 import { Fragment } from 'react/jsx-runtime';
 import { Box, Button } from '@mui/material';
 import { Edit, Delete, Person } from '@mui/icons-material';
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { isNull } from 'lodash';
+import { configProvider, COOKIES } from '../utils';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router';
 
 export const UserAccount = () => {
   const { user } = useUser();
-
+  const { appRoot } = configProvider();
   const photoRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
   const [userImage, setUserImage] = useState<string | undefined>(user?.profilePic);
   const [coverImage, setCoverImage] = useState<string | undefined>(user?.coverImage);
+  const nav = useNavigate();
 
   const handleRemovePhoto = () => {
     setUserImage('');
@@ -49,6 +53,10 @@ export const UserAccount = () => {
     objectFit: 'cover',
     objectPosition: 'center center',
   };
+
+  useEffect(() => {
+    if (!Cookies.get(COOKIES.userToken)) nav(appRoot);
+  }, [user]);
 
   if (user) {
     return (

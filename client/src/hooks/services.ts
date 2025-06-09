@@ -1,13 +1,20 @@
 import axios, { AxiosResponse, isAxiosError } from 'axios';
-import { IUser, IUserDataForm, IUserRegister } from '../interfaces';
+import { useUser, useUserDispatch } from '../contexts';
 import { configProvider, COOKIES, translateError } from '../utils';
+import { IUser, IUserDataForm, IUserRegister } from '../interfaces';
 import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router';
 
 const handler = axios.create({
   baseURL: process.env.ACCOUNT_API,
 });
 
-export const userService = () => {
+export const useServices = () => {
+  const { user } = useUser();
+  const userDispatch = useUserDispatch();
+  const { isDev, appRoot } = configProvider();
+  const nav = useNavigate();
+
   const fetchUser = async (token: string) => {
     try {
       const res: AxiosResponse<{ found: boolean; user: IUser }> = await handler.get(`/user/find`, {
@@ -53,8 +60,6 @@ export const userService = () => {
   };
 
   const updateUser = async (userData: IUserDataForm['fields']) => {
-    console.log(userData);
-
     try {
       const res = await handler.post('/user/update', userData, {
         headers: {
@@ -63,6 +68,17 @@ export const userService = () => {
       });
 
       console.log(res);
+
+      userDispatch({
+        type: 'setUser',
+        payload: {
+          logged: true,
+          user: {
+            ...user,
+            ...(userData as IUser),
+          },
+        },
+      });
 
       return {
         success: true,
@@ -107,12 +123,7 @@ export const userService = () => {
     }
   };
 
-  const login = async (credentials: {
-    username: string;
-    password: string;
-  }): Promise<{ logged: boolean; user?: IUser; token?: string }> => {
-    const { isDev } = configProvider();
-
+  const login = async (credentials: { username: string; password: string }) => {
     try {
       const { data } = await handler.post('/login', {
         credential: credentials.username,
@@ -127,30 +138,51 @@ export const userService = () => {
         expires: 365,
       });
 
+      userDispatch({
+        type: 'setUser',
+        payload: {
+          logged: true,
+          user: data.user,
+        },
+      });
+
+      nav(appRoot);
+
       return {
-        logged: true,
-        user: data.user,
-        token: data.token,
+        success: true,
       };
     } catch (e) {
       console.error(e);
 
       return {
-        logged: false,
+        success: false,
       };
     }
   };
 
-  const logout = async () => {
+  const logout = () => {
     Cookies.remove(COOKIES.userToken);
+    userDispatch({
+      type: 'setUser',
+      payload: {
+        logged: false,
+        user: null,
+      },
+    });
+    nav(appRoot);
+  };
+
+  const redirectHome = () => {
+    nav(appRoot);
   };
 
   return {
     fetchUser,
     findUser,
-    registerUser,
     updateUser,
+    registerUser,
     login,
     logout,
+    redirectHome,
   };
 };

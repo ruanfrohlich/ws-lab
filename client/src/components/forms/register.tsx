@@ -1,10 +1,9 @@
 import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
 import { ChangeEvent, FormEvent, Fragment, useEffect, useRef, useState } from 'react';
 import { AppInput } from '../Input';
-import { useValidate } from '../../hooks';
+import { useServices, useValidate } from '../../hooks';
 import { IRegisterFormFields, IRegisterFormState } from '../../interfaces';
 import { pull } from 'lodash';
-import { userService } from '../../services';
 import { Link } from 'react-router';
 
 export const FormRegister = (props: { onCancel: () => void }) => {
@@ -23,7 +22,7 @@ export const FormRegister = (props: { onCancel: () => void }) => {
       password: '',
     },
   });
-  const { registerUser } = userService();
+  const { registerUser } = useServices();
 
   const updateState = (el: keyof IRegisterFormState, value: any) => {
     setState((state) => {

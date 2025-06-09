@@ -1,10 +1,10 @@
 import { Box } from '@mui/material';
 import { IRegisterFormState } from '../interfaces';
 import { Fragment } from 'react';
-import { userService } from '../services';
+import { useServices } from './services';
 
 export const useValidate = (updateState: (el: keyof IRegisterFormState, value: unknown) => void) => {
-  const { findUser } = userService();
+  const { findUser } = useServices();
 
   const validate = async (field: string, value: string) => {
     if (value !== '' && value.length > 3) {

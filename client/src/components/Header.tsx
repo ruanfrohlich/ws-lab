@@ -15,7 +15,8 @@ export const Header = () => {
   const navigate = useNavigate();
   const { appRoot } = configProvider();
   const { logged, user } = useUser();
-  const [actions, setActions] = useState<IActionsState[]>([
+
+  const initialActions = [
     {
       label: 'Início',
       value: appRoot,
@@ -26,7 +27,9 @@ export const Header = () => {
       value: 'join',
       icon: <AccountCircle />,
     },
-  ]);
+  ];
+
+  const [actions, setActions] = useState<IActionsState[]>(initialActions);
 
   const handleChange = (event: SyntheticEvent, route: string) => {
     navigate(route);
@@ -39,7 +42,7 @@ export const Header = () => {
     },
   });
 
-  useEffect(() => {
+  const updateActions = () => {
     if (logged && user) {
       setActions((actions) => {
         return [
@@ -51,8 +54,12 @@ export const Header = () => {
           },
         ];
       });
+    } else {
+      setActions(initialActions);
     }
-  }, [logged]);
+  };
+
+  useEffect(updateActions, [logged]);
 
   return (
     <Box

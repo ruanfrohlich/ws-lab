@@ -1,21 +1,23 @@
 import { Fragment, ReactNode, useEffect, useState } from 'react';
 import { AppLink, Header } from '../components';
-import { Box, Breadcrumbs, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Button, Typography } from '@mui/material';
 import { configProvider, translatePathname } from '../utils';
 import { useLocation, useNavigate } from 'react-router';
 import texture from 'url:../assets/images/texture.png';
+import { useUser } from '../contexts';
+import { useServices } from '../hooks';
 
 export const AppLayout = (props: { children: ReactNode }) => {
   const { appRoot } = configProvider();
   const [breadItems, setBreadItems] = useState<string[]>([]);
   const { pathname } = useLocation();
-  const navigator = useNavigate();
+  const { logged } = useUser();
+  const { logout, redirectHome } = useServices();
 
   useEffect(() => {
     if (pathname === '/') {
       console.log('redirecionando');
-
-      navigator(appRoot);
+      redirectHome();
     }
   }, []);
 
@@ -62,6 +64,24 @@ export const AppLayout = (props: { children: ReactNode }) => {
           );
         })}
       </Breadcrumbs>
+      {logged && (
+        <Button
+          variant='contained'
+          color='error'
+          size='small'
+          onClick={logout}
+          sx={{
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            zIndex: 1001,
+            fontSize: '9px',
+            marginTop: '2px',
+          }}
+        >
+          Desconectar
+        </Button>
+      )}
       <Box
         component='main'
         sx={({ palette }) => ({
