@@ -1,13 +1,15 @@
 import { Box, Button } from '@mui/material';
 import { AppInput } from '../Input';
 import { useUser } from '../../contexts';
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, Fragment, useEffect, useState } from 'react';
 import { IUserDataForm, IUserDataFormProps } from '../../interfaces';
 import { useServices } from '../../hooks';
+import { LogoutModal } from '../modals';
 
 export const UserDataForm = (props: IUserDataFormProps) => {
   const { user } = useUser();
   const { updateUser } = useServices();
+  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
 
   const [formState, setFormState] = useState<IUserDataForm>({
     fields: {
@@ -63,25 +65,40 @@ export const UserDataForm = (props: IUserDataFormProps) => {
   }, [props]);
 
   return (
-    <Box
-      component={'form'}
-      noValidate
-      sx={{
-        width: '100%',
-        maxWidth: '400px',
-        margin: '0 auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-      }}
-      onSubmit={handleSubmit}
-    >
-      <Box component={'div'}>
-        <AppInput id='username' label='Username' error='' value={formState.fields.username} onChange={handleChange} />
+    <Fragment>
+      {isOpenModal && <LogoutModal canClose onClose={() => setIsOpenModal(false)} />}
+      <Box
+        component={'form'}
+        noValidate
+        sx={{
+          width: '100%',
+          maxWidth: '400px',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
+        }}
+        onSubmit={handleSubmit}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+        >
+          <AppInput id='username' label='Username' error='' value={formState.fields.username} onChange={handleChange} />
+          <AppInput id='email' label='E-mail' error='' value={formState.fields.email} onChange={handleChange} />
+        </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Button variant='contained' color='primary' type='submit'>
+            Atualizar
+          </Button>
+          <Button variant='contained' color='error' type='button' onClick={() => setIsOpenModal(true)}>
+            Desconectar
+          </Button>
+        </Box>
       </Box>
-      <Button variant='contained' color='primary' type='submit'>
-        Atualizar
-      </Button>
-    </Box>
+    </Fragment>
   );
 };

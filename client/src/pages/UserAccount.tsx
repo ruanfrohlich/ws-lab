@@ -86,7 +86,7 @@ export const UserAccount = () => {
           />
           <Button
             className='cover-btn'
-            variant='outlined'
+            variant='contained'
             color='info'
             size='small'
             sx={{
@@ -110,7 +110,7 @@ export const UserAccount = () => {
             alignItems: 'center',
           }}
         >
-          <Box sx={{ position: 'relative' }} pb={4}>
+          <Box sx={{ position: 'relative', paddingBottom: '15px', marginBottom: '25px' }}>
             <input ref={photoRef} type='file' id='image-input' hidden onChange={handleInputFile} />
             <Box
               component={'picture'}
@@ -141,7 +141,7 @@ export const UserAccount = () => {
             <Box
               sx={{
                 position: 'absolute',
-                bottom: 15,
+                bottom: 0,
                 left: '50%',
                 transform: 'translateX(-50%)',
                 display: 'flex',

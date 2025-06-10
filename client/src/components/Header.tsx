@@ -1,5 +1,5 @@
 import { ReactNode, SyntheticEvent, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { AccountCircle, Home, Person } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
 import { configProvider } from '../utils';
@@ -15,7 +15,8 @@ export const Header = () => {
   const navigate = useNavigate();
   const { appRoot } = configProvider();
   const { logged } = useUser();
-  let times = 0;
+  const { pathname } = useLocation();
+  const [selected, setSelected] = useState<string>();
 
   const initialActions = [
     {
@@ -37,15 +38,25 @@ export const Header = () => {
   };
 
   const actionStyles = () => ({
-    transition: 'transform 200ms ease',
+    transition: 'transform 200ms ease, color 300ms ease-in-out',
     ':hover': {
       transform: 'scale(1.1)',
     },
   });
 
-  const updateActions = () => {
-    times++;
+  const handleSelected = (item?: string) => {
+    if (item) {
+      setSelected(item);
+      return;
+    }
 
+    const page = pathname.split(appRoot + '/')[1];
+
+    if (page) setSelected(page);
+    else setSelected(appRoot);
+  };
+
+  const updateActions = () => {
     if (logged) {
       setActions((actions) => {
         return [
@@ -60,11 +71,11 @@ export const Header = () => {
     } else {
       setActions(initialActions);
     }
-
-    console.log('chamou o logged %d vezes', times, logged);
   };
 
   useEffect(updateActions, [logged]);
+
+  useEffect(handleSelected, [pathname]);
 
   return (
     <Box
@@ -93,7 +104,13 @@ export const Header = () => {
             label={action.label}
             value={action.value}
             icon={action.icon}
-            sx={actionStyles}
+            sx={({ palette }) => ({
+              ...actionStyles,
+              svg: {
+                fill: action.value === selected ? palette.primary.light : 'inherit',
+              },
+            })}
+            onClick={() => handleSelected(action.value)}
           />
         ))}
       </BottomNavigation>
