@@ -1,5 +1,5 @@
 import { Fragment, ReactNode, useEffect, useState } from 'react';
-import { AppLink, Header } from '../components';
+import { AppLink, AppLoading, Header } from '../components';
 import { Box, Breadcrumbs, Typography } from '@mui/material';
 import { configProvider, translatePathname } from '../utils';
 import { useLocation } from 'react-router';
@@ -24,12 +24,9 @@ export const AppLayout = (props: { children: ReactNode }) => {
     setBreadItems(pathname.split('/'));
   }, [pathname]);
 
-  if (hasAuthCookie && !user) {
-    return <p>Loading...</p>;
-  }
-
   return (
     <Fragment>
+      <AppLoading show={hasAuthCookie && !user} />
       <Header />
       <Breadcrumbs
         sx={({ palette }) => ({

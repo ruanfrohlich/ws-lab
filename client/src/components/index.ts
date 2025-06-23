@@ -5,3 +5,4 @@ export { AppLink } from './AppLink';
 export { AppInput } from './Input';
 export * from './forms';
 export { Wrapper } from './Wrapper';
+export { AppLoading } from './AppLoading';

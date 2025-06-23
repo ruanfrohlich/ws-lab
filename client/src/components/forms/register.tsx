@@ -24,6 +24,7 @@ export const FormRegister = (props: { onCancel: () => void }) => {
   });
   const { registerUser } = useServices();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateState = (el: keyof IRegisterFormState, value: any) => {
     setState((state) => {
       switch (el) {
