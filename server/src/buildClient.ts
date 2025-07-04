@@ -1,9 +1,8 @@
 import { Parcel } from '@parcel/core';
 import type { InitialParcelOptions } from '@parcel/types';
 import { cwd } from 'process';
-import { isProd, log } from './utils';
+import { isProd, log, publicUrl } from './utils';
 import loading from 'loading-cli';
-import { publicUrl } from './utils';
 
 interface IWatchResponse {
   success: boolean;
