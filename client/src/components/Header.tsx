@@ -1,14 +1,16 @@
-import { ReactNode, SyntheticEvent, useEffect, useState } from 'react';
+import { Fragment, ReactNode, SyntheticEvent, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { AccountCircle, Home, Person } from '@mui/icons-material';
+import { AccountCircle, Home, Person, Search } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
 import { configProvider } from '../utils';
 import { useUser } from '../contexts';
+import { FindModal } from './modals';
 
 interface IActionsState {
   label: string;
-  value: string;
+  value?: string;
   icon: ReactNode;
+  onClick?: () => void;
 }
 
 export const Header = () => {
@@ -17,6 +19,7 @@ export const Header = () => {
   const { logged } = useUser();
   const { pathname } = useLocation();
   const [selected, setSelected] = useState<string>();
+  const [findModal, setFindModal] = useState<boolean>(false);
 
   const initialActions = [
     {
@@ -44,7 +47,7 @@ export const Header = () => {
     },
   });
 
-  const handleSelected = (item?: string) => {
+  const handleSelected = (item?: string, cb?: () => void) => {
     if (item) {
       setSelected(item);
       return;
@@ -54,6 +57,8 @@ export const Header = () => {
 
     if (page) setSelected(page);
     else setSelected(appRoot);
+
+    if (cb) cb();
   };
 
   const updateActions = () => {
@@ -65,6 +70,11 @@ export const Header = () => {
             label: 'Meu Perfil',
             value: 'account',
             icon: <Person />,
+          },
+          {
+            label: 'Pequisar',
+            icon: <Search />,
+            onClick: () => setFindModal(true),
           },
         ];
       });
@@ -78,42 +88,45 @@ export const Header = () => {
   useEffect(handleSelected, [pathname]);
 
   return (
-    <Box
-      component='header'
-      sx={{
-        position: 'fixed',
-        bottom: '20px',
-        left: '50%',
-        zIndex: 999,
-        transform: 'translateX(-50%)',
-        overflow: 'hidden',
-      }}
-    >
-      <BottomNavigation
-        showLabels
-        onChange={handleChange}
+    <Fragment>
+      {findModal && <FindModal onClose={() => setFindModal(false)} />}
+      <Box
+        component='header'
         sx={{
-          border: '1px solid white',
-          padding: 0.4,
-          borderRadius: 4,
+          position: 'fixed',
+          bottom: '20px',
+          left: '50%',
+          zIndex: 999,
+          transform: 'translateX(-50%)',
+          overflow: 'hidden',
         }}
       >
-        {actions.map((action) => (
-          <BottomNavigationAction
-            key={action.label}
-            label={action.label}
-            value={action.value}
-            icon={action.icon}
-            sx={({ palette }) => ({
-              ...actionStyles,
-              svg: {
-                fill: action.value === selected ? palette.primary.light : 'inherit',
-              },
-            })}
-            onClick={() => handleSelected(action.value)}
-          />
-        ))}
-      </BottomNavigation>
-    </Box>
+        <BottomNavigation
+          showLabels
+          onChange={handleChange}
+          sx={{
+            border: '1px solid white',
+            padding: 0.4,
+            borderRadius: 4,
+          }}
+        >
+          {actions.map((action) => (
+            <BottomNavigationAction
+              key={action.label}
+              label={action.label}
+              value={action.value ?? ''}
+              icon={action.icon}
+              sx={({ palette }) => ({
+                ...actionStyles,
+                svg: {
+                  fill: action.value === selected ? palette.primary.light : 'inherit',
+                },
+              })}
+              onClick={() => handleSelected(action.value, action.onClick)}
+            />
+          ))}
+        </BottomNavigation>
+      </Box>
+    </Fragment>
   );
 };

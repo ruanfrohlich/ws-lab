@@ -4,7 +4,7 @@ import { extname, relative } from 'path';
 import { cwd } from 'process';
 import { publicUrl } from '../utils';
 
-export const clientRoutes = ({ url, method }: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
+export const clientRoutes = ({ url }: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
   const appRoot = relative(cwd(), 'client/public');
   let contentType = '';
   let filePath = appRoot + url?.replace(publicUrl, '');

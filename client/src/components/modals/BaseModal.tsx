@@ -1,11 +1,34 @@
 import { Box, Button } from '@mui/material';
-import { Fragment } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import { IBaseModalProps } from '../../interfaces';
 import { Close } from '@mui/icons-material';
 
-export default ({ children, onClose, canClose }: IBaseModalProps) => {
+export default ({ children, onClose, canClose, closeFocus }: IBaseModalProps) => {
+  const modalBody = useRef<HTMLDivElement>(null);
+  const modal = useRef<HTMLDivElement>(null);
+
+  const checkFocus = (event: MouseEvent) => {
+    const modalInner = modalBody.current;
+    const clickedEl = event.target as HTMLDivElement;
+
+    if (modalInner) {
+      const isInner = !!clickedEl.closest(`.${modalInner.classList[1]}`);
+
+      if (!isInner && onClose) {
+        onClose();
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (closeFocus && modal.current) {
+      modal.current.addEventListener('click', checkFocus);
+    }
+  }, []);
+
   return (
     <Box
+      ref={modal}
       sx={{
         '@keyframes fadeIn': {
           '0%': {
@@ -26,6 +49,7 @@ export default ({ children, onClose, canClose }: IBaseModalProps) => {
       }}
     >
       <Box
+        ref={modalBody}
         sx={({ palette }) => ({
           display: 'flex',
           flexDirection: 'column',
