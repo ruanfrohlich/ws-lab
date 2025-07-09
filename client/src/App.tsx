@@ -13,6 +13,10 @@ const appTheme = createTheme({
       main: '#e7e7e7',
       dark: '#1d1d1c',
     },
+    secondary: {
+      main: '#0fa4d1',
+      dark: '#1d0c0c',
+    },
   },
 });
 

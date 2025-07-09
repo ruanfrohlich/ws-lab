@@ -24,7 +24,7 @@ export const translatePathname = (path: string) => {
       return 'Minha Conta';
     }
     default: {
-      capitalize(path);
+      return capitalize(path);
     }
   }
 };

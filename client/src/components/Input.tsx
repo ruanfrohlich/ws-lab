@@ -1,7 +1,7 @@
 import { Theme } from '@emotion/react';
 import { Box, Button, SxProps, TextField, Typography } from '@mui/material';
 import { red } from '@mui/material/colors';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, RefObject, useState } from 'react';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
@@ -16,6 +16,7 @@ interface IAppInputProps {
     max: number;
   };
   onChange: (evt: ChangeEvent<HTMLInputElement>) => void;
+  ref: RefObject<HTMLInputElement | null>;
 }
 
 export const AppInput = (props: IAppInputProps) => {
@@ -25,7 +26,6 @@ export const AppInput = (props: IAppInputProps) => {
     backgroundColor: 'rgba(0,0,0,.6)',
   };
   const [pwVisible, setPwVisible] = useState<boolean>(false);
-
   const attributes: { [key: string]: unknown } = {
     id,
     label,
@@ -62,6 +62,7 @@ export const AppInput = (props: IAppInputProps) => {
           sx={inputStyles}
           aria-invalid={!!error}
           {...attributes}
+          ref={props.ref}
         />
         {id === 'password' && (
           <Button

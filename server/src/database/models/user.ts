@@ -1,8 +1,8 @@
-import { Model, QueryTypes, Sequelize } from 'sequelize';
+import { QueryTypes, Sequelize } from 'sequelize';
 import { IUser, ModelTypes } from '../types';
 import { IDBUser } from '../../interfaces';
 import { log } from '../../utils';
-import { first, forEach, isEmpty } from 'lodash';
+import { first, isEmpty } from 'lodash';
 
 export const User = (sequelize: Sequelize) => {
   const User = sequelize.define('User', ModelTypes.User);

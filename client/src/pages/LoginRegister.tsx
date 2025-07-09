@@ -51,10 +51,11 @@ export const LoginRegister = () => {
               <Typography
                 component={'span'}
                 fontSize={12}
-                sx={{
+                sx={({ palette }) => ({
                   fontFamily: '"Boldonse", system-ui',
                   textDecoration: 'underline',
-                }}
+                  color: palette.secondary.main,
+                })}
               >
                 gratuitamente
               </Typography>{' '}
@@ -76,7 +77,9 @@ export const LoginRegister = () => {
                 <Typography variant='body1'>
                   Não possui conta?{' '}
                   <AppLink to={''} onClick={handleRegister}>
-                    Cadastre-se
+                    <Box component={'span'} sx={({ palette: { secondary } }) => ({ color: secondary.main })}>
+                      Cadastre-se
+                    </Box>
                   </AppLink>
                 </Typography>
               </Fragment>

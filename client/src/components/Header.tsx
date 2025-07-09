@@ -114,12 +114,13 @@ export const Header = () => {
             <BottomNavigationAction
               key={action.label}
               label={action.label}
-              value={action.value ?? ''}
+              value={action.value}
               icon={action.icon}
-              sx={({ palette }) => ({
+              sx={({ palette: { primary, secondary } }) => ({
                 ...actionStyles,
+                color: action.value === selected ? secondary.main : primary.main,
                 svg: {
-                  fill: action.value === selected ? palette.primary.light : 'inherit',
+                  fill: action.value === selected ? secondary.main : primary.main,
                 },
               })}
               onClick={() => handleSelected(action.value, action.onClick)}
