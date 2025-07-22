@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "nodemon",
     "dev:api": "nodemon --api",
-    "start": "rimraf -rf client/.parcel-cache client/public && ts-node server/src/index.ts --prod",
-    "start:api": "ts-node server/src/index.ts --api",
+    "start": "rimraf -rf client/.parcel-cache client/public && tsx server/src/index.ts --prod",
+    "start:api": "tsx server/src/index.ts --api",
     "lint": "eslint --no-color -o ./tests/eslint.txt"
   },
   "engines": {
@@ -24,7 +24,7 @@
       "server/.env.dev"
     ],
     "ext": "ts,tsx,js,jsx,html",
-    "exec": "ts-node server/src/index.ts"
+    "exec": "tsx server/src/index.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
@@ -34,7 +34,7 @@
     "nodemon": "^3.1.9",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.34.0"
   }
