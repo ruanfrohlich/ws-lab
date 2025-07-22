@@ -8,7 +8,7 @@
     "dev:api": "nodemon --api",
     "start": "rimraf -rf client/.parcel-cache client/public && tsx server/src/index.ts --prod",
     "start:api": "tsx server/src/index.ts --api",
-    "lint": "eslint --no-color -o ./tests/eslint.txt"
+    "lint": "eslint"
   },
   "engines": {
     "node": "22"

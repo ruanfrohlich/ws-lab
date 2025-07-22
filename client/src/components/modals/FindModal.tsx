@@ -19,8 +19,6 @@ export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
 
     const fetch = () =>
       new Promise<IFindModalResult[] | null>((res) => {
-        console.log(normalize(term));
-
         setTimeout(() => {
           const user = mockDB.filter((el) => normalize(el.name).includes(normalize(term))) ?? null;
 
