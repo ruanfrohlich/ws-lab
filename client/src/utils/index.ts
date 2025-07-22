@@ -1,4 +1,5 @@
 import { capitalize } from '@mui/material';
+import unidecode from 'unidecode';
 
 export { configProvider } from './configProvider';
 export * from './enums';
@@ -34,3 +35,5 @@ export const commonRegEx = {
   username: /^[aA-zZ0-9_-]{3,24}$/,
   password: /^(?=.*\d)(?=.*[aA-zZ])(?=.*[^\w\d\s:])([^\s]){8,}$/,
 };
+
+export const normalize = (str: string) => String(unidecode(str)).toLowerCase();

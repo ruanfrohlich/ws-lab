@@ -7,6 +7,7 @@ import mockDB from '../../data/mockDB.json';
 import { AvatarCard } from '../cards';
 import { AppLink } from '../AppLink';
 import { isEmpty } from 'lodash';
+import { normalize } from '../../utils';
 
 export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -18,8 +19,10 @@ export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
 
     const fetch = () =>
       new Promise<IFindModalResult[] | null>((res) => {
+        console.log(normalize(term));
+
         setTimeout(() => {
-          const user = mockDB.filter((el) => el.name.toLowerCase().includes(term.toLowerCase())) ?? null;
+          const user = mockDB.filter((el) => normalize(el.name).includes(normalize(term))) ?? null;
 
           res(user);
         }, 2000);
