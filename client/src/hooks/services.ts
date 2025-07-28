@@ -126,12 +126,14 @@ export const useServices = () => {
 
   const login = async (credentials: { username: string; password: string }) => {
     try {
-      const { data } = await handler.post('/login', {
+      const {
+        data: { user, token },
+      } = await handler.post('/login', {
         credential: credentials.username,
         password: credentials.password,
       });
 
-      Cookies.set(COOKIES.userToken, data.token, {
+      Cookies.set(COOKIES.userToken, token, {
         domain: isDev ? 'localhost' : process.env.COOKIE_DOMAIN,
         sameSite: 'None',
         path: '/',
@@ -143,7 +145,7 @@ export const useServices = () => {
         type: 'setUser',
         payload: {
           logged: true,
-          user: data.user,
+          user,
         },
       });
 

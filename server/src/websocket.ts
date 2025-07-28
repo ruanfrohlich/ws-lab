@@ -26,18 +26,18 @@ export default (server: Server) => {
 
   wss.on('connection', async (ws: WebSocket, { headers }: IncomingMessage) => {
     const { cookie, origin } = headers;
-    const clientId = Cookies.parse(cookie ?? '')['USER_TOKEN'] ?? '';
-    const { getUser } = await database();
+    const clientToken = Cookies.parse(cookie ?? '')['WS_AUTH'] ?? '';
+    const { getUserByToken } = await database();
 
-    if (!clientId || !originIsAllowed(origin ?? '')) {
-      if (!clientId) log(`ClientID not provided!`);
+    if (!clientToken || !originIsAllowed(origin ?? '')) {
+      if (!clientToken) log(`Client token not provided!`);
       else log(`Connection refused for origin ${origin}`);
 
       ws.close(1008, 'Unauthorized');
     }
 
     if (ws.readyState === WebSocket.OPEN) {
-      const user = await getUser({ username: clientId, email: '' });
+      const user = await getUserByToken(clientToken);
 
       if (user) {
         connections[user.username] = ws;
@@ -46,7 +46,7 @@ export default (server: Server) => {
 
         ws.on('message', (data) => {
           try {
-            const message = JSON.parse(data.toString()) as IIncomingData; //NOSONAR
+            const message = JSON.parse(data.toString()) as IIncomingData;
             sendMessage([connections[message.content.to], ws], message);
           } catch (e) {
             console.log(e);
@@ -54,7 +54,7 @@ export default (server: Server) => {
             sendMessage([ws], {
               type: 'error',
               content: {
-                message: data.toString(), //NOSONAR
+                message: data.toString(),
                 error: (e as Error).message,
               },
             });
@@ -62,14 +62,14 @@ export default (server: Server) => {
         });
 
         ws.on('close', function () {
-          log(`Client ${clientId} disconnected`);
+          log(`Client ${user.username} disconnected`);
 
-          delete connections[clientId];
+          delete connections[user.username];
 
           log(`Connected clients: ${JSON.stringify(Object.keys(connections))}`);
         });
       } else {
-        log(`User [${clientId}] não consta no banco de dados. Desconectando`);
+        log('User not found on database. Disconnecting');
 
         ws.close(1008, 'Unauthorized');
       }
