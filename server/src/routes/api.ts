@@ -32,7 +32,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const body = (await getBody(req)) as IFindUser;
+      const body = await getBody<IFindUser>(req);
       const user = await getUser(body);
 
       if (user) {
@@ -80,7 +80,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
       checkAuthorization();
 
-      const body = (await getBody(req)) as IDBUser;
+      const body = (await getBody(req)) as unknown as IDBUser;
       const user = await updateUser(body, String(headers.authorization));
 
       if (user) {
@@ -100,7 +100,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const body = (await getBody(req)) as IDBUser;
+      const body = await getBody<IDBUser>(req);
       const user = await getUser(body);
 
       if (user) {
@@ -135,7 +135,10 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const body = await getBody(req);
+      const body = await getBody<{
+        credential: string;
+        password: string;
+      }>(req);
 
       if (!body) {
         return sendResponse(403, {

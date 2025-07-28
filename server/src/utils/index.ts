@@ -11,8 +11,8 @@ export const originIsAllowed = (origin: string) => {
   if (acceptedOrigins.includes(origin)) return true;
 };
 
-export const getBody = (req: IncomingMessage): Promise<{ [key: string]: unknown } | null> => {
-  return new Promise((resolve) => {
+export const getBody = <T>(req: IncomingMessage): Promise<T> => {
+  return new Promise((resolve, reject) => {
     const data: Buffer[] = [];
 
     req
@@ -23,7 +23,7 @@ export const getBody = (req: IncomingMessage): Promise<{ [key: string]: unknown 
         const body = Buffer.concat(data).toString();
 
         if (body) resolve(JSON.parse(body));
-        else resolve(null);
+        else reject(null);
       });
   });
 };

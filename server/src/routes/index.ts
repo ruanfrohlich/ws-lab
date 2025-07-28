@@ -15,12 +15,10 @@ export const router = (req: IncomingMessage, res: ServerResponse<IncomingMessage
 
   switch (path()) {
     case 'client': {
-      clientRoutes(req, res);
-      break;
+      return clientRoutes(req, res);
     }
     case 'api': {
-      apiRoutes(req, res);
-      break;
+      return apiRoutes(req, res);
     }
     default: {
       res.writeHead(404, 'Not found');

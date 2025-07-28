@@ -4,7 +4,7 @@ import { Fragment } from 'react/jsx-runtime';
 import { Box, Button } from '@mui/material';
 import { Edit, Delete, Person } from '@mui/icons-material';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { isNull } from 'lodash';
+import { isEmpty, isNull } from 'lodash';
 import { configProvider, COOKIES } from '../utils';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router';
@@ -27,7 +27,6 @@ export const UserAccount = () => {
 
     if (!isNull(files)) {
       const file = /\.(jpe?g|png|webp)$/i.test(files[0].name) ? files[0] : null;
-      console.log(file);
 
       if (file) {
         try {
@@ -81,7 +80,11 @@ export const UserAccount = () => {
         >
           <Box
             component={'img'}
-            src={coverImage ?? user.coverImage ?? 'https://picsum.photos/1920/1080'}
+            src={(() => {
+              if (coverImage) return coverImage;
+              else if (!isEmpty(user.coverImage)) return user.coverImage;
+              else return 'https://picsum.photos/1920/1080';
+            })()}
             sx={imageStyles}
           />
           <Button

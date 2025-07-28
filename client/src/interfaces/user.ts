@@ -8,6 +8,7 @@ export interface IUser {
   id: number;
   username: string;
   email: string;
+  uuid: string;
   profilePic: string;
   coverImage: string;
   createdAt: string;

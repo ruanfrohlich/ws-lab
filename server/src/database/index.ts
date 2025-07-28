@@ -19,7 +19,7 @@ const database = async () => {
 
   await sequelize
     .sync({ alter: true })
-    .then(() => log('All models were synchronized successfully.'))
+    .then(() => log('All models were synchronized successfully'))
     .catch((err) => console.log(err));
 
   const close = () => sequelize.close();
