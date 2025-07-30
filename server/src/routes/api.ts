@@ -8,7 +8,7 @@ import { omit } from 'lodash';
 export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
   const { url, method, headers } = req;
   const endpoint = url?.split('/api')[1];
-  const { createUser, getUser, getUserByToken, updateUser } = await database();
+  const { UserModel } = await database();
   const appKey = process.env.APP_KEY ?? '';
 
   const sendResponse = (status: number, message: object) => {
@@ -33,7 +33,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
       }
 
       const body = await getBody<IFindUser>(req);
-      const user = await getUser(body);
+      const user = await UserModel.getUser(body);
 
       if (user) {
         return sendResponse(200, {
@@ -58,7 +58,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const user = await getUserByToken(headers.authorization);
+      const user = await UserModel.getUserByToken(headers.authorization);
 
       if (user) {
         return sendResponse(200, {
@@ -81,7 +81,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
       checkAuthorization();
 
       const body = (await getBody(req)) as unknown as IDBUser;
-      const user = await updateUser(body, String(headers.authorization));
+      const user = await UserModel.updateUser(body, String(headers.authorization));
 
       if (user) {
         return sendResponse(200, {
@@ -101,7 +101,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
       }
 
       const body = await getBody<IDBUser>(req);
-      const user = await getUser(body);
+      const user = await UserModel.getUser(body);
 
       if (user) {
         return sendResponse(400, {
@@ -115,7 +115,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
           password: AES.encrypt(body.password, appKey).toString(),
         };
 
-        await createUser(user);
+        await UserModel.createUser(user);
 
         return sendResponse(201, {
           message: 'User created successfully',
@@ -155,7 +155,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const user = await getUser({ email: credential, username: credential });
+      const user = await UserModel.getUser({ email: credential, username: credential });
 
       if (user) {
         if (password === AES.decrypt(user.password, appKey).toString(enc.Utf8)) {

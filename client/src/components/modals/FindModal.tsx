@@ -1,4 +1,4 @@
-import { alpha, Box } from '@mui/material';
+import { alpha, Box, LinearProgress } from '@mui/material';
 import { IBaseModalProps, IFindModalResult } from '../../interfaces';
 import BaseModal from './BaseModal';
 import { AppInput } from '../Input';
@@ -57,6 +57,13 @@ export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
           onChange={({ target: { value } }) => setTerm(value)}
           autoComplete='off'
         />
+        {!isEmpty(term) && !results && (
+          <LinearProgress
+            sx={{
+              marginTop: '10px',
+            }}
+          />
+        )}
         {!isEmpty(results) && (
           <Box
             component={'ul'}

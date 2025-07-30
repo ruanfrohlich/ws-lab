@@ -1,3 +1,2 @@
-import { User } from './user';
-
-export { User };
+export { User } from './user';
+export { AccountType } from './accountType';

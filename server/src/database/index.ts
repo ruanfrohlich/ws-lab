@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import { User } from './models';
+import { AccountType, User } from './models';
 import { cwd } from 'process';
 import { log } from '../utils';
 
@@ -15,7 +15,17 @@ const database = async () => {
     },
   });
 
-  const { getAllUsers, getUser, createUser, getUserByToken, updateUser } = User(sequelize);
+  const AccountTypeModel = AccountType(sequelize);
+  const UserModel = User(sequelize);
+
+  UserModel.User.belongsTo(AccountTypeModel.AccountType, {
+    onUpdate: 'restrict',
+    targetKey: 'label',
+    foreignKey: {
+      name: 'type',
+      allowNull: false,
+    },
+  });
 
   await sequelize
     .sync({ alter: true })
@@ -24,12 +34,13 @@ const database = async () => {
 
   const close = () => sequelize.close();
 
+  await AccountTypeModel.createType('CHANNEL');
+  await AccountTypeModel.createType('USER');
+  await AccountTypeModel.createType('SERVER');
+
   return {
-    getUser,
-    getUserByToken,
-    getAllUsers,
-    createUser,
-    updateUser,
+    AccountTypeModel,
+    UserModel,
     close,
   };
 };

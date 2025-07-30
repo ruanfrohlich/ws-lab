@@ -30,6 +30,20 @@ export const translatePathname = (path: string) => {
   }
 };
 
+export const translateAccountType = (type: string) => {
+  switch (type) {
+    case 'user': {
+      return 'Usuário';
+    }
+    case 'channel': {
+      return 'Canal';
+    }
+    case 'server': {
+      return 'Servidor';
+    }
+  }
+};
+
 export const commonRegEx = {
   email: /^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/,
   username: /^[aA-zZ0-9_-]{3,24}$/,

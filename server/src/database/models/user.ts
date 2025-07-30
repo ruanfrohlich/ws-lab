@@ -1,5 +1,5 @@
 import { QueryTypes, Sequelize } from 'sequelize';
-import { IUser, ModelTypes } from '../types';
+import { AccountTypesEnum, IUser, ModelTypes } from '../types';
 import { IDBUser } from '../../interfaces';
 import { log } from '../../utils';
 import { first, isEmpty } from 'lodash';
@@ -28,10 +28,8 @@ export const User = (sequelize: Sequelize) => {
     }
   };
 
-  const createUser = async (userData: IDBUser) => {
-    const user = User.build({ ...userData });
-
-    await user.save();
+  const createUser = async (userData: IDBUser): Promise<{ user: IUser }> => {
+    const user = await User.create({ type: AccountTypesEnum['USER'], ...userData });
 
     log(`User [${userData.username}] was saved to the database.`);
 
@@ -83,6 +81,7 @@ export const User = (sequelize: Sequelize) => {
   };
 
   return {
+    User,
     getUser,
     getUserByToken,
     getAllUsers,
