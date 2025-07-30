@@ -27,7 +27,9 @@ export default (server: Server) => {
   wss.on('connection', async (ws: WebSocket, { headers }: IncomingMessage) => {
     const { cookie, origin } = headers;
     const clientToken = Cookies.parse(cookie ?? '')['WS_AUTH'] ?? '';
-    const { getUserByToken } = await database();
+    const {
+      UserModel: { getUserByToken },
+    } = await database();
 
     if (!clientToken || !originIsAllowed(origin ?? '')) {
       if (!clientToken) log(`Client token not provided!`);
