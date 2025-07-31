@@ -1,7 +1,6 @@
 import { Sequelize } from 'sequelize';
 import { AccountType, User } from './models';
 import { cwd } from 'process';
-import { log } from '../utils';
 
 const database = async () => {
   const sequelize = new Sequelize({
@@ -27,16 +26,16 @@ const database = async () => {
     },
   });
 
-  await sequelize
-    .sync({ alter: true })
-    .then(() => log('All models were synchronized successfully'))
-    .catch((err) => console.log(err));
-
-  const close = () => sequelize.close();
+  // await sequelize
+  //   .sync({ force: true })
+  //   .then(() => log('All models were synchronized successfully'))
+  //   .catch((err) => console.log(err));
 
   await AccountTypeModel.createType('CHANNEL');
   await AccountTypeModel.createType('USER');
   await AccountTypeModel.createType('SERVER');
+
+  const close = () => sequelize.close();
 
   return {
     AccountTypeModel,
