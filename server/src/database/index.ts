@@ -6,8 +6,6 @@ const database = async () => {
   const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: cwd() + '/server/.db/db.sqlite3',
-    // username: process.env.DB_USER,
-    // password: process.env.DB_PASSWORD,
     logging: false,
     define: {
       freezeTableName: true,
@@ -25,15 +23,6 @@ const database = async () => {
       allowNull: false,
     },
   });
-
-  // await sequelize
-  //   .sync({ force: true })
-  //   .then(() => log('All models were synchronized successfully'))
-  //   .catch((err) => console.log(err));
-
-  await AccountTypeModel.createType('CHANNEL');
-  await AccountTypeModel.createType('USER');
-  await AccountTypeModel.createType('SERVER');
 
   const close = () => sequelize.close();
 
