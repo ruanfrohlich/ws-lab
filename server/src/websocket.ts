@@ -26,20 +26,20 @@ export default (server: Server) => {
 
   wss.on('connection', async (ws: WebSocket, { headers }: IncomingMessage) => {
     const { cookie, origin } = headers;
-    const clientToken = Cookies.parse(cookie ?? '')['WS_AUTH'] ?? '';
+    const clientUUID = Cookies.parse(cookie ?? '')['WS_AUTH'] ?? '';
     const {
-      UserModel: { getUserByToken },
+      UserModel: { getUserByUUID },
     } = await database();
 
-    if (!clientToken || !originIsAllowed(origin ?? '')) {
-      if (!clientToken) log(`Client token not provided!`);
+    if (!clientUUID || !originIsAllowed(origin ?? '')) {
+      if (!clientUUID) log(`Client token not provided!`);
       else log(`Connection refused for origin ${origin}`);
 
       ws.close(1008, 'Unauthorized');
     }
 
     if (ws.readyState === WebSocket.OPEN) {
-      const user = await getUserByToken(clientToken);
+      const user = await getUserByUUID(clientUUID);
 
       if (user) {
         connections[user.username] = ws;

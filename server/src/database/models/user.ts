@@ -1,15 +1,15 @@
-import { QueryTypes, Sequelize } from 'sequelize';
-import { AccountTypesEnum, IUser, ModelTypes } from '../types';
+import { ModelDefined, QueryTypes, Sequelize } from 'sequelize';
+import { AccountTypesEnum, ModelTypes, UserAttributes, UserCreationAttributes } from '../types';
 import { IDBUser } from '../../interfaces';
 import { log } from '../../utils';
-import { first, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 
 export const User = (sequelize: Sequelize) => {
-  const User = sequelize.define('User', ModelTypes.User);
+  const User: ModelDefined<UserAttributes, UserCreationAttributes> = sequelize.define('User', ModelTypes.User);
 
   const getUser = async (data: Omit<IDBUser, 'password' | 'coverImage' | 'profilePic'>): Promise<IDBUser | null> => {
     try {
-      const query = await sequelize.query(
+      const query = await sequelize.query<IDBUser>(
         `SELECT * FROM User WHERE username="${data.username}" OR email="${data.email}"`,
         {
           type: QueryTypes.SELECT,
@@ -20,7 +20,7 @@ export const User = (sequelize: Sequelize) => {
         return null;
       }
 
-      return first(query) as unknown as IDBUser;
+      return query[0];
     } catch (e) {
       console.log(e);
 
@@ -28,26 +28,26 @@ export const User = (sequelize: Sequelize) => {
     }
   };
 
-  const createUser = async (userData: IDBUser): Promise<{ user: IUser }> => {
-    const user = await User.create({ type: AccountTypesEnum['USER'], ...userData });
+  const createUser = async (userData: IDBUser): Promise<{ user: UserAttributes }> => {
+    const { dataValues } = await User.create({ type: AccountTypesEnum['USER'], ...userData });
 
-    log(`User [${userData.username}] was saved to the database.`);
+    log(`User [${dataValues.username}] was saved to the database.`);
 
     return {
-      user: user as unknown as IUser,
+      user: dataValues,
     };
   };
 
-  const getUserByToken = async (token: string): Promise<IDBUser | null> => {
+  const getUserByUUID = async (uuid: string): Promise<IDBUser | null> => {
     try {
       const user = await User.findOne({
         where: {
-          password: token,
+          uuid: uuid,
         },
       });
 
       if (user) {
-        return user.dataValues as unknown as IDBUser;
+        return user.dataValues;
       }
 
       return null;
@@ -61,7 +61,7 @@ export const User = (sequelize: Sequelize) => {
   const getAllUsers = async () => {
     const users = await User.findAll();
 
-    return users as unknown as IUser[];
+    return users;
   };
 
   const updateUser = async (data: Omit<IDBUser, 'password'>, token: string) => {
@@ -83,7 +83,7 @@ export const User = (sequelize: Sequelize) => {
   return {
     User,
     getUser,
-    getUserByToken,
+    getUserByUUID,
     getAllUsers,
     createUser,
     updateUser,

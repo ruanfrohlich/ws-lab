@@ -26,6 +26,9 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
   const [websocket, dispatch] = useReducer(websocketReducer, {
     connected: false,
   });
+  let retryCount = 0;
+  const maxRetries = 3;
+  let connected = false;
 
   const webSocketHandler = () => {
     const WSConnection = websocket.socket ?? new WebSocket(`wss://${process.env.WS_SERVER}/`);
@@ -45,7 +48,8 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
     };
 
     WSConnection.onopen = function () {
-      console.log('Websocket conectado!');
+      console.log('Websocket connected!');
+      connected = true;
 
       dispatch({
         type: 'updateWSState',
@@ -58,7 +62,7 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
     };
 
     WSConnection.onclose = function () {
-      console.log('Websocket fechado!');
+      console.log('Websocket closed!');
 
       dispatch({
         type: 'updateWSState',
@@ -77,46 +81,35 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
     };
   };
 
-  useEffect(() => {
-    if (logged && !websocket.connected) webSocketHandler();
+  const connect = () => {
+    const interval = Math.floor(Math.random() * 2000) + 1000;
 
-    if (websocket.connected && !logged) {
+    const reconnectInterval = setInterval(() => {
+      if (retryCount >= maxRetries) {
+        console.error('Maximum number of retries reached. Giving up on reconnecting.');
+        clearInterval(reconnectInterval);
+        return;
+      }
+
+      if (connected) {
+        clearInterval(reconnectInterval);
+        return;
+      }
+
+      webSocketHandler();
+      retryCount++;
+    }, interval);
+  };
+
+  useEffect(() => {
+    if (logged && !websocket.connected) {
+      connect();
+    }
+
+    if (!logged) {
       websocket.socket?.close();
     }
-  }, [logged, websocket.connected]);
-
-  // useEffect(() => {
-  //   let timer: NodeJS.Timeout;
-  //   let reconnectionCount = 0;
-
-  //   if (!user) {
-  //     return;
-  //   }
-
-  //   dispatch({
-  //     type: 'updateWSState',
-  //     payload: {
-  //       ...websocket,
-  //     },
-  //   });
-
-  //   (async () => {
-  //     while (!websocket.connected && reconnectionCount < 3) {
-  //       await new Promise((res) => {
-  //         timer = setTimeout(
-  //           () => {
-  //             webSocketHandler();
-  //             reconnectionCount++;
-  //             res('connecting');
-  //           },
-  //           Math.floor(Math.random() * 3000),
-  //         );
-  //       });
-  //     }
-  //   })();
-
-  //   return () => clearTimeout(timer);
-  // }, [websocket.connected]);
+  }, [logged]);
 
   return (
     <WebsocketContext value={websocket}>

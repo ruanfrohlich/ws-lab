@@ -58,7 +58,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const user = await UserModel.getUserByToken(headers.authorization);
+      const user = await UserModel.getUserByUUID(headers.authorization);
 
       if (user) {
         return sendResponse(200, {
@@ -162,7 +162,6 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
           return sendResponse(200, {
             message: 'Logged successfully',
             user: omit(user, ['password']),
-            token: user.password,
           });
         }
 
