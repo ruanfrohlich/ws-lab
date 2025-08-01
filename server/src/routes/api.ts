@@ -2,13 +2,14 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { AES, enc } from 'crypto-js';
 import database from '../database';
 import { getBody } from '../utils';
-import { IDBUser, IFindUser } from '../interfaces';
+import { IFindUser } from '../interfaces';
 import { omit } from 'lodash';
+import { UserCreationAttributes } from '../database/types';
 
 export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
   const { url, method, headers } = req;
   const endpoint = url?.split('/api')[1];
-  const { UserModel } = await database();
+  const { UserModel, FriendsModel } = await database();
   const appKey = process.env.APP_KEY ?? '';
 
   const sendResponse = (status: number, message: object) => {
@@ -16,13 +17,10 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
     res.end(JSON.stringify(message), 'utf-8');
   };
 
-  const checkAuthorization = () => {
-    if (!headers.authorization) {
-      return sendResponse(401, {
-        message: 'Token not provided!',
-      });
-    }
-  };
+  const tokenError = () =>
+    sendResponse(401, {
+      message: 'Token not provided!',
+    });
 
   switch (true) {
     case endpoint === '/user': {
@@ -52,13 +50,11 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      if (!headers.authorization) {
-        return sendResponse(401, {
-          message: 'Token not provided!',
-        });
-      }
+      if (!headers.authorization) return tokenError();
 
       const user = await UserModel.getUserByUUID(headers.authorization);
+
+      if (user) await FriendsModel.getAllFriendsById(user.id);
 
       if (user) {
         return sendResponse(200, {
@@ -78,19 +74,21 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      checkAuthorization();
+      if (!headers.authorization) return tokenError();
 
-      const body = (await getBody(req)) as unknown as IDBUser;
-      const user = await UserModel.updateUser(body, String(headers.authorization));
+      const body = await getBody<UserCreationAttributes>(req);
+      const user = await UserModel.updateUser(body, headers.authorization);
 
       if (user) {
         return sendResponse(200, {
           success: true,
+          message: 'User updated successfully!',
         });
       }
 
       return sendResponse(200, {
         success: false,
+        message: 'User not found with provided token!',
       });
     }
     case endpoint === '/register': {
@@ -100,7 +98,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const body = await getBody<IDBUser>(req);
+      const body = await getBody<UserCreationAttributes>(req);
       const user = await UserModel.getUser(body);
 
       if (user) {
@@ -110,15 +108,16 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
       }
 
       try {
-        const user: IDBUser = {
+        const data: UserCreationAttributes = {
           ...body,
           password: AES.encrypt(body.password, appKey).toString(),
         };
 
-        await UserModel.createUser(user);
+        const { user } = await UserModel.createUser(data);
 
         return sendResponse(201, {
           message: 'User created successfully',
+          user: omit(user, ['password']),
         });
       } catch (e) {
         console.log(e);

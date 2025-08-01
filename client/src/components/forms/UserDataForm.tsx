@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Alert, Box, Button, Snackbar } from '@mui/material';
 import { AppInput } from '../Input';
 import { useUser } from '../../contexts';
 import { ChangeEvent, FormEvent, Fragment, useEffect, useState } from 'react';
@@ -17,8 +17,11 @@ export const UserDataForm = (props: IUserDataFormProps) => {
       email: user?.email ?? '',
       coverImage: user?.coverImage ?? '',
       profilePic: user?.profilePic ?? '',
+      name: user?.name ?? '',
     },
     loading: false,
+    success: false,
+    error: false,
   });
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -44,9 +47,13 @@ export const UserDataForm = (props: IUserDataFormProps) => {
 
     try {
       await updateUser(formState.fields);
-    } finally {
+
       setFormState((state) => {
-        return { ...state, loading: false };
+        return { ...state, loading: false, success: true };
+      });
+    } catch {
+      setFormState((state) => {
+        return { ...state, loading: false, error: true };
       });
     }
   };
@@ -64,9 +71,42 @@ export const UserDataForm = (props: IUserDataFormProps) => {
     });
   }, [props]);
 
+  const isValid =
+    formState.fields.email !== user?.email ||
+    formState.fields.username !== user?.username ||
+    formState.fields.profilePic !== user?.profilePic ||
+    formState.fields.coverImage !== user?.coverImage ||
+    formState.fields.name !== user?.name;
+
   return (
     <Fragment>
       {isOpenModal && <LogoutModal canClose onClose={() => setIsOpenModal(false)} />}
+      <Snackbar
+        open={formState.success}
+        autoHideDuration={5000}
+        onClose={() => {
+          setFormState((state) => {
+            return { ...state, success: false };
+          });
+        }}
+      >
+        <Alert severity='success' variant='filled' sx={{ width: '100%' }}>
+          Dados atualizados com sucesso!
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={formState.error}
+        autoHideDuration={5000}
+        onClose={() => {
+          setFormState((state) => {
+            return { ...state, error: false };
+          });
+        }}
+      >
+        <Alert severity='error' variant='filled' sx={{ width: '100%' }}>
+          Tivemos um problema ao atualizar seus dados, tente novamente em alguns minutos!
+        </Alert>
+      </Snackbar>
       <Box
         component={'form'}
         noValidate
@@ -88,10 +128,11 @@ export const UserDataForm = (props: IUserDataFormProps) => {
           }}
         >
           <AppInput id='username' label='Username' error='' value={formState.fields.username} onChange={handleChange} />
+          <AppInput id='name' label='Seu nome' error='' value={formState.fields.name} onChange={handleChange} />
           <AppInput id='email' label='E-mail' error='' value={formState.fields.email} onChange={handleChange} />
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Button variant='contained' color='primary' type='submit'>
+          <Button variant='contained' color='primary' type='submit' disabled={!isValid}>
             Atualizar
           </Button>
           <Button variant='contained' color='error' type='button' onClick={() => setIsOpenModal(true)}>

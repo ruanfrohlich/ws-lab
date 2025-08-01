@@ -6,6 +6,7 @@ export interface IUserRegister {
 
 export interface IUser {
   id: number;
+  name: string;
   username: string;
   email: string;
   uuid: string;

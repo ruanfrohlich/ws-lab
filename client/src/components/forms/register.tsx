@@ -17,6 +17,7 @@ export const FormRegister = (props: { onCancel: () => void }) => {
     validatedFields: [],
     registerSuccess: false,
     fields: {
+      name: '',
       username: '',
       email: '',
       password: '',
@@ -185,6 +186,14 @@ export const FormRegister = (props: { onCancel: () => void }) => {
             }}
           >
             <Box sx={flex} padding={0} ref={registerFields}>
+              <AppInput
+                id='name'
+                label='Seu nome'
+                onChange={handleChange}
+                error={state.errors?.name ?? ''}
+                value={state.fields.name}
+              />
+
               <AppInput
                 id='password'
                 label='Senha'

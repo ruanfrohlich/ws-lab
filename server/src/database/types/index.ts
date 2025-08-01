@@ -1,4 +1,12 @@
-import { CreationOptional, DataTypes, ModelAttributes, Optional } from 'sequelize';
+import { CreationOptional, DataTypes, ModelAttributes } from 'sequelize';
+
+export interface IDefaultAttributes {
+  id: number;
+  createdAt: CreationOptional<Date>;
+  updatedAt: CreationOptional<Date>;
+}
+
+type DefaultOptionalAttibutes = 'id' | 'createdAt' | 'updatedAt';
 
 export enum AccountTypesEnum {
   USER = 'user',
@@ -6,15 +14,16 @@ export enum AccountTypesEnum {
   CHANNEL = 'channel',
 }
 
-export interface AccountTypeAttributes {
-  id: number;
+export interface AccountTypeAttributes extends IDefaultAttributes {
   label: AccountTypesEnum;
 }
 
-export type AccountTypeCreationAttributes = Optional<AccountTypeAttributes, 'id'>;
+type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-export interface UserAttributes {
-  id: number;
+export type AccountTypeCreationAttributes = Optional<AccountTypeAttributes, DefaultOptionalAttibutes>;
+
+export interface UserAttributes extends IDefaultAttributes {
+  name: string;
   type: AccountTypesEnum;
   username: string;
   email: string;
@@ -22,22 +31,27 @@ export interface UserAttributes {
   uuid: string;
   profilePic: string;
   coverImage: string;
-  createdAt: CreationOptional<Date>;
-  updatedAt: CreationOptional<Date>;
 }
 
-export type UserCreationAttributes = Optional<UserAttributes, 'id' | 'uuid' | 'createdAt' | 'updatedAt'>;
+export type UserCreationAttributes = Optional<UserAttributes, DefaultOptionalAttibutes | 'uuid'>;
+
+export interface FriendsAttributes extends IDefaultAttributes {
+  status: string;
+}
+
+export type FriendsCreationAttributes = Optional<FriendsAttributes, DefaultOptionalAttibutes>;
 
 export const ModelTypes: {
   [key: string]: ModelAttributes;
 } = {
   User: {
+    name: { type: DataTypes.STRING, allowNull: false },
     username: { type: DataTypes.STRING, allowNull: false, unique: true },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: { type: DataTypes.STRING, allowNull: false },
     uuid: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, allowNull: false },
-    profilePic: { type: DataTypes.STRING, allowNull: true },
-    coverImage: { type: DataTypes.STRING, allowNull: true },
+    profilePic: { type: DataTypes.STRING, defaultValue: '' },
+    coverImage: { type: DataTypes.STRING, defaultValue: '' },
   },
   AccountType: {
     label: {

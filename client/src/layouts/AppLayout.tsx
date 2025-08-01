@@ -1,6 +1,6 @@
 import { Fragment, ReactNode, useEffect, useState } from 'react';
 import { AppLink, AppLoading, Header } from '../components';
-import { Box, Breadcrumbs, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Typography, Zoom } from '@mui/material';
 import { configProvider, translatePathname } from '../utils';
 import { useLocation } from 'react-router';
 import { useUser } from '../contexts';
@@ -73,7 +73,9 @@ export const AppLayout = (props: { children: ReactNode }) => {
           backgroundColor: `rgba(${palette.primary.dark}, 0.8)`,
         })}
       >
-        {props.children}
+        <Zoom in={!!user || !hasAuthCookie} style={{ transitionDelay: '100ms' }}>
+          <Box>{props.children}</Box>
+        </Zoom>
       </Box>
     </Fragment>
   );

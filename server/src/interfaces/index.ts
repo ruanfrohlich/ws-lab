@@ -10,14 +10,6 @@ export interface IReturnData {
 
 export type TRoute = 'client' | 'api';
 
-export interface IDBUser {
-  username: string;
-  email: string;
-  password: string;
-  profilePic: string;
-  coverImage: string;
-}
-
 export interface IFindUser {
   username: string;
   email: string;

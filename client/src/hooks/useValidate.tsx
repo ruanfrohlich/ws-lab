@@ -9,6 +9,9 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
   const validate = async (field: string, value: string) => {
     if (value !== '' && value.length > 3) {
       switch (field) {
+        case 'name': {
+          return true;
+        }
         case 'email': {
           if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
             updateState('checkingEmail', true);

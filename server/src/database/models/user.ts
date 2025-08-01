@@ -1,15 +1,14 @@
 import { ModelDefined, QueryTypes, Sequelize } from 'sequelize';
-import { AccountTypesEnum, ModelTypes, UserAttributes, UserCreationAttributes } from '../types';
-import { IDBUser } from '../../interfaces';
+import { ModelTypes, UserAttributes, UserCreationAttributes } from '../types';
 import { log } from '../../utils';
 import { isEmpty } from 'lodash';
 
 export const User = (sequelize: Sequelize) => {
   const User: ModelDefined<UserAttributes, UserCreationAttributes> = sequelize.define('User', ModelTypes.User);
 
-  const getUser = async (data: Omit<IDBUser, 'password' | 'coverImage' | 'profilePic'>): Promise<IDBUser | null> => {
+  const getUser = async (data: { username: string; email: string }) => {
     try {
-      const query = await sequelize.query<IDBUser>(
+      const query = await sequelize.query<UserAttributes>(
         `SELECT * FROM User WHERE username="${data.username}" OR email="${data.email}"`,
         {
           type: QueryTypes.SELECT,
@@ -28,8 +27,8 @@ export const User = (sequelize: Sequelize) => {
     }
   };
 
-  const createUser = async (userData: IDBUser): Promise<{ user: UserAttributes }> => {
-    const { dataValues } = await User.create({ type: AccountTypesEnum['USER'], ...userData });
+  const createUser = async (userData: UserCreationAttributes): Promise<{ user: UserAttributes }> => {
+    const { dataValues } = await User.create({ ...userData });
 
     log(`User [${dataValues.username}] was saved to the database.`);
 
@@ -38,7 +37,7 @@ export const User = (sequelize: Sequelize) => {
     };
   };
 
-  const getUserByUUID = async (uuid: string): Promise<IDBUser | null> => {
+  const getUserByUUID = async (uuid: string): Promise<UserAttributes | null> => {
     try {
       const user = await User.findOne({
         where: {
@@ -64,11 +63,11 @@ export const User = (sequelize: Sequelize) => {
     return users;
   };
 
-  const updateUser = async (data: Omit<IDBUser, 'password'>, token: string) => {
+  const updateUser = async (data: Omit<UserCreationAttributes, 'password'>, token: string) => {
     try {
       const updatedUser = await User.update(data, {
         where: {
-          password: token,
+          uuid: token,
         },
       });
 

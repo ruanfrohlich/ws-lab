@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import { AccountType, User } from './models';
+import { AccountType, Friends, User } from './models';
 import { cwd } from 'process';
 
 const database = async () => {
@@ -14,6 +14,7 @@ const database = async () => {
 
   const AccountTypeModel = AccountType(sequelize);
   const UserModel = User(sequelize);
+  const FriendsModel = Friends(sequelize);
 
   UserModel.User.belongsTo(AccountTypeModel.AccountType, {
     onUpdate: 'restrict',
@@ -29,6 +30,7 @@ const database = async () => {
   return {
     AccountTypeModel,
     UserModel,
+    FriendsModel,
     close,
   };
 };

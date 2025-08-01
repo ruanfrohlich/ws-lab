@@ -12,8 +12,10 @@ export interface IUserDataFormProps {
 }
 
 export interface IUserDataForm {
-  fields: Pick<IUser, 'username' | 'email' | 'profilePic' | 'coverImage'>;
+  fields: Pick<IUser, 'username' | 'email' | 'profilePic' | 'coverImage' | 'name'>;
   loading: boolean;
+  success: boolean;
+  error: boolean;
 }
 
 export interface ILoginFormState {
@@ -24,6 +26,7 @@ export interface ILoginFormState {
   loading: boolean;
 }
 export interface IRegisterFormFields {
+  name: string;
   username: string;
   email: string;
   password: string;

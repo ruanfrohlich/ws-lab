@@ -24,8 +24,10 @@ export default (server: Server) => {
     server,
   });
 
-  wss.on('connection', async (ws: WebSocket, { headers }: IncomingMessage) => {
+  wss.on('connection', async (ws: WebSocket, { headers, url }: IncomingMessage) => {
     const { cookie, origin } = headers;
+    console.log('ws requested url: ', url);
+
     const clientUUID = Cookies.parse(cookie ?? '')['WS_AUTH'] ?? '';
     const {
       UserModel: { getUserByUUID },

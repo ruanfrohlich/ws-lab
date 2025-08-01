@@ -1,4 +1,4 @@
-import axios, { AxiosResponse, isAxiosError } from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { useUser, useUserDispatch } from '../contexts';
 import { configProvider, COOKIES, translateError } from '../utils';
 import { IUser, IUserDataForm, IUserRegister } from '../interfaces';
@@ -16,9 +16,19 @@ export const useServices = () => {
   const nav = useNavigate();
   const hasAuthCookie = !!Cookies.get(COOKIES.userToken);
 
+  const createAuthCookie = (uuid: string) => {
+    Cookies.set(COOKIES.userToken, uuid, {
+      domain: isDev ? 'localhost' : process.env.COOKIE_DOMAIN,
+      sameSite: 'None',
+      path: '/',
+      secure: true,
+      expires: 365,
+    });
+  };
+
   const fetchUser = async (token: string) => {
     try {
-      const res: AxiosResponse<{ found: boolean; user: IUser }> = await handler.get(`/user/find`, {
+      const res = await handler.get<{ found: boolean; user: IUser }>(`/user/find`, {
         headers: {
           Authorization: token,
         },
@@ -43,7 +53,7 @@ export const useServices = () => {
   const findUser = async (user: { username: string; email: string }): Promise<boolean> => {
     try {
       const { username, email } = user;
-      const { data }: AxiosResponse<{ found: boolean }> = await handler.post('/user', {
+      const { data } = await handler.post<{ found: boolean }>('/user', {
         username,
         email,
       });
@@ -62,27 +72,33 @@ export const useServices = () => {
 
   const updateUser = async (userData: IUserDataForm['fields']) => {
     try {
-      const res = await handler.post('/user/update', userData, {
+      const { data } = await handler.post<{ success: boolean; message: string }>('/user/update', userData, {
         headers: {
           Authorization: Cookies.get(COOKIES.userToken),
         },
       });
 
-      console.log(res);
+      console.log(data);
 
-      userDispatch({
-        type: 'setUser',
-        payload: {
-          logged: true,
-          user: {
-            ...user,
-            ...(userData as IUser),
+      if (data.success) {
+        userDispatch({
+          type: 'setUser',
+          payload: {
+            logged: true,
+            user: {
+              ...user,
+              ...(userData as IUser),
+            },
           },
-        },
-      });
+        });
+
+        return {
+          success: true,
+        };
+      }
 
       return {
-        success: true,
+        success: false,
       };
     } catch (e) {
       console.log(e);
@@ -95,9 +111,18 @@ export const useServices = () => {
 
   const registerUser = async (fields: IUserRegister): Promise<{ success: boolean; error?: string }> => {
     try {
-      const res = await handler.post('/register', fields);
+      const res = await handler.post<{ user: IUser }>('/register', fields);
 
       if (res.status === 201) {
+        createAuthCookie(res.data.user.uuid);
+        userDispatch({
+          type: 'setUser',
+          payload: {
+            logged: true,
+            user: res.data.user,
+          },
+        });
+
         return {
           success: true,
         };
@@ -139,14 +164,7 @@ export const useServices = () => {
         };
       }
 
-      Cookies.set(COOKIES.userToken, user.uuid, {
-        domain: isDev ? 'localhost' : process.env.COOKIE_DOMAIN,
-        sameSite: 'None',
-        path: '/',
-        secure: true,
-        expires: 365,
-      });
-
+      createAuthCookie(user.uuid);
       userDispatch({
         type: 'setUser',
         payload: {

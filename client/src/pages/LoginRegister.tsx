@@ -13,12 +13,12 @@ export const LoginRegister = () => {
   const handleRegister = () => setIsRegister(!isRegister);
 
   useEffect(() => {
-    if (logged) nav('/app');
+    if (logged && !isRegister) nav('/app');
   }, [logged]);
 
-  if (logged) {
-    return;
-  }
+  useEffect(() => {
+    console.log(isRegister);
+  }, [isRegister]);
 
   return (
     <Box>

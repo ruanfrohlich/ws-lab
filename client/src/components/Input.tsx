@@ -16,11 +16,11 @@ interface IAppInputProps {
     max: number;
   };
   onChange: (evt: ChangeEvent<HTMLInputElement>) => void;
-  ref: RefObject<HTMLInputElement | null>;
+  ref?: RefObject<HTMLInputElement | null>;
 }
 
 export const AppInput = (props: IAppInputProps) => {
-  const { id, error, label, value, onChange, count, autoComplete } = props;
+  const { id, error, label, value, onChange, count, autoComplete, ref } = props;
   const inputStyles: SxProps<Theme> = {
     position: 'relative',
     backgroundColor: 'rgba(0,0,0,.6)',
@@ -32,6 +32,7 @@ export const AppInput = (props: IAppInputProps) => {
     value,
     onChange,
     autoComplete,
+    ref,
   };
 
   if (id === 'password') {
@@ -62,7 +63,6 @@ export const AppInput = (props: IAppInputProps) => {
           sx={inputStyles}
           aria-invalid={!!error}
           {...attributes}
-          ref={props.ref}
         />
         {id === 'password' && (
           <Button
