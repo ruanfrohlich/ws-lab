@@ -52,14 +52,12 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
       if (!headers.authorization) return tokenError();
 
-      const user = await UserModel.getUserByUUID(headers.authorization);
-
-      if (user) await FriendsModel.getAllFriendsById(user.id);
+      const user = await UserModel.getUserByUUID(headers.authorization, FriendsModel.Model);
 
       if (user) {
         return sendResponse(200, {
           found: true,
-          user: omit(user, ['password']),
+          user,
         });
       }
 
@@ -160,7 +158,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         if (password === AES.decrypt(user.password, appKey).toString(enc.Utf8)) {
           return sendResponse(200, {
             message: 'Logged successfully',
-            user: omit(user, ['password']),
+            uuid: user.uuid,
           });
         }
 

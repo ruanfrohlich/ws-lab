@@ -31,6 +31,7 @@ export default (server: Server) => {
     const clientUUID = Cookies.parse(cookie ?? '')['WS_AUTH'] ?? '';
     const {
       UserModel: { getUserByUUID },
+      FriendsModel,
     } = await database();
 
     if (!clientUUID || !originIsAllowed(origin ?? '')) {
@@ -41,7 +42,7 @@ export default (server: Server) => {
     }
 
     if (ws.readyState === WebSocket.OPEN) {
-      const user = await getUserByUUID(clientUUID);
+      const user = await getUserByUUID(clientUUID, FriendsModel.Model);
 
       if (user) {
         connections[user.username] = ws;

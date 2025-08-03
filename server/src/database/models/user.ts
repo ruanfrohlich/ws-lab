@@ -1,10 +1,10 @@
-import { ModelDefined, QueryTypes, Sequelize } from 'sequelize';
-import { ModelTypes, UserAttributes, UserCreationAttributes } from '../types';
+import { QueryTypes, Sequelize } from 'sequelize';
+import { FriendsModel, ModelTypes, UserAttributes, UserCreationAttributes, UserModel } from '../types';
 import { log } from '../../utils';
-import { isEmpty } from 'lodash';
+import { isEmpty, omit, pick } from 'lodash';
 
 export const User = (sequelize: Sequelize) => {
-  const User: ModelDefined<UserAttributes, UserCreationAttributes> = sequelize.define('User', ModelTypes.User);
+  const Model: UserModel = sequelize.define('User', ModelTypes.User);
 
   const getUser = async (data: { username: string; email: string }) => {
     try {
@@ -28,7 +28,7 @@ export const User = (sequelize: Sequelize) => {
   };
 
   const createUser = async (userData: UserCreationAttributes): Promise<{ user: UserAttributes }> => {
-    const { dataValues } = await User.create({ ...userData });
+    const { dataValues } = await Model.create({ ...userData });
 
     log(`User [${dataValues.username}] was saved to the database.`);
 
@@ -37,16 +37,37 @@ export const User = (sequelize: Sequelize) => {
     };
   };
 
-  const getUserByUUID = async (uuid: string): Promise<UserAttributes | null> => {
+  const getUserByUUID = async (uuid: string, friendsModel: FriendsModel): Promise<UserAttributes | null> => {
     try {
-      const user = await User.findOne({
+      const query = await Model.findOne({
         where: {
-          uuid: uuid,
+          uuid,
+        },
+        include: {
+          model: friendsModel,
+          as: 'friends',
+          include: [
+            {
+              model: Model,
+            },
+          ],
         },
       });
 
-      if (user) {
-        return user.dataValues;
+      if (query) {
+        return {
+          ...omit(query?.dataValues, ['password']),
+          //@ts-expect-error friends created by association
+          friends: query?.dataValues.friends.map((friend) =>
+            pick(
+              {
+                ...friend.dataValues,
+                user: pick(friend.dataValues.User.dataValues, ['id', 'username', 'name', 'uuid', 'profilePic']),
+              },
+              ['id', 'status', 'user'],
+            ),
+          ),
+        };
       }
 
       return null;
@@ -58,14 +79,14 @@ export const User = (sequelize: Sequelize) => {
   };
 
   const getAllUsers = async () => {
-    const users = await User.findAll();
+    const users = await Model.findAll();
 
     return users;
   };
 
   const updateUser = async (data: Omit<UserCreationAttributes, 'password'>, token: string) => {
     try {
-      const updatedUser = await User.update(data, {
+      const updatedUser = await Model.update(data, {
         where: {
           uuid: token,
         },
@@ -80,7 +101,7 @@ export const User = (sequelize: Sequelize) => {
   };
 
   return {
-    User,
+    Model,
     getUser,
     getUserByUUID,
     getAllUsers,

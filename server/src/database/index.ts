@@ -16,13 +16,26 @@ const database = async () => {
   const UserModel = User(sequelize);
   const FriendsModel = Friends(sequelize);
 
-  UserModel.User.belongsTo(AccountTypeModel.AccountType, {
+  UserModel.Model.belongsTo(AccountTypeModel.Model, {
     onUpdate: 'restrict',
     targetKey: 'label',
     foreignKey: {
       name: 'type',
       allowNull: false,
     },
+  });
+
+  UserModel.Model.hasMany(FriendsModel.Model, {
+    as: 'friends',
+  });
+
+  ['userId', 'friendId'].forEach((id) => {
+    FriendsModel.Model.belongsTo(UserModel.Model, {
+      foreignKey: {
+        name: id,
+        allowNull: false,
+      },
+    });
   });
 
   const close = () => sequelize.close();

@@ -152,24 +152,32 @@ export const useServices = () => {
   const login = async (credentials: { username: string; password: string }) => {
     try {
       const {
-        data: { user },
-      } = await handler.post<{ user: IUser }>('/login', {
+        data: { uuid },
+      } = await handler.post<{ uuid: string }>('/login', {
         credential: credentials.username,
         password: credentials.password,
       });
 
-      if (!user) {
+      if (!uuid) {
         return {
           success: false,
         };
       }
 
-      createAuthCookie(user.uuid);
+      const res = await fetchUser(uuid);
+
+      if (!res?.user) {
+        return {
+          success: false,
+        };
+      }
+
+      createAuthCookie(uuid);
       userDispatch({
         type: 'setUser',
         payload: {
           logged: true,
-          user,
+          user: res?.user,
         },
       });
 

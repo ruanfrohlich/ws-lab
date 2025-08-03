@@ -1,4 +1,4 @@
-import { CreationOptional, DataTypes, ModelAttributes } from 'sequelize';
+import { CreationOptional, DataTypes, ModelAttributes, ModelDefined } from 'sequelize';
 
 export interface IDefaultAttributes {
   id: number;
@@ -22,6 +22,8 @@ type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 export type AccountTypeCreationAttributes = Optional<AccountTypeAttributes, DefaultOptionalAttibutes>;
 
+export type AccountTypeModel = ModelDefined<AccountTypeAttributes, AccountTypeCreationAttributes>;
+
 export interface UserAttributes extends IDefaultAttributes {
   name: string;
   type: AccountTypesEnum;
@@ -35,11 +37,15 @@ export interface UserAttributes extends IDefaultAttributes {
 
 export type UserCreationAttributes = Optional<UserAttributes, DefaultOptionalAttibutes | 'uuid'>;
 
+export type UserModel = ModelDefined<UserAttributes, UserCreationAttributes>;
+
 export interface FriendsAttributes extends IDefaultAttributes {
   status: string;
 }
 
 export type FriendsCreationAttributes = Optional<FriendsAttributes, DefaultOptionalAttibutes>;
+
+export type FriendsModel = ModelDefined<FriendsAttributes, FriendsCreationAttributes>;
 
 export const ModelTypes: {
   [key: string]: ModelAttributes;
@@ -58,6 +64,14 @@ export const ModelTypes: {
       type: DataTypes.ENUM(...Object.values(AccountTypesEnum)),
       allowNull: false,
       unique: true,
+    },
+  },
+  Friends: {
+    status: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      unique: true,
+      defaultValue: 'send',
     },
   },
 };
