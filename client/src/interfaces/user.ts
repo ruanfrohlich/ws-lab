@@ -4,6 +4,8 @@ export interface IUserRegister {
   password: string;
 }
 
+export type TFriendStatus = 'send' | 'accepted' | 'rejected';
+
 export interface IUser {
   id: number;
   name: string;
@@ -12,6 +14,11 @@ export interface IUser {
   uuid: string;
   profilePic: string;
   coverImage: string;
+  friends: Array<{
+    id: number;
+    status: TFriendStatus;
+    user: Pick<IUser, 'id' | 'username' | 'name' | 'uuid' | 'profilePic'>;
+  }>;
   createdAt: string;
   updatedAt: string;
 }

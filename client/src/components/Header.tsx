@@ -1,4 +1,4 @@
-import { Fragment, ReactNode, SyntheticEvent, useEffect, useState } from 'react';
+import { Fragment, ReactNode, RefObject, SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { AccountCircle, Home, Person, Search } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
@@ -13,13 +13,14 @@ interface IActionsState {
   onClick?: () => void;
 }
 
-export const Header = () => {
+export const Header = ({ mainRef }: { mainRef: RefObject<HTMLElement | null> }) => {
   const navigate = useNavigate();
   const { appRoot } = configProvider();
   const { logged } = useUser();
   const { pathname } = useLocation();
   const [selected, setSelected] = useState<string>();
   const [findModal, setFindModal] = useState<boolean>(false);
+  const headerRef = useRef<HTMLElement>(null);
 
   const initialActions = [
     {
@@ -87,11 +88,21 @@ export const Header = () => {
 
   useEffect(handleSelected, [pathname]);
 
+  useEffect(() => {
+    const { current: main } = mainRef;
+    const { current: header } = headerRef;
+
+    if (main && header) {
+      main.style.paddingBottom = `${header.getBoundingClientRect().height}px`;
+    }
+  }, [mainRef, headerRef]);
+
   return (
     <Fragment>
       {findModal && <FindModal onClose={() => setFindModal(false)} />}
       <Box
         component='header'
+        ref={headerRef}
         sx={{
           position: 'fixed',
           bottom: '20px',

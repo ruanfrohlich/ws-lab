@@ -90,7 +90,7 @@ export const UserDataForm = (props: IUserDataFormProps) => {
           });
         }}
       >
-        <Alert severity='success' variant='filled' sx={{ width: '100%' }}>
+        <Alert color='success' variant='outlined' sx={{ width: '100%' }}>
           Dados atualizados com sucesso!
         </Alert>
       </Snackbar>
@@ -103,7 +103,7 @@ export const UserDataForm = (props: IUserDataFormProps) => {
           });
         }}
       >
-        <Alert severity='error' variant='filled' sx={{ width: '100%' }}>
+        <Alert color='error' variant='outlined' sx={{ width: '100%' }}>
           Tivemos um problema ao atualizar seus dados, tente novamente em alguns minutos!
         </Alert>
       </Snackbar>
