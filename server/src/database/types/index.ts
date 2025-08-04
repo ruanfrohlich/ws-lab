@@ -70,8 +70,12 @@ export const ModelTypes: {
     status: {
       type: DataTypes.TEXT,
       allowNull: false,
-      unique: true,
       defaultValue: 'send',
+    },
+    activityStatus: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      defaultValue: 'offline',
     },
   },
 };

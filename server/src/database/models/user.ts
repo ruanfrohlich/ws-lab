@@ -64,7 +64,7 @@ export const User = (sequelize: Sequelize) => {
                 ...friend.dataValues,
                 user: pick(friend.dataValues.User.dataValues, ['id', 'username', 'name', 'uuid', 'profilePic']),
               },
-              ['id', 'status', 'user'],
+              ['id', 'status', 'activityStatus', 'user'],
             ),
           ),
         };
