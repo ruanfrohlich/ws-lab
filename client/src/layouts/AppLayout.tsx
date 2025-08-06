@@ -141,8 +141,10 @@ export const AppLayout = (props: { children: ReactNode }) => {
                   margin: '0',
                   padding: '0',
                   minWidth: '30px',
-                  transform: 'translate(-28px, -50%)',
+                  minHeight: '50px',
+                  transform: 'translate(-30px, -50%)',
                   borderRight: 'none',
+                  borderRadius: '4px 0 0 4px',
                   justifyContent: 'flex-start',
                   svg: {
                     transform: activityShow ? 'rotate(0);' : 'rotate(180deg);',

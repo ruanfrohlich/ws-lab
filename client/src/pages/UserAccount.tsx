@@ -60,109 +60,107 @@ export const UserAccount = () => {
     if (!Cookies.get(COOKIES.userToken)) nav(appRoot);
   }, [user]);
 
-  if (user) {
-    return (
-      <Fragment>
-        <AppHelmet title='Minha Conta' description='Gerencie sua conta' />
-        <Box
-          component={'picture'}
-          sx={{
-            position: 'relative',
-            display: 'inline-block',
-            width: '100%',
-            height: '300px',
-            ':hover': {
-              '.cover-btn': {
-                opacity: 1,
-              },
+  if (!user) return <></>;
+
+  return (
+    <Fragment>
+      <AppHelmet title='Minha Conta' description='Gerencie sua conta' />
+      <Box
+        component={'picture'}
+        sx={{
+          position: 'relative',
+          display: 'inline-block',
+          width: '100%',
+          height: '300px',
+          ':hover': {
+            '.cover-btn': {
+              opacity: 1,
             },
+          },
+        }}
+      >
+        <Box
+          component={'img'}
+          src={coverImage ?? assetsUrl?.concat(`/user/${user.uuid}/cover-image.webp`)}
+          onError={({ currentTarget }) => {
+            currentTarget.src = 'https://picsum.photos/1920/1080';
           }}
+          sx={imageStyles}
+        />
+        <Button
+          className='cover-btn'
+          variant='contained'
+          color='info'
+          size='small'
+          sx={{
+            position: 'absolute',
+            bottom: 10,
+            left: 10,
+            opacity: 0,
+            transition: 'opacity 250ms ease-in-out',
+            zIndex: 2,
+          }}
+          onClick={() => coverRef.current?.click()}
         >
+          Alterar capa
+        </Button>
+        <input ref={coverRef} type='file' id='cover-input' onChange={handleInputFile} hidden />
+      </Box>
+      <Wrapper
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Box sx={{ position: 'relative', paddingBottom: '15px', marginBottom: '25px' }}>
+          <input ref={photoRef} type='file' id='image-input' hidden onChange={handleInputFile} />
           <Box
-            component={'img'}
-            src={coverImage ?? assetsUrl?.concat(`/user/${user.uuid}/cover-image.webp`)}
-            onError={({ currentTarget }) => {
-              currentTarget.src = 'https://picsum.photos/1920/1080';
+            component={'picture'}
+            sx={{
+              display: 'block',
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: '50%',
+              width: '150px',
+              height: '150px',
+              border: '1px solid gray',
+              filter: 'drop-shadow(0 10px 12px rgba(255,255,255,.2))',
+              backgroundColor: 'goldenrod',
             }}
-            sx={imageStyles}
-          />
-          <Button
-            className='cover-btn'
-            variant='contained'
-            color='info'
-            size='small'
+          >
+            <Avatar
+              alt={user.name}
+              src={userImage ?? assetsUrl?.concat(`/user/${user.uuid}/profile-pic.webp`)}
+              sx={{ width: 150, height: 150, fontSize: '3rem' }}
+            />
+          </Box>
+          <Box
             sx={{
               position: 'absolute',
-              bottom: 10,
-              left: 10,
-              opacity: 0,
-              transition: 'opacity 250ms ease-in-out',
-              zIndex: 2,
+              bottom: 0,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              gap: 1,
             }}
-            onClick={() => coverRef.current?.click()}
           >
-            Alterar capa
-          </Button>
-          <input ref={coverRef} type='file' id='cover-input' onChange={handleInputFile} hidden />
-        </Box>
-        <Wrapper
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Box sx={{ position: 'relative', paddingBottom: '15px', marginBottom: '25px' }}>
-            <input ref={photoRef} type='file' id='image-input' hidden onChange={handleInputFile} />
-            <Box
-              component={'picture'}
-              sx={{
-                display: 'block',
-                position: 'relative',
-                overflow: 'hidden',
-                borderRadius: '50%',
-                width: '150px',
-                height: '150px',
-                border: '1px solid gray',
-                filter: 'drop-shadow(0 10px 12px rgba(255,255,255,.2))',
-                backgroundColor: 'goldenrod',
-              }}
+            <Button
+              variant='contained'
+              color='info'
+              size='small'
+              startIcon={<Edit />}
+              onClick={() => photoRef.current?.click()}
             >
-              <Avatar
-                alt={user.name}
-                src={userImage ?? assetsUrl?.concat(`/user/${user.uuid}/profile-pic.webp`)}
-                sx={{ width: 150, height: 150, fontSize: '3rem' }}
-              />
-            </Box>
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: 0,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                display: 'flex',
-                gap: 1,
-              }}
-            >
-              <Button
-                variant='contained'
-                color='info'
-                size='small'
-                startIcon={<Edit />}
-                onClick={() => photoRef.current?.click()}
-              >
-                Alterar
-              </Button>
-              <Button variant='contained' color='error' size='small' endIcon={<Delete />} onClick={handleRemovePhoto}>
-                Remover
-              </Button>
-            </Box>
+              Alterar
+            </Button>
+            <Button variant='contained' color='error' size='small' endIcon={<Delete />} onClick={handleRemovePhoto}>
+              Remover
+            </Button>
           </Box>
-          <UserDataForm image={userImage} cover={coverImage} />
-        </Wrapper>
-      </Fragment>
-    );
-  }
-
-  return <></>;
+        </Box>
+        <UserDataForm image={userImage} cover={coverImage} />
+      </Wrapper>
+    </Fragment>
+  );
 };

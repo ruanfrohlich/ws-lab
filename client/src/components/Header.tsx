@@ -21,6 +21,7 @@ export const Header = () => {
   const [selected, setSelected] = useState<string>();
   const [findModal, setFindModal] = useState<boolean>(false);
   const headerRef = useRef<HTMLElement>(null);
+  const [showHeader, setShowHeader] = useState<boolean>(false);
 
   const initialActions = [
     {
@@ -88,6 +89,15 @@ export const Header = () => {
 
   useEffect(handleSelected, [pathname]);
 
+  useEffect(() => {
+    const { current } = headerRef;
+
+    if (current) {
+      current.addEventListener('mouseenter', () => setShowHeader(true));
+      current.addEventListener('mouseleave', () => setShowHeader(false));
+    }
+  }, [headerRef]);
+
   return (
     <Fragment>
       {findModal && <FindModal onClose={() => setFindModal(false)} />}
@@ -96,11 +106,13 @@ export const Header = () => {
         ref={headerRef}
         sx={{
           position: 'fixed',
-          bottom: '20px',
+          bottom: showHeader ? '-230px' : '-266px',
           left: '50%',
           zIndex: 999,
           transform: 'translateX(-50%)',
           overflow: 'hidden',
+          transition: 'bottom 250ms ease-in-out',
+          minHeight: '300px',
         }}
       >
         <BottomNavigation
