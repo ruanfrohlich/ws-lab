@@ -9,7 +9,7 @@ import { ArrowBackIosRounded, EmojiPeople, OndemandVideo, Storefront } from '@mu
 import { capitalize } from 'lodash';
 
 export const AppLayout = (props: { children: ReactNode }) => {
-  const { appRoot } = configProvider();
+  const { appRoot, assetsUrl } = configProvider();
   const [breadItems, setBreadItems] = useState<string[]>([]);
   const { pathname } = useLocation();
   const { user, logged } = useUser();
@@ -212,7 +212,7 @@ export const AppLayout = (props: { children: ReactNode }) => {
                               border: '1px solid currentColor',
                             }}
                             alt={friend.user.name}
-                            src={friend.user.profilePic}
+                            src={assetsUrl.concat('user/', friend.user.uuid, '/profile-pic.webp')}
                           />
                           <Typography>
                             {friend.user.name}{' '}

@@ -1,11 +1,12 @@
 import { Sequelize } from 'sequelize';
 import { AccountType, Friends, User } from './models';
-import { cwd } from 'process';
+import { join } from 'path';
+import { rootPath } from '../utils';
 
 const database = async () => {
   const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: cwd() + '/server/.db/db.sqlite3',
+    storage: join(rootPath, '.db/db.sqlite3'),
     logging: false,
     define: {
       freezeTableName: true,

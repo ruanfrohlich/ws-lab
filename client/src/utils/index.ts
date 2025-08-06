@@ -1,6 +1,6 @@
 import { capitalize } from '@mui/material';
+import { deburr, toLower } from 'lodash';
 import { CSSProperties } from 'react';
-import unidecode from 'unidecode';
 
 export { configProvider } from './configProvider';
 export * from './enums';
@@ -51,7 +51,7 @@ export const commonRegEx = {
   password: /^(?=.*\d)(?=.*[aA-zZ])(?=.*[^\w\d\s:])([^\s]){8,}$/,
 };
 
-export const normalize = (str: string) => String(unidecode(str)).toLowerCase();
+export const normalize = (str: string) => toLower(deburr(str));
 
 export const appStyled = (el: HTMLElement, styles: CSSProperties) => {
   return Object.assign(el.style, styles);

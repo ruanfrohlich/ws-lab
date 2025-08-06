@@ -2,13 +2,12 @@ import { createServer } from 'https';
 import dotenv from 'dotenv';
 import { readFileSync } from 'fs';
 import { router } from './routes';
-import { isProd, onlyAPI, publicUrl } from './utils';
-import { BuildClient } from './buildClient';
-import { cwd } from 'process';
+import { isProd, onlyAPI, publicUrl, rootPath } from './utils';
+import { BuildClient } from './frontend';
 import websocket from './websocket';
 
 dotenv.config({
-  path: cwd() + `/server/.env.${!isProd ? 'dev' : 'prd'}`,
+  path: `${rootPath}/.env.${!isProd ? 'dev' : 'prd'}`,
 });
 
 const port = process.env.PORT ?? 3001;

@@ -81,7 +81,7 @@ export const UserAccount = () => {
       >
         <Box
           component={'img'}
-          src={coverImage ?? assetsUrl?.concat(`/user/${user.uuid}/cover-image.webp`)}
+          src={coverImage ?? assetsUrl.concat('user/', user.uuid, '/cover-image.webp')}
           onError={({ currentTarget }) => {
             currentTarget.src = 'https://picsum.photos/1920/1080';
           }}
@@ -131,7 +131,7 @@ export const UserAccount = () => {
           >
             <Avatar
               alt={user.name}
-              src={userImage ?? assetsUrl?.concat(`/user/${user.uuid}/profile-pic.webp`)}
+              src={userImage ?? assetsUrl.concat('user/', user.uuid, '/profile-pic.webp')}
               sx={{ width: 150, height: 150, fontSize: '3rem' }}
             />
           </Box>

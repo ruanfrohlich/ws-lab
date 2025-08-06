@@ -1,12 +1,11 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { AES, enc } from 'crypto-js';
 import database from '../database';
-import { getBody } from '../utils';
+import { getBody, rootPath } from '../utils';
 import { IFindUser } from '../interfaces';
 import { omit } from 'lodash';
 import { AccountTypesEnum, UserCreationAttributes } from '../database/types';
 import sharp from 'sharp';
-import { cwd } from 'process';
 import { join } from 'path';
 import { existsSync, mkdirSync, readFile, rm } from 'fs';
 
@@ -83,7 +82,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
       if (user) {
         [body.profilePic, body.coverImage].forEach((asset, i) => {
-          const folderPath = join(cwd(), 'server/public/user', user.dataValues.uuid);
+          const folderPath = join(rootPath, 'public/user', user.dataValues.uuid);
           const filepath = `${folderPath}/${i === 0 ? 'profile-pic' : 'cover-image'}.webp`;
 
           if (asset !== '') {
@@ -210,7 +209,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      readFile(join(cwd(), 'server/public', filePath), (err, data) => {
+      readFile(join(rootPath, 'public', filePath), (err, data) => {
         if (err) {
           return sendResponse(404, {
             message: 'Asset not found!',

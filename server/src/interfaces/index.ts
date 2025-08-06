@@ -1,4 +1,4 @@
-export type TDataType = 'chatMessage' | 'updateActivityStatus' | 'error';
+export type TDataType = 'chatMessage' | 'updateActivityStatus' | 'connections' | 'error';
 
 export interface IReturnData {
   type: TDataType;

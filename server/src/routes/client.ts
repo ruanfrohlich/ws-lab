@@ -1,11 +1,10 @@
 import { readFile } from 'fs';
 import { IncomingMessage, ServerResponse } from 'http';
-import { extname, relative } from 'path';
-import { cwd } from 'process';
-import { publicUrl } from '../utils';
+import { extname, join } from 'path';
+import { publicUrl, rootPath } from '../utils';
 
 export const clientRoutes = ({ url }: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
-  const appRoot = relative(cwd(), 'client/public');
+  const appRoot = join(rootPath, '../client/public');
   let contentType = '';
   let filePath = appRoot + url?.replace(publicUrl, '');
 
