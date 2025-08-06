@@ -47,6 +47,10 @@ export type FriendsCreationAttributes = Optional<FriendsAttributes, DefaultOptio
 
 export type FriendsModel = ModelDefined<FriendsAttributes, FriendsCreationAttributes>;
 
+export type TFriendStatus = 'send' | 'accepted' | 'rejected';
+
+export type TActivityStatus = 'online' | 'away' | 'offline' | 'busy';
+
 export const ModelTypes: {
   [key: string]: ModelAttributes;
 } = {

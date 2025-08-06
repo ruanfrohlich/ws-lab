@@ -1,21 +1,21 @@
 import { useUser } from '../contexts';
 import { AppHelmet, UserDataForm, Wrapper } from '../components';
 import { Fragment } from 'react/jsx-runtime';
-import { Box, Button } from '@mui/material';
-import { Edit, Delete, Person } from '@mui/icons-material';
+import { Avatar, Box, Button } from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { isEmpty, isNull } from 'lodash';
+import { isNull } from 'lodash';
 import { configProvider, COOKIES } from '../utils';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router';
 
 export const UserAccount = () => {
   const { user } = useUser();
-  const { appRoot } = configProvider();
+  const { appRoot, assetsUrl } = configProvider();
   const photoRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
-  const [userImage, setUserImage] = useState<string | undefined>(user?.profilePic);
-  const [coverImage, setCoverImage] = useState<string | undefined>(user?.coverImage);
+  const [userImage, setUserImage] = useState<string>();
+  const [coverImage, setCoverImage] = useState<string>();
   const nav = useNavigate();
 
   const handleRemovePhoto = () => {
@@ -80,11 +80,10 @@ export const UserAccount = () => {
         >
           <Box
             component={'img'}
-            src={(() => {
-              if (coverImage) return coverImage;
-              else if (!isEmpty(user.coverImage)) return user.coverImage;
-              else return 'https://picsum.photos/1920/1080';
-            })()}
+            src={coverImage ?? assetsUrl?.concat(`/user/${user.uuid}/cover-image.webp`)}
+            onError={({ currentTarget }) => {
+              currentTarget.src = 'https://picsum.photos/1920/1080';
+            }}
             sx={imageStyles}
           />
           <Button
@@ -95,7 +94,7 @@ export const UserAccount = () => {
             sx={{
               position: 'absolute',
               bottom: 10,
-              right: 10,
+              left: 10,
               opacity: 0,
               transition: 'opacity 250ms ease-in-out',
               zIndex: 2,
@@ -129,17 +128,11 @@ export const UserAccount = () => {
                 backgroundColor: 'goldenrod',
               }}
             >
-              {userImage || (user.profilePic && userImage !== '') ? (
-                <Box
-                  component={'img'}
-                  src={userImage ?? user.profilePic}
-                  alt='Imagem de perfil'
-                  draggable='false'
-                  sx={imageStyles}
-                />
-              ) : (
-                <Person sx={imageStyles} />
-              )}
+              <Avatar
+                alt={user.name}
+                src={userImage ?? assetsUrl?.concat(`/user/${user.uuid}/profile-pic.webp`)}
+                sx={{ width: 150, height: 150, fontSize: '3rem' }}
+              />
             </Box>
             <Box
               sx={{

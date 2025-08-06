@@ -4,7 +4,11 @@ import database from '../database';
 import { getBody } from '../utils';
 import { IFindUser } from '../interfaces';
 import { omit } from 'lodash';
-import { UserCreationAttributes } from '../database/types';
+import { AccountTypesEnum, UserCreationAttributes } from '../database/types';
+import sharp from 'sharp';
+import { cwd } from 'process';
+import { join } from 'path';
+import { existsSync, mkdirSync, readFile, rm } from 'fs';
 
 export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
   const { url, method, headers } = req;
@@ -78,6 +82,31 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
       const user = await UserModel.updateUser(body, headers.authorization);
 
       if (user) {
+        [body.profilePic, body.coverImage].forEach((asset, i) => {
+          const folderPath = join(cwd(), 'server/public/user', user.dataValues.uuid);
+          const filepath = `${folderPath}/${i === 0 ? 'profile-pic' : 'cover-image'}.webp`;
+
+          if (asset !== '') {
+            const [, imageBase64] = asset.split(/data:image\/(?:png|jpe?g|webp);base64,/);
+            const imageBuffer = Buffer.from(imageBase64, 'base64');
+
+            mkdirSync(folderPath, { recursive: true });
+
+            sharp(imageBuffer).toFile(filepath, (err, info) => {
+              if (err) console.log(err);
+
+              console.log(info);
+            });
+          } else {
+            if (existsSync(filepath))
+              rm(filepath, (err) => {
+                if (err) {
+                  console.log(err);
+                }
+              });
+          }
+        });
+
         return sendResponse(200, {
           success: true,
           message: 'User updated successfully!',
@@ -108,6 +137,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
       try {
         const data: UserCreationAttributes = {
           ...body,
+          type: AccountTypesEnum['USER'],
           password: AES.encrypt(body.password, appKey).toString(),
         };
 
@@ -170,6 +200,27 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
       return sendResponse(401, {
         message: 'User not found',
       });
+    }
+    case /\/assets/.test(String(endpoint)): {
+      const filePath = endpoint?.split('/assets')[1];
+
+      if (!filePath) {
+        return sendResponse(404, {
+          message: 'Asset not found!',
+        });
+      }
+
+      readFile(join(cwd(), 'server/public', filePath), (err, data) => {
+        if (err) {
+          return sendResponse(404, {
+            message: 'Asset not found!',
+          });
+        }
+
+        return res.writeHead(200, { 'content-type': `image/webp` }).end(data);
+      });
+
+      break;
     }
     default: {
       return sendResponse(404, {

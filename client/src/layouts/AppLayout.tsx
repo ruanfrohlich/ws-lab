@@ -1,7 +1,7 @@
 import { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import { AppLink, AppLoading, Header } from '../components';
-import { Avatar, Box, Breadcrumbs, Button, Typography, Zoom } from '@mui/material';
-import { configProvider, translatePathname } from '../utils';
+import { Avatar, Box, Breadcrumbs, Button, Typography } from '@mui/material';
+import { appStyled, configProvider, translatePathname } from '../utils';
 import { useLocation } from 'react-router';
 import { useUser } from '../contexts';
 import { useServices } from '../hooks';
@@ -12,36 +12,40 @@ export const AppLayout = (props: { children: ReactNode }) => {
   const { appRoot } = configProvider();
   const [breadItems, setBreadItems] = useState<string[]>([]);
   const { pathname } = useLocation();
-  const { user } = useUser();
+  const { user, logged } = useUser();
   const { redirectHome, hasAuthCookie } = useServices();
-  const [activityShow, setActivityShow] = useState<boolean>(true);
-  const mainRef = useRef<HTMLElement>(null);
-  const pageContent = useRef<HTMLElement>(null);
+  const [activityShow, setActivityShow] = useState<boolean>(false);
   const activityBox = useRef<HTMLElement>(null);
+  const pageContent = useRef<HTMLElement>(null);
 
-  const handleShowActivity = () => {
-    const { current: content } = pageContent;
+  const handleActivityBar = () => {
     const { current: activity } = activityBox;
+    const { current: content } = pageContent;
 
-    if (content && activity) {
-      activity.style.right = activityShow ? '0px' : `-${activity.getBoundingClientRect().width + 4}px`;
+    if (activity && content) {
+      appStyled(activity, {
+        opacity: 1,
+        right: activityShow ? '0px' : `-${activity.getBoundingClientRect().width - 10}px`,
+      });
+      appStyled(content, {
+        marginLeft: activityShow ? `-${activity.getBoundingClientRect().width - 10}px` : '0',
+      });
     }
 
     setActivityShow(!activityShow);
   };
 
   useEffect(() => {
-    handleShowActivity();
-
+    setBreadItems(pathname.split('/'));
     if (pathname === '/') {
       console.log('redirecionando');
       redirectHome();
     }
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
-    setBreadItems(pathname.split('/'));
-  }, [pathname]);
+    if (logged) handleActivityBar();
+  }, [logged]);
 
   const StyledTitle = (props: { children: ReactNode }) => (
     <Typography
@@ -63,7 +67,7 @@ export const AppLayout = (props: { children: ReactNode }) => {
   return (
     <Fragment>
       <AppLoading show={hasAuthCookie && !user} />
-      <Header {...{ mainRef }} />
+      <Header />
       <Breadcrumbs
         sx={({ palette }) => ({
           backgroundColor: palette.primary.dark,
@@ -102,7 +106,6 @@ export const AppLayout = (props: { children: ReactNode }) => {
       </Breadcrumbs>
       <Box
         component='main'
-        ref={mainRef}
         sx={({ palette }) => ({
           position: 'relative',
           paddingTop: '30px',
@@ -110,8 +113,8 @@ export const AppLayout = (props: { children: ReactNode }) => {
           backgroundColor: `rgba(${palette.primary.dark}, 0.8)`,
         })}
       >
-        <Zoom in={!!user || !hasAuthCookie} style={{ transitionDelay: '100ms' }}>
-          <Box>
+        <Box>
+          {logged && (
             <Box
               ref={activityBox}
               sx={({ palette }) => ({
@@ -123,10 +126,12 @@ export const AppLayout = (props: { children: ReactNode }) => {
                 height: '100vh',
                 minWidth: '250px',
                 zIndex: 999,
+                boxShadow: '-5px 0px 10px rgba(0,0,0,.4);',
+                opacity: 0,
               })}
             >
               <Button
-                onClick={handleShowActivity}
+                onClick={handleActivityBar}
                 color='primary'
                 variant='outlined'
                 sx={{
@@ -138,8 +143,9 @@ export const AppLayout = (props: { children: ReactNode }) => {
                   minWidth: '30px',
                   transform: 'translate(-28px, -50%)',
                   borderRight: 'none',
+                  justifyContent: 'flex-start',
                   svg: {
-                    transform: activityShow ? 'rotate(180deg);' : 'rotate(0);',
+                    transform: activityShow ? 'rotate(0);' : 'rotate(180deg);',
                     transition: '250ms ease-in-out',
                   },
                 }}
@@ -202,7 +208,6 @@ export const AppLayout = (props: { children: ReactNode }) => {
                               height: 30,
                               fontSize: '80%',
                               border: '1px solid currentColor',
-                              color: getStatusColor(),
                             }}
                             alt={friend.user.name}
                             src={friend.user.profilePic}
@@ -214,7 +219,7 @@ export const AppLayout = (props: { children: ReactNode }) => {
                               sx={{
                                 display: 'block',
                                 fontSize: '10px',
-                                color: getStatusColor(),
+                                color: ({ palette }) => `${palette[getStatusColor()].main}`,
                               }}
                             >
                               {capitalize(friend.activityStatus)}
@@ -237,16 +242,11 @@ export const AppLayout = (props: { children: ReactNode }) => {
                 </Box>
               </Box>
             </Box>
-            <Box
-              ref={pageContent}
-              sx={{
-                transition: '300ms ease-in-out',
-              }}
-            >
-              {props.children}
-            </Box>
+          )}
+          <Box ref={pageContent} sx={{ transition: '300ms ease-in-out' }}>
+            {props.children}
           </Box>
-        </Zoom>
+        </Box>
       </Box>
     </Fragment>
   );

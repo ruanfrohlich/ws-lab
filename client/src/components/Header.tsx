@@ -1,4 +1,4 @@
-import { Fragment, ReactNode, RefObject, SyntheticEvent, useEffect, useRef, useState } from 'react';
+import { Fragment, ReactNode, SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { AccountCircle, Home, Person, Search } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
@@ -13,7 +13,7 @@ interface IActionsState {
   onClick?: () => void;
 }
 
-export const Header = ({ mainRef }: { mainRef: RefObject<HTMLElement | null> }) => {
+export const Header = () => {
   const navigate = useNavigate();
   const { appRoot } = configProvider();
   const { logged } = useUser();
@@ -87,15 +87,6 @@ export const Header = ({ mainRef }: { mainRef: RefObject<HTMLElement | null> }) 
   useEffect(updateActions, [logged]);
 
   useEffect(handleSelected, [pathname]);
-
-  useEffect(() => {
-    const { current: main } = mainRef;
-    const { current: header } = headerRef;
-
-    if (main && header) {
-      main.style.paddingBottom = `${header.getBoundingClientRect().height}px`;
-    }
-  }, [mainRef, headerRef]);
 
   return (
     <Fragment>

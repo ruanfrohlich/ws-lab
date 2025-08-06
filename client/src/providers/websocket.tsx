@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useReducer } from 'react';
 import { ISocketData, IWebsocketAction, IWebsocketContext } from '../interfaces';
 import { WebsocketContext, WebsocketDispatchContext } from '../contexts/websocket';
-import { useUser } from '../contexts';
+import { useUser, useUserDispatch } from '../contexts';
 
 const websocketReducer = (websocket: IWebsocketContext, action: IWebsocketAction): IWebsocketContext => {
   switch (action.type) {
@@ -23,6 +23,7 @@ const websocketReducer = (websocket: IWebsocketContext, action: IWebsocketAction
 
 export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
   const { logged } = useUser();
+  const userDispatch = useUserDispatch();
   const [websocket, dispatch] = useReducer(websocketReducer, {
     connected: false,
   });
@@ -77,7 +78,14 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
     WSConnection.onmessage = function (e: MessageEvent<unknown>) {
       const data = JSON.parse(String(e.data)) as ISocketData;
 
-      console.log(data);
+      if (data.type === 'updateActivityStatus') {
+        userDispatch({
+          type: 'updateFriendActivity',
+          payload: {
+            uuid: data.content.uuid,
+          },
+        });
+      }
     };
   };
 

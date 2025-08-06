@@ -1,8 +1,7 @@
-export type TDataType = 'chatMessage' | 'updateClientId' | 'error';
+export type TDataType = 'chatMessage' | 'updateActivityStatus' | 'error';
 
 export interface IReturnData {
   type: TDataType;
-  clientId?: string;
   content?: {
     [key: string]: string;
   };
@@ -16,7 +15,6 @@ export interface IFindUser {
 }
 export interface IIncomingData {
   type: TDataType;
-  clientId: string;
   content: {
     [key: string]: string;
   };

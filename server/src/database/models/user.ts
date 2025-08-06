@@ -1,5 +1,13 @@
 import { QueryTypes, Sequelize } from 'sequelize';
-import { FriendsModel, ModelTypes, UserAttributes, UserCreationAttributes, UserModel } from '../types';
+import {
+  FriendsModel,
+  ModelTypes,
+  TActivityStatus,
+  TFriendStatus,
+  UserAttributes,
+  UserCreationAttributes,
+  UserModel,
+} from '../types';
 import { log } from '../../utils';
 import { isEmpty, omit, pick } from 'lodash';
 
@@ -37,7 +45,20 @@ export const User = (sequelize: Sequelize) => {
     };
   };
 
-  const getUserByUUID = async (uuid: string, friendsModel: FriendsModel): Promise<UserAttributes | null> => {
+  const getUserByUUID = async (
+    uuid: string,
+    friendsModel: FriendsModel,
+  ): Promise<
+    | (Omit<UserAttributes, 'password'> & {
+        friends: Array<{
+          id: number;
+          status: TFriendStatus;
+          activityStatus: TActivityStatus;
+          user: Pick<UserAttributes, 'id' | 'username' | 'name' | 'uuid' | 'profilePic'>;
+        }>;
+      })
+    | null
+  > => {
     try {
       const query = await Model.findOne({
         where: {
@@ -86,17 +107,23 @@ export const User = (sequelize: Sequelize) => {
 
   const updateUser = async (data: Omit<UserCreationAttributes, 'password'>, token: string) => {
     try {
-      const updatedUser = await Model.update(data, {
+      const user = await Model.findOne({
         where: {
           uuid: token,
         },
       });
 
-      return updatedUser[0];
+      if (user) {
+        await user.update(data);
+
+        return user;
+      }
+
+      return null;
     } catch (e) {
       console.log(e);
 
-      return 0;
+      return null;
     }
   };
 

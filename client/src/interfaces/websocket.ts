@@ -1,9 +1,7 @@
 export interface ISocketData {
-  type: 'chatMessage' | 'other';
+  type: 'chatMessage' | 'updateActivityStatus' | 'error';
   content: {
-    from: string;
-    to: string;
-    message: string;
+    [key: string]: unknown;
   };
 }
 

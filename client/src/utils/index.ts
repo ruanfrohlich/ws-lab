@@ -1,4 +1,5 @@
 import { capitalize } from '@mui/material';
+import { CSSProperties } from 'react';
 import unidecode from 'unidecode';
 
 export { configProvider } from './configProvider';
@@ -51,3 +52,7 @@ export const commonRegEx = {
 };
 
 export const normalize = (str: string) => String(unidecode(str)).toLowerCase();
+
+export const appStyled = (el: HTMLElement, styles: CSSProperties) => {
+  return Object.assign(el.style, styles);
+};

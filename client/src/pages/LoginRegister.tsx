@@ -1,7 +1,6 @@
 import { AppHelmet, AppLink, FormLogin, FormRegister } from '../components';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { Fragment, useEffect, useState } from 'react';
-import hero from 'url:../assets/images/hero-login.jpg';
 import { useUser } from '../contexts';
 import { useNavigate } from 'react-router';
 
@@ -10,15 +9,13 @@ export const LoginRegister = () => {
   const { logged } = useUser();
   const nav = useNavigate();
 
+  const imageHero = new URL('url:../assets/images/hero-login.jpg', import.meta.url).toString();
+
   const handleRegister = () => setIsRegister(!isRegister);
 
   useEffect(() => {
     if (logged && !isRegister) nav('/app');
   }, [logged]);
-
-  useEffect(() => {
-    console.log(isRegister);
-  }, [isRegister]);
 
   return (
     <Box>
@@ -104,8 +101,8 @@ export const LoginRegister = () => {
           >
             <Box
               component={'img'}
-              src={hero}
-              alt={'Imagem divulgação'}
+              src={imageHero}
+              alt={'Imagem decoração'}
               sx={{
                 width: '100%',
                 height: '100%',

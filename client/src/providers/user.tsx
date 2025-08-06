@@ -1,21 +1,49 @@
 import { ReactNode, useEffect, useReducer } from 'react';
-import { IUserAction, IUserContext } from '../interfaces';
+import { IFriends, IUserAction, IUserContext } from '../interfaces';
 import { UserContext, UserDispatchContext } from '../contexts/user';
 import Cookies from 'js-cookie';
 import { COOKIES } from '../utils';
 import { useServices } from '../hooks';
 
-const userReducer = (user: IUserContext, action: IUserAction): IUserContext => {
+const userReducer = (state: IUserContext, action: IUserAction): IUserContext => {
   switch (action.type) {
     case 'setUser': {
       if (action.payload) {
         return {
-          ...user,
+          ...state,
           ...action.payload,
         };
       }
 
-      return user;
+      return state;
+    }
+    case 'updateFriendActivity': {
+      const { user } = state;
+
+      if (user) {
+        const updatedFriends = user.friends.reduce((acc: IFriends[], curr: IFriends) => {
+          if (curr.user.uuid === action.payload?.uuid) {
+            acc.push({
+              ...curr,
+              activityStatus: 'online',
+            });
+          } else {
+            acc.push(curr);
+          }
+
+          return acc;
+        }, []);
+
+        return {
+          ...state,
+          user: {
+            ...user,
+            friends: updatedFriends,
+          },
+        };
+      }
+
+      return state;
     }
     default: {
       throw Error('Unknown action: ' + action.type);

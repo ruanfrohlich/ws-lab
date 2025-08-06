@@ -11,8 +11,6 @@ export default (server: Server) => {
   } = {};
 
   const sendMessage = (clients: WebSocket[], message: IReturnData) => {
-    if (message.type !== 'updateClientId') delete message.clientId;
-
     clients.forEach((client) => {
       if (client) {
         client.send(JSON.stringify(message));
@@ -29,6 +27,7 @@ export default (server: Server) => {
     console.log('ws requested url: ', url);
 
     const clientUUID = Cookies.parse(cookie ?? '')['WS_AUTH'] ?? '';
+
     const {
       UserModel: { getUserByUUID },
       FriendsModel,
@@ -45,14 +44,34 @@ export default (server: Server) => {
       const user = await getUserByUUID(clientUUID, FriendsModel.Model);
 
       if (user) {
-        connections[user.username] = ws;
+        connections[user.uuid] = ws;
 
         log('Connection accepted, client: ' + user.username);
 
         ws.on('message', (data) => {
           try {
             const message = JSON.parse(data.toString()) as IIncomingData;
-            sendMessage([connections[message.content.to], ws], message);
+
+            if (message.type === 'updateActivityStatus') {
+              console.log('Sending activity status update.');
+
+              Object.keys(connections).map((uuid) => {
+                const { friends } = user;
+
+                friends.forEach((friend, i) => {
+                  if (friend.user.uuid === uuid) {
+                    console.log(i + 1, 'amigos conectados');
+
+                    sendMessage([connections[uuid]], {
+                      type: 'updateActivityStatus',
+                      content: {
+                        uuid: user.uuid,
+                      },
+                    });
+                  }
+                });
+              });
+            }
           } catch (e) {
             console.log(e);
 
@@ -69,7 +88,7 @@ export default (server: Server) => {
         ws.on('close', function () {
           log(`Client ${user.username} disconnected`);
 
-          delete connections[user.username];
+          delete connections[user.uuid];
 
           log(`Connected clients: ${JSON.stringify(Object.keys(connections))}`);
         });
