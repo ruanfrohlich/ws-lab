@@ -3,8 +3,8 @@ import type { InitialParcelOptions } from '@parcel/types';
 import { clientRoot, isProd, publicUrl } from '../utils';
 import loading from 'loading-cli';
 import { join } from 'path';
-import { existsSync, rmSync } from 'fs';
-
+import { existsSync, readFileSync, rmSync } from 'fs';
+import { parse } from 'dotenv';
 interface IWatchResponse {
   success: boolean;
   error?: unknown;
@@ -21,6 +21,16 @@ export const BuildClient = async (): Promise<IWatchResponse> => {
     },
   );
 
+  const clientEnvs = () => {
+    const envs = readFileSync(
+      join(clientRoot, isProd ? '.env.prd' : '.env.dev'),
+      'utf8',
+    );
+    const parsed = parse(Buffer.from(envs));
+
+    return parsed;
+  };
+
   const loadBuild = loading({
     text: 'Building the client',
   }).start();
@@ -32,11 +42,13 @@ export const BuildClient = async (): Promise<IWatchResponse> => {
     defaultConfig: '@parcel/config-default',
     env: {
       TEST: 'test',
+      ...clientEnvs(),
     },
     defaultTargetOptions: {
       publicUrl,
       sourceMaps: !isProd,
       distDir: join(clientRoot, 'public'),
+      isLibrary: false,
     },
     mode,
     cacheDir: join(clientRoot, '.parcel-cache'),
