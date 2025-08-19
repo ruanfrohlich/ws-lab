@@ -28,11 +28,14 @@ export const useServices = () => {
 
   const fetchUser = async (token: string) => {
     try {
-      const res = await handler.get<{ found: boolean; user: IUser }>(`/user/find`, {
-        headers: {
-          Authorization: token,
+      const res = await handler.get<{ found: boolean; user: IUser }>(
+        `/user/find`,
+        {
+          headers: {
+            Authorization: token,
+          },
         },
-      });
+      );
 
       if (res.status === 200) {
         const { user } = res.data;
@@ -50,7 +53,10 @@ export const useServices = () => {
     }
   };
 
-  const findUser = async (user: { username: string; email: string }): Promise<boolean> => {
+  const findUser = async (user: {
+    username: string;
+    email: string;
+  }): Promise<boolean> => {
     try {
       const { username, email } = user;
       const { data } = await handler.post<{ found: boolean }>('/user', {
@@ -72,7 +78,10 @@ export const useServices = () => {
 
   const updateUser = async (userData: IUserDataForm['fields']) => {
     try {
-      const { data } = await handler.post<{ success: boolean; message: string }>('/user/update', userData, {
+      const { data } = await handler.post<{
+        success: boolean;
+        message: string;
+      }>('/user/update', userData, {
         headers: {
           Authorization: Cookies.get(COOKIES.userToken),
         },
@@ -109,7 +118,9 @@ export const useServices = () => {
     }
   };
 
-  const registerUser = async (fields: IUserRegister): Promise<{ success: boolean; error?: string }> => {
+  const registerUser = async (
+    fields: IUserRegister,
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await handler.post<{ user: IUser }>('/register', fields);
 

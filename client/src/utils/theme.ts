@@ -1,6 +1,11 @@
 import { createTheme } from '@mui/material';
+import '@fontsource/jetbrains-mono';
+import '@fontsource/roboto';
 
 export const appTheme = createTheme({
+  typography: {
+    fontFamily: "'JetBrains Mono Variable', monospace",
+  },
   palette: {
     mode: 'dark',
     primary: {

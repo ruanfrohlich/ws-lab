@@ -1,7 +1,7 @@
 export const configProvider = () => {
   return {
-    appRoot: process.env.APP_ROOT as string,
+    appRoot: String(process.env.APP_ROOT),
     isDev: process.env.NODE_ENV !== 'production',
-    assetsUrl: process.env.ACCOUNT_API?.concat('/assets') as string,
+    assetsUrl: String(process.env.ACCOUNT_API?.concat('/assets')),
   };
 };

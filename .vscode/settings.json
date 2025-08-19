@@ -4,5 +4,5 @@
   "prettier.configPath": ".prettierrc",
   "eslint.enable": true,
   "eslint.validate": ["ts", "tsx"],
-  "eslint.run": "onSave"
+  "eslint.run": "onType"
 }

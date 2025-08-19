@@ -1,40 +1,52 @@
 import { Parcel } from '@parcel/core';
 import type { InitialParcelOptions } from '@parcel/types';
-import { isProd, log, publicUrl, rootPath } from '../utils';
+import { clientRoot, isProd, publicUrl } from '../utils';
 import loading from 'loading-cli';
 import { join } from 'path';
+import { existsSync, rmSync } from 'fs';
 
 interface IWatchResponse {
   success: boolean;
   error?: unknown;
 }
 
-export const BuildClient = async () => {
+export const BuildClient = async (): Promise<IWatchResponse> => {
+  [join(clientRoot, 'public'), join(clientRoot, '.parcel-cache')].forEach(
+    (folder) => {
+      if (existsSync(folder)) {
+        rmSync(folder, {
+          recursive: true,
+        });
+      }
+    },
+  );
+
   const loadBuild = loading({
     text: 'Building the client',
   }).start();
 
-  const clientRoot = join(rootPath, '../client');
-
   const mode = isProd ? 'production' : 'development';
 
   let parcelConfig: InitialParcelOptions = {
-    entries: clientRoot + '/src/index.html',
+    entries: join(clientRoot, 'src/index.html'),
     defaultConfig: '@parcel/config-default',
+    env: {
+      TEST: 'test',
+    },
     defaultTargetOptions: {
       publicUrl,
       sourceMaps: !isProd,
+      distDir: join(clientRoot, 'public'),
     },
     mode,
-    env: {
-      NODE_ENV: mode,
-    },
+    cacheDir: join(clientRoot, '.parcel-cache'),
+    shouldContentHash: false,
   };
 
   if (!isProd) {
     parcelConfig = {
       ...parcelConfig,
-      watchDir: clientRoot + '/src',
+      watchDir: join(clientRoot, 'src/'),
       shouldAutoInstall: true,
       hmrOptions: {
         port: parseInt(process.env.HMR_PORT ?? '3000'),
@@ -47,22 +59,27 @@ export const BuildClient = async () => {
   return new Promise<IWatchResponse>((res) => {
     bundler.watch((err, event) => {
       if (err) {
+        loadBuild.fail(err.message);
+
         res({
           success: false,
-          error: err,
+          error: JSON.stringify(err, null, 2),
         });
       }
 
       if (event?.type === 'buildSuccess') {
-        loadBuild.succeed();
-
         const bundles = event.bundleGraph.getBundles();
-        console.log(`✨ Built ${bundles.length} bundles in ${event.buildTime}ms!`);
+
+        loadBuild.succeed(
+          `Built ${bundles.length} bundles in ${event.buildTime}ms!`,
+        );
+
         res({
           success: true,
         });
       } else if (event?.type === 'buildFailure') {
-        log(JSON.stringify(event.diagnostics));
+        loadBuild.fail(event.diagnostics[0].message);
+
         res({
           success: false,
           error: err,

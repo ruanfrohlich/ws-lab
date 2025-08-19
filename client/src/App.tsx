@@ -5,7 +5,17 @@ import { AppLayout } from './layouts/AppLayout';
 import { StrictMode } from 'react';
 import { UserProvider, WebsocketProvider } from './providers';
 import { appTheme } from './utils/theme';
-import 'dotenv/config';
+import { config } from 'dotenv';
+import { relative } from 'path';
+
+config({
+  path: relative(
+    __dirname,
+    `../.env.${process.env.NODE_ENV !== 'production' ? 'dev' : 'prd'}`,
+  ),
+});
+
+console.log(process.env);
 
 export function App() {
   return (

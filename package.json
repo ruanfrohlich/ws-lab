@@ -3,40 +3,26 @@
   "version": "1.0.0",
   "license": "MIT",
   "type": "module",
+  "private": true,
   "scripts": {
-    "dev": "nodemon",
-    "dev:api": "nodemon --api",
-    "start": "rimraf -rf client/.parcel-cache client/public && tsx server/src/index.ts --prod",
-    "start:api": "tsx server/src/index.ts --api",
-    "lint": "eslint",
-    "deps": "yarn install && cd client && yarn install && cd ../server && yarn install"
+    "ws:client": "yarn workspace client",
+    "ws:server": "yarn workspace server",
+    "dev": "yarn ws:server dev",
+    "lint": "eslint"
   },
   "engines": {
-    "node": "22"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "**/node_modules/**",
-      "**/docs/**",
-      "**/test/**"
-    ],
-    "watch": [
-      "server/src",
-      "server/.env.dev"
-    ],
-    "ext": "ts",
-    "exec": "tsx server/src/index.ts"
+    "node": "^22.15.1",
+    "yarn": "^1.22.22"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
-    "@types/node": "^22.15.29",
     "eslint": "^9.28.0",
     "eslint-plugin-react": "^7.37.5",
-    "nodemon": "^3.1.9",
     "prettier": "^3.4.2",
-    "rimraf": "^6.0.1",
-    "tsx": "^4.20.3",
-    "typescript": "^5.8.2",
     "typescript-eslint": "^8.34.0"
-  }
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ]
 }

@@ -1,12 +1,12 @@
 import { createServer } from 'https';
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 import { readFileSync } from 'fs';
 import { router } from './routes';
 import { isProd, onlyAPI, publicUrl, rootPath } from './utils';
 import { BuildClient } from './frontend';
 import websocket from './websocket';
 
-dotenv.config({
+config({
   path: `${rootPath}/.env.${!isProd ? 'dev' : 'prd'}`,
 });
 
@@ -27,7 +27,9 @@ const serverOptions = {
 
   if (success) {
     const server = createServer(serverOptions, router).listen(port, () => {
-      console.log(`🌪️  Server is listening on https://localhost:${port}${onlyAPI ? '/api' : publicUrl}`);
+      console.log(
+        `🌪️  Server is listening on https://localhost:${port}${onlyAPI ? '/api' : publicUrl}`,
+      );
     });
 
     // WebSocket Server

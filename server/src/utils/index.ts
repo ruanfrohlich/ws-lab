@@ -1,5 +1,6 @@
 import { IncomingMessage } from 'http';
-import { resolve } from 'path';
+import { relative } from 'path';
+import { cwd } from 'process';
 
 const acceptedOrigins = ['https://localhost:3005'];
 
@@ -32,4 +33,5 @@ export const getBody = <T>(req: IncomingMessage): Promise<T> => {
 export const onlyAPI = process.argv.includes('--api');
 export const isProd = process.argv.includes('--prod');
 export const publicUrl = isProd ? '/ws-lab' : '/app';
-export const rootPath = resolve(__dirname, '../..'); // path to /server
+export const rootPath = cwd(); // path to /server
+export const clientRoot = relative(rootPath, '../client');
