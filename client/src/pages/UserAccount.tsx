@@ -75,6 +75,7 @@ export const UserAccount = () => {
           display: 'inline-block',
           width: '100%',
           aspectRatio: '1/0.25',
+          maxHeight: '300px',
           ':hover': {
             '.cover-btn': {
               opacity: 1,
