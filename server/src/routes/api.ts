@@ -8,16 +8,28 @@ import { AccountTypesEnum, UserCreationAttributes } from '../database/types';
 import sharp from 'sharp';
 import { join } from 'path';
 import { existsSync, mkdirSync, readFile, rm } from 'fs';
+import { createGzip } from 'zlib';
 
-export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
+export const apiRoutes = async (
+  req: IncomingMessage,
+  res: ServerResponse<IncomingMessage>,
+) => {
   const { url, method, headers } = req;
   const endpoint = url?.split('/api')[1];
   const { UserModel, FriendsModel } = await database();
   const appKey = process.env.APP_KEY ?? '';
 
   const sendResponse = (status: number, message: object) => {
-    res.writeHead(status, { 'content-type': 'application/json' });
-    res.end(JSON.stringify(message), 'utf-8');
+    res.writeHead(status, {
+      'content-type': 'application/json',
+      'Cache-Control': 'max-age=31536000',
+      'Content-Encoding': 'gzip',
+    });
+
+    const gzip = createGzip();
+    gzip.pipe(res);
+
+    gzip.end(JSON.stringify(message), 'utf-8');
   };
 
   const tokenError = () =>
@@ -55,7 +67,10 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
       if (!headers.authorization) return tokenError();
 
-      const user = await UserModel.getUserByUUID(headers.authorization, FriendsModel.Model);
+      const user = await UserModel.getUserByUUID(
+        headers.authorization,
+        FriendsModel.Model,
+      );
 
       if (user) {
         return sendResponse(200, {
@@ -82,20 +97,34 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
       if (user) {
         [body.profilePic, body.coverImage].forEach((asset, i) => {
-          const folderPath = join(rootPath, 'public/user', user.dataValues.uuid);
+          const folderPath = join(
+            rootPath,
+            'public/user',
+            user.dataValues.uuid,
+          );
           const filepath = `${folderPath}/${i === 0 ? 'profile-pic' : 'cover-image'}.webp`;
 
           if (asset !== '') {
-            const [, imageBase64] = asset.split(/data:image\/(?:png|jpe?g|webp);base64,/);
+            const [, imageBase64] = asset.split(
+              /data:image\/(?:png|jpe?g|webp);base64,/,
+            );
             const imageBuffer = Buffer.from(imageBase64, 'base64');
 
             mkdirSync(folderPath, { recursive: true });
 
-            sharp(imageBuffer).toFile(filepath, (err, info) => {
-              if (err) console.log(err);
-
-              console.log(info);
-            });
+            sharp(imageBuffer)
+              .webp({
+                quality: 50,
+                effort: 2,
+                lossless: true,
+              })
+              .resize({
+                width: i === 0 ? 400 : 1280,
+                height: i === 0 ? 400 : 720,
+              })
+              .toFile(filepath, (err) => {
+                if (err) console.log(err);
+              });
           } else {
             if (existsSync(filepath))
               rm(filepath, (err) => {
@@ -181,10 +210,15 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const user = await UserModel.getUser({ email: credential, username: credential });
+      const user = await UserModel.getUser({
+        email: credential,
+        username: credential,
+      });
 
       if (user) {
-        if (password === AES.decrypt(user.password, appKey).toString(enc.Utf8)) {
+        if (
+          password === AES.decrypt(user.password, appKey).toString(enc.Utf8)
+        ) {
           return sendResponse(200, {
             message: 'Logged successfully',
             uuid: user.uuid,
@@ -209,14 +243,19 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      readFile(join(rootPath, 'public', filePath), (err, data) => {
+      readFile(join(rootPath, 'public', filePath), async (err, data) => {
         if (err) {
           return sendResponse(404, {
             message: 'Asset not found!',
           });
         }
 
-        return res.writeHead(200, { 'content-type': `image/webp` }).end(data);
+        res.writeHead(200, {
+          'content-type': 'image/webp',
+          'cache-control': 'max-age=31536000',
+        });
+
+        return res.end(data);
       });
 
       break;

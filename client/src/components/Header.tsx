@@ -113,7 +113,7 @@ export const Header = () => {
         ref={headerRef}
         sx={{
           position: 'fixed',
-          bottom: showHeader ? '-230px' : '-266px',
+          bottom: showHeader ? '-240px' : '-266px',
           left: '50%',
           zIndex: 999,
           transform: 'translateX(-50%)',

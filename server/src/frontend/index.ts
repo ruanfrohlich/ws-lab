@@ -42,6 +42,7 @@ export const BuildClient = async (): Promise<IWatchResponse> => {
     defaultConfig: '@parcel/config-default',
     env: {
       TEST: 'test',
+      NODE_ENV: mode,
       ...clientEnvs(),
     },
     defaultTargetOptions: {
@@ -61,42 +62,62 @@ export const BuildClient = async (): Promise<IWatchResponse> => {
       watchDir: join(clientRoot, 'src/'),
       shouldAutoInstall: true,
       hmrOptions: {
-        port: parseInt(process.env.HMR_PORT ?? '3000'),
+        port: parseInt(process.env.HMR_PORT ?? '3001'),
       },
     };
   }
 
   const bundler = new Parcel(parcelConfig);
 
-  return new Promise<IWatchResponse>((res) => {
-    bundler.watch((err, event) => {
-      if (err) {
-        loadBuild.fail(err.message);
-
-        res({
-          success: false,
-          error: JSON.stringify(err, null, 2),
-        });
-      }
-
-      if (event?.type === 'buildSuccess') {
-        const bundles = event.bundleGraph.getBundles();
-
-        loadBuild.succeed(
-          `Built ${bundles.length} bundles in ${event.buildTime}ms!`,
-        );
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise<IWatchResponse>(async (res) => {
+    if (isProd) {
+      try {
+        const { bundleGraph, buildTime } = await bundler.run();
+        const bundles = bundleGraph.getBundles();
+        loadBuild.succeed(`Built ${bundles.length} bundles in ${buildTime}ms!`);
 
         res({
           success: true,
         });
-      } else if (event?.type === 'buildFailure') {
-        loadBuild.fail(event.diagnostics[0].message);
+      } catch (err) {
+        loadBuild.fail();
+        console.log(err);
 
         res({
           success: false,
-          error: err,
         });
       }
-    });
+    } else {
+      bundler.watch((err, event) => {
+        if (err) {
+          loadBuild.fail(err.message);
+
+          res({
+            success: false,
+            error: JSON.stringify(err, null, 2),
+          });
+        }
+
+        if (event?.type === 'buildSuccess') {
+          const bundles = event.bundleGraph.getBundles();
+
+          loadBuild.succeed(
+            `Built ${bundles.length} bundles in ${event.buildTime}ms!`,
+          );
+
+          res({
+            success: true,
+          });
+        } else if (event?.type === 'buildFailure') {
+          loadBuild.fail(event.diagnostics[0].message);
+
+          res({
+            success: false,
+            error: err,
+          });
+        }
+      });
+    }
   });
 };

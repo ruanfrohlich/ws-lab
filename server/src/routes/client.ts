@@ -2,6 +2,7 @@ import { readFile } from 'fs';
 import { IncomingMessage, ServerResponse } from 'http';
 import { extname, join } from 'path';
 import { publicUrl, rootPath } from '../utils';
+import { createGzip } from 'zlib';
 
 export const clientRoutes = (
   { url }: IncomingMessage,
@@ -49,7 +50,21 @@ export const clientRoutes = (
   }
 
   readFile(filePath, function (error, content) {
-    res.writeHead(200, { 'Content-Type': contentType });
-    res.end(content, 'utf-8');
+    if (error) {
+      res.writeHead(500);
+      return res.end('Server error');
+    }
+
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Cache-Control': 'max-age=31536000',
+      'Content-Encoding': 'gzip',
+    });
+
+    const gzip = createGzip();
+
+    gzip.pipe(res);
+
+    return gzip.end(content, 'utf-8');
   });
 };

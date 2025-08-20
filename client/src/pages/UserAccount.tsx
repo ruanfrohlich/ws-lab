@@ -1,7 +1,7 @@
 import { useUser } from '../contexts';
 import { AppHelmet, UserDataForm, Wrapper } from '../components';
 import { Fragment } from 'react/jsx-runtime';
-import { Avatar, Box, Button } from '@mui/material';
+import { Avatar, Box, Button, SxProps } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { isNull } from 'lodash';
@@ -49,7 +49,10 @@ export const UserAccount = () => {
     }
   };
 
-  const imageStyles = {
+  const imageStyles: SxProps = {
+    position: 'absolute',
+    top: '0',
+    left: '0',
     width: '100%',
     height: '100%',
     objectFit: 'cover',
@@ -71,7 +74,7 @@ export const UserAccount = () => {
           position: 'relative',
           display: 'inline-block',
           width: '100%',
-          height: '300px',
+          aspectRatio: '1/0.25',
           ':hover': {
             '.cover-btn': {
               opacity: 1,
@@ -81,7 +84,10 @@ export const UserAccount = () => {
       >
         <Box
           component={'img'}
-          src={coverImage ?? assetsUrl.concat('user/', user.uuid, '/cover-image.webp')}
+          src={
+            coverImage ??
+            assetsUrl.concat('user/', user.uuid, '/cover-image.webp')
+          }
           onError={({ currentTarget }) => {
             currentTarget.src = 'https://picsum.photos/1920/1080';
           }}
@@ -104,7 +110,13 @@ export const UserAccount = () => {
         >
           Alterar capa
         </Button>
-        <input ref={coverRef} type='file' id='cover-input' onChange={handleInputFile} hidden />
+        <input
+          ref={coverRef}
+          type='file'
+          id='cover-input'
+          onChange={handleInputFile}
+          hidden
+        />
       </Box>
       <Wrapper
         sx={{
@@ -113,8 +125,20 @@ export const UserAccount = () => {
           alignItems: 'center',
         }}
       >
-        <Box sx={{ position: 'relative', paddingBottom: '15px', marginBottom: '25px' }}>
-          <input ref={photoRef} type='file' id='image-input' hidden onChange={handleInputFile} />
+        <Box
+          sx={{
+            position: 'relative',
+            paddingBottom: '15px',
+            marginBottom: '25px',
+          }}
+        >
+          <input
+            ref={photoRef}
+            type='file'
+            id='image-input'
+            hidden
+            onChange={handleInputFile}
+          />
           <Box
             component={'picture'}
             sx={{
@@ -131,7 +155,10 @@ export const UserAccount = () => {
           >
             <Avatar
               alt={user.name}
-              src={userImage ?? assetsUrl.concat('user/', user.uuid, '/profile-pic.webp')}
+              src={
+                userImage ??
+                assetsUrl.concat('user/', user.uuid, '/profile-pic.webp')
+              }
               sx={{ width: 150, height: 150, fontSize: '3rem' }}
             />
           </Box>
@@ -154,7 +181,13 @@ export const UserAccount = () => {
             >
               Alterar
             </Button>
-            <Button variant='contained' color='error' size='small' endIcon={<Delete />} onClick={handleRemovePhoto}>
+            <Button
+              variant='contained'
+              color='error'
+              size='small'
+              endIcon={<Delete />}
+              onClick={handleRemovePhoto}
+            >
               Remover
             </Button>
           </Box>
