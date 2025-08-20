@@ -8,7 +8,12 @@ import {
 } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { AccountCircle, Home, Person, Search } from '@mui/icons-material';
-import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
+import {
+  alpha,
+  BottomNavigation,
+  BottomNavigationAction,
+  Box,
+} from '@mui/material';
 import { configProvider } from 'utils';
 import { useUser } from 'contexts';
 import { FindModal } from './modals';
@@ -48,13 +53,6 @@ export const Header = () => {
   const handleChange = (event: SyntheticEvent, route: string) => {
     navigate(route);
   };
-
-  const actionStyles = () => ({
-    transition: 'transform 200ms ease, color 300ms ease-in-out',
-    ':hover': {
-      transform: 'scale(1.1)',
-    },
-  });
 
   const handleSelected = (item?: string, cb?: () => void) => {
     if (item) {
@@ -140,13 +138,19 @@ export const Header = () => {
               value={action.value}
               icon={action.icon}
               sx={({ palette: { primary, secondary } }) => ({
-                ...actionStyles,
                 color:
                   action.value === selected ? secondary.main : primary.main,
                 svg: {
                   fill:
                     action.value === selected ? secondary.main : primary.main,
                 },
+                ':hover': {
+                  span: {
+                    transition: 'color 250ms ease-in-out',
+                    color: alpha(secondary.main, 0.8),
+                  },
+                },
+                flex: '1 1 auto',
               })}
               onClick={() => handleSelected(action.value, action.onClick)}
             />
