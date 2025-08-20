@@ -17,6 +17,8 @@ export const translateError = (error: string) => {
   }
 };
 
+export { appTheme } from './theme';
+
 export const translatePathname = (path: string) => {
   switch (path) {
     case 'join': {

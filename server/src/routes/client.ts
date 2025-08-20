@@ -3,7 +3,10 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { extname, join } from 'path';
 import { publicUrl, rootPath } from '../utils';
 
-export const clientRoutes = ({ url }: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
+export const clientRoutes = (
+  { url }: IncomingMessage,
+  res: ServerResponse<IncomingMessage>,
+) => {
   const appRoot = join(rootPath, '../client/public');
   let contentType = '';
   let filePath = appRoot + url?.replace(publicUrl, '');
@@ -12,30 +15,33 @@ export const clientRoutes = ({ url }: IncomingMessage, res: ServerResponse<Incom
 
   const extName = extname(filePath);
 
-  switch (extName) {
-    case '.js':
+  switch (true) {
+    case extName === '.js':
       contentType = 'text/javascript';
       break;
-    case '.css':
+    case extName === '.css':
       contentType = 'text/css';
       break;
-    case '.json':
+    case extName === '.json':
       contentType = 'application/json';
       break;
-    case '.png':
+    case extName === '.png':
       contentType = 'image/png';
       break;
-    case '.jpg':
+    case /\.jpe?g/.test(extName):
       contentType = 'image/jpg';
       break;
-    case '.jpeg':
-      contentType = 'image/jpg';
-      break;
-    case '.webp':
+    case extName === '.webp':
       contentType = 'image/webp';
       break;
-    case '.wav':
+    case extName === '.wav':
       contentType = 'audio/wav';
+      break;
+    case extName === '.woff':
+      contentType = 'font/woff';
+      break;
+    case extName === '.woff2':
+      contentType = 'font/woff2';
       break;
     default:
       filePath = appRoot + '/index.html';

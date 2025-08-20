@@ -1,10 +1,13 @@
 import { createTheme } from '@mui/material';
-import '@fontsource/jetbrains-mono';
-import '@fontsource/roboto';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource/boldonse';
 
 export const appTheme = createTheme({
   typography: {
     fontFamily: "'JetBrains Mono Variable', monospace",
+    h2: {
+      fontFamily: "'Boldonse', system-ui",
+    },
   },
   palette: {
     mode: 'dark',

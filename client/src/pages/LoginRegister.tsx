@@ -1,7 +1,7 @@
-import { AppHelmet, AppLink, FormLogin, FormRegister } from '../components';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { AppHelmet, AppLink, FormLogin, FormRegister } from 'components';
+import { useUser } from 'contexts';
 import { Fragment, useEffect, useState } from 'react';
-import { useUser } from '../contexts';
 import { useNavigate } from 'react-router';
 
 export const LoginRegister = () => {
@@ -9,7 +9,10 @@ export const LoginRegister = () => {
   const { logged } = useUser();
   const nav = useNavigate();
 
-  const imageHero = new URL('url:../assets/images/hero-login.jpg', import.meta.url).toString();
+  const imageHero = new URL(
+    'url:../assets/images/hero-login.jpg?as=webp&width=1200',
+    import.meta.url,
+  ).toString();
 
   const handleRegister = () => setIsRegister(!isRegister);
 
@@ -30,13 +33,7 @@ export const LoginRegister = () => {
               margin: '0 30px 0 auto ',
             }}
           >
-            <Typography
-              component={'h1'}
-              fontSize={48}
-              sx={{
-                fontFamily: '"Boldonse", system-ui',
-              }}
-            >
+            <Typography component={'h1'} fontSize={48} variant='h2'>
               {isRegister ? 'Cadastre-se' : 'Entrar'}
             </Typography>
             <Typography
@@ -48,8 +45,8 @@ export const LoginRegister = () => {
               <Typography
                 component={'span'}
                 fontSize={12}
+                variant='h2'
                 sx={({ palette }) => ({
-                  fontFamily: '"Boldonse", system-ui',
                   textDecoration: 'underline',
                   color: palette.secondary.main,
                 })}
@@ -74,7 +71,12 @@ export const LoginRegister = () => {
                 <Typography variant='body1'>
                   Não possui conta?{' '}
                   <AppLink to={''} onClick={handleRegister}>
-                    <Box component={'span'} sx={({ palette: { secondary } }) => ({ color: secondary.main })}>
+                    <Box
+                      component={'span'}
+                      sx={({ palette: { secondary } }) => ({
+                        color: secondary.main,
+                      })}
+                    >
                       Cadastre-se
                     </Box>
                   </AppLink>

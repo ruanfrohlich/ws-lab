@@ -1,9 +1,14 @@
 import { Box, Button } from '@mui/material';
 import { Fragment, useEffect, useRef } from 'react';
-import { IBaseModalProps } from '../../interfaces';
+import { IBaseModalProps } from 'interfaces';
 import { Close } from '@mui/icons-material';
 
-export default ({ children, onClose, canClose, closeFocus }: IBaseModalProps) => {
+export default ({
+  children,
+  onClose,
+  canClose,
+  closeFocus,
+}: IBaseModalProps) => {
   const modalBody = useRef<HTMLDivElement>(null);
   const modal = useRef<HTMLDivElement>(null);
 

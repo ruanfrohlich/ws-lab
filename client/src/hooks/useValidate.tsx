@@ -1,9 +1,11 @@
 import { Box } from '@mui/material';
-import { IRegisterFormState } from '../interfaces';
+import { IRegisterFormState } from 'interfaces';
 import { Fragment } from 'react';
 import { useServices } from './services';
 
-export const useValidate = (updateState: (el: keyof IRegisterFormState, value: unknown) => void) => {
+export const useValidate = (
+  updateState: (el: keyof IRegisterFormState, value: unknown) => void,
+) => {
   const { findUser } = useServices();
 
   const validate = async (field: string, value: string) => {
@@ -35,7 +37,8 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
 
           updateState('checkingEmail', false);
           updateState('errors', {
-            email: 'A gente precisa do seu e-mail válido pra seguir com o cadastro.',
+            email:
+              'A gente precisa do seu e-mail válido pra seguir com o cadastro.',
           });
 
           return false;
@@ -70,7 +73,9 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
         case 'password': {
           if (value.length < 8) return false;
 
-          if (/^(?=.*\d)(?=.*[aA-zZ])(?=.*[^\w\d\s:])([^\s]){8,}$/gm.test(value)) {
+          if (
+            /^(?=.*\d)(?=.*[aA-zZ])(?=.*[^\w\d\s:])([^\s]){8,}$/gm.test(value)
+          ) {
             updateState('errors', { password: '' });
             return true;
           }
@@ -78,7 +83,8 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
           updateState('errors', {
             password: (
               <Fragment>
-                Por favor, verifique a senha digitada. Precisa cumprir as seguintes regras:
+                Por favor, verifique a senha digitada. Precisa cumprir as
+                seguintes regras:
                 <Box component={'ul'}>
                   <li>Ter no mínimo 8 caracteres</li>
                   <li>1 letra maiúscula</li>

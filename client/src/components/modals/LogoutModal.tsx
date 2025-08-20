@@ -1,7 +1,7 @@
 import { Button, Typography } from '@mui/material';
 import BaseModal from './BaseModal';
-import { useServices } from '../../hooks';
-import { IBaseModalProps } from '../../interfaces';
+import { useServices } from 'hooks';
+import { IBaseModalProps } from 'interfaces';
 
 export default (props: Pick<IBaseModalProps, 'canClose' | 'onClose'>) => {
   const { logout } = useServices();

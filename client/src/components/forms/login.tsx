@@ -1,9 +1,9 @@
 import { Alert, Box, Button, CircularProgress } from '@mui/material';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { ILoginFormState } from '../../interfaces';
+import { ILoginFormState } from 'interfaces';
 import { AppInput } from '../Input';
-import { commonRegEx } from '../../utils';
-import { useServices } from '../../hooks';
+import { commonRegEx } from 'utils';
+import { useServices } from 'hooks';
 
 export const FormLogin = () => {
   const { login } = useServices();
@@ -67,7 +67,8 @@ export const FormLogin = () => {
     const patterns = commonRegEx;
 
     const isValid =
-      (patterns.email.test(username) || patterns.username.test(username)) && patterns.password.test(password);
+      (patterns.email.test(username) || patterns.username.test(username)) &&
+      patterns.password.test(password);
 
     setState((state) => {
       return {
@@ -81,8 +82,8 @@ export const FormLogin = () => {
     <form noValidate onSubmit={handleSubmit}>
       {state.loginError && (
         <Alert severity='error'>
-          Opa! Parece que tivemos um problema ao conectar você, dá uma checada no seus dados de acesso ou tente
-          novamente em alguns minutos.
+          Opa! Parece que tivemos um problema ao conectar você, dá uma checada
+          no seus dados de acesso ou tente novamente em alguns minutos.
         </Alert>
       )}
       <Box
@@ -109,7 +110,12 @@ export const FormLogin = () => {
           onChange={handleChange}
           autoComplete='password'
         />
-        <Button type='submit' variant='contained' disabled={!state.isValid} loading={state.loading}>
+        <Button
+          type='submit'
+          variant='contained'
+          disabled={!state.isValid}
+          loading={state.loading}
+        >
           {state.loading ? <CircularProgress size={20} /> : 'Entrar'}
         </Button>
       </Box>

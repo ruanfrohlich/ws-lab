@@ -1,6 +1,6 @@
 import { alpha, Box, Typography } from '@mui/material';
-import { IFindModalResult } from '../../interfaces';
-import { translateAccountType } from '../../utils';
+import { IFindModalResult } from 'interfaces';
+import { translateAccountType } from 'utils';
 
 export const AvatarCard = ({ data }: { data: IFindModalResult }) => {
   return (

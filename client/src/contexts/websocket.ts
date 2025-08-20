@@ -1,19 +1,14 @@
-import { IWebsocketAction, IWebsocketContext } from '../interfaces';
+import { IWebsocketAction, IWebsocketContext } from 'interfaces';
 import { ActionDispatch, createContext, useContext } from 'react';
 
 const initialState: IWebsocketContext = {
   connected: false,
-  receivedMessages: [],
-  messagesHistory: [],
-  clientId: '',
-  openChats: [],
-  receiver: {
-    id: '',
-  },
 };
 
 export const WebsocketContext = createContext<IWebsocketContext>(initialState);
-export const WebsocketDispatchContext = createContext<ActionDispatch<[action: IWebsocketAction]>>(() => initialState);
+export const WebsocketDispatchContext = createContext<
+  ActionDispatch<[action: IWebsocketAction]>
+>(() => initialState);
 
 export function useWebsocket() {
   return useContext(WebsocketContext);

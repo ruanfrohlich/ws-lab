@@ -1,13 +1,13 @@
 import { alpha, Box, LinearProgress } from '@mui/material';
-import { IBaseModalProps, IFindModalResult } from '../../interfaces';
+import { IBaseModalProps, IFindModalResult } from 'interfaces';
 import BaseModal from './BaseModal';
 import { AppInput } from '../Input';
 import { useEffect, useRef, useState } from 'react';
-import mockDB from '../../data/mockDB.json';
+import mockDB from 'data/mockDB.json';
 import { AvatarCard } from '../cards';
 import { AppLink } from '../AppLink';
 import { isEmpty } from 'lodash';
-import { normalize } from '../../utils';
+import { normalize } from 'utils';
 
 export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -20,7 +20,10 @@ export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
     const fetch = () =>
       new Promise<IFindModalResult[] | null>((res) => {
         setTimeout(() => {
-          const user = mockDB.filter((el) => normalize(el.name).includes(normalize(term))) ?? null;
+          const user =
+            mockDB.filter((el) =>
+              normalize(el.name).includes(normalize(term)),
+            ) ?? null;
 
           res(user);
         }, 2000);
@@ -90,7 +93,10 @@ export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
                   },
                 })}
               >
-                <AppLink to={`${item.type}?slug=${item.slug}`} onClick={onClose}>
+                <AppLink
+                  to={`${item.type}?slug=${item.slug}`}
+                  onClick={onClose}
+                >
                   <AvatarCard data={item} />
                 </AppLink>
               </Box>

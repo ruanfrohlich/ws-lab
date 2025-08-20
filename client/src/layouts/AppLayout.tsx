@@ -1,11 +1,16 @@
 import { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
-import { AppLink, AppLoading, Header } from '../components';
+import { AppLink, AppLoading, Header } from 'components';
 import { Avatar, Box, Breadcrumbs, Button, Typography } from '@mui/material';
-import { appStyled, configProvider, translatePathname } from '../utils';
+import { appStyled, configProvider, translatePathname } from 'utils';
 import { useLocation } from 'react-router';
-import { useUser } from '../contexts';
-import { useServices } from '../hooks';
-import { ArrowBackIosRounded, EmojiPeople, OndemandVideo, Storefront } from '@mui/icons-material';
+import { useUser } from 'contexts';
+import { useServices } from 'hooks';
+import {
+  ArrowBackIosRounded,
+  EmojiPeople,
+  OndemandVideo,
+  Storefront,
+} from '@mui/icons-material';
 import { capitalize } from 'lodash';
 
 export const AppLayout = (props: { children: ReactNode }) => {
@@ -25,10 +30,14 @@ export const AppLayout = (props: { children: ReactNode }) => {
     if (activity && content) {
       appStyled(activity, {
         opacity: 1,
-        right: activityShow ? '0px' : `-${activity.getBoundingClientRect().width - 10}px`,
+        right: activityShow
+          ? '0px'
+          : `-${activity.getBoundingClientRect().width - 10}px`,
       });
       appStyled(content, {
-        marginLeft: activityShow ? `-${activity.getBoundingClientRect().width - 10}px` : '0',
+        marginLeft: activityShow
+          ? `-${activity.getBoundingClientRect().width - 10}px`
+          : '0',
       });
     }
 
@@ -56,9 +65,9 @@ export const AppLayout = (props: { children: ReactNode }) => {
         gap: '6px',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        fontFamily: '"Boldonse", system-ui',
         marginBottom: '10px',
       }}
+      variant='h2'
     >
       {props.children}
     </Typography>
@@ -88,7 +97,9 @@ export const AppLayout = (props: { children: ReactNode }) => {
           if (breadItems.length - 1 === i) {
             return (
               <Typography key={el} sx={{ color: 'text.primary' }}>
-                {el === appRoot.replace('/', '') ? 'Início' : translatePathname(el)}
+                {el === appRoot.replace('/', '')
+                  ? 'Início'
+                  : translatePathname(el)}
               </Typography>
             );
           }
@@ -202,7 +213,13 @@ export const AppLayout = (props: { children: ReactNode }) => {
                         <Box
                           component={'li'}
                           key={friend.id}
-                          sx={{ padding: '0', display: 'flex', gap: 1, alignItems: 'center', position: 'relative' }}
+                          sx={{
+                            padding: '0',
+                            display: 'flex',
+                            gap: 1,
+                            alignItems: 'center',
+                            position: 'relative',
+                          }}
                         >
                           <Avatar
                             sx={{
@@ -212,7 +229,11 @@ export const AppLayout = (props: { children: ReactNode }) => {
                               border: '1px solid currentColor',
                             }}
                             alt={friend.user.name}
-                            src={assetsUrl.concat('user/', friend.user.uuid, '/profile-pic.webp')}
+                            src={assetsUrl.concat(
+                              'user/',
+                              friend.user.uuid,
+                              '/profile-pic.webp',
+                            )}
                           />
                           <Typography>
                             {friend.user.name}{' '}
@@ -221,7 +242,8 @@ export const AppLayout = (props: { children: ReactNode }) => {
                               sx={{
                                 display: 'block',
                                 fontSize: '10px',
-                                color: ({ palette }) => `${palette[getStatusColor()].main}`,
+                                color: ({ palette }) =>
+                                  `${palette[getStatusColor()].main}`,
                               }}
                             >
                               {capitalize(friend.activityStatus)}

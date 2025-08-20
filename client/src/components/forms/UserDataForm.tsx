@@ -1,9 +1,9 @@
 import { Alert, Box, Button, Snackbar } from '@mui/material';
 import { AppInput } from '../Input';
-import { useUser } from '../../contexts';
+import { useUser } from 'contexts';
 import { ChangeEvent, FormEvent, Fragment, useEffect, useState } from 'react';
-import { IUserDataForm, IUserDataFormProps } from '../../interfaces';
-import { useServices } from '../../hooks';
+import { IUserDataForm, IUserDataFormProps } from 'interfaces';
+import { useServices } from 'hooks';
 import { LogoutModal } from '../modals';
 
 export const UserDataForm = (props: IUserDataFormProps) => {
@@ -80,7 +80,9 @@ export const UserDataForm = (props: IUserDataFormProps) => {
 
   return (
     <Fragment>
-      {isOpenModal && <LogoutModal canClose onClose={() => setIsOpenModal(false)} />}
+      {isOpenModal && (
+        <LogoutModal canClose onClose={() => setIsOpenModal(false)} />
+      )}
       <Snackbar
         open={formState.success}
         autoHideDuration={5000}
@@ -104,7 +106,8 @@ export const UserDataForm = (props: IUserDataFormProps) => {
         }}
       >
         <Alert color='error' variant='outlined' sx={{ width: '100%' }}>
-          Tivemos um problema ao atualizar seus dados, tente novamente em alguns minutos!
+          Tivemos um problema ao atualizar seus dados, tente novamente em alguns
+          minutos!
         </Alert>
       </Snackbar>
       <Box
@@ -127,15 +130,43 @@ export const UserDataForm = (props: IUserDataFormProps) => {
             gap: 2,
           }}
         >
-          <AppInput id='username' label='Username' error='' value={formState.fields.username} onChange={handleChange} />
-          <AppInput id='name' label='Seu nome' error='' value={formState.fields.name} onChange={handleChange} />
-          <AppInput id='email' label='E-mail' error='' value={formState.fields.email} onChange={handleChange} />
+          <AppInput
+            id='username'
+            label='Username'
+            error=''
+            value={formState.fields.username}
+            onChange={handleChange}
+          />
+          <AppInput
+            id='name'
+            label='Seu nome'
+            error=''
+            value={formState.fields.name}
+            onChange={handleChange}
+          />
+          <AppInput
+            id='email'
+            label='E-mail'
+            error=''
+            value={formState.fields.email}
+            onChange={handleChange}
+          />
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Button variant='contained' color='primary' type='submit' disabled={!isValid}>
+          <Button
+            variant='contained'
+            color='primary'
+            type='submit'
+            disabled={!isValid}
+          >
             Atualizar
           </Button>
-          <Button variant='contained' color='error' type='button' onClick={() => setIsOpenModal(true)}>
+          <Button
+            variant='contained'
+            color='error'
+            type='button'
+            onClick={() => setIsOpenModal(true)}
+          >
             Desconectar
           </Button>
         </Box>

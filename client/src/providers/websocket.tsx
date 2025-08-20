@@ -1,9 +1,12 @@
 import { ReactNode, useEffect, useReducer } from 'react';
-import { ISocketData, IWebsocketAction, IWebsocketContext } from '../interfaces';
-import { WebsocketContext, WebsocketDispatchContext } from '../contexts/websocket';
-import { useUser, useUserDispatch } from '../contexts';
+import { ISocketData, IWebsocketAction, IWebsocketContext } from 'interfaces';
+import { WebsocketContext, WebsocketDispatchContext } from 'contexts/websocket';
+import { useUser, useUserDispatch } from 'contexts';
 
-const websocketReducer = (websocket: IWebsocketContext, action: IWebsocketAction): IWebsocketContext => {
+const websocketReducer = (
+  websocket: IWebsocketContext,
+  action: IWebsocketAction,
+): IWebsocketContext => {
   switch (action.type) {
     case 'updateWSState': {
       if (action.payload) {
@@ -32,7 +35,8 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
   let connected = false;
 
   const webSocketHandler = () => {
-    const WSConnection = websocket.socket ?? new WebSocket(`wss://${process.env.WS_SERVER}/`);
+    const WSConnection =
+      websocket.socket ?? new WebSocket(`wss://${process.env.WS_SERVER}/`);
 
     WSConnection.onerror = function (error) {
       console.log('Websocket error!');
@@ -94,7 +98,9 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
 
     const reconnectInterval = setInterval(() => {
       if (retryCount >= maxRetries) {
-        console.error('Maximum number of retries reached. Giving up on reconnecting.');
+        console.error(
+          'Maximum number of retries reached. Giving up on reconnecting.',
+        );
         clearInterval(reconnectInterval);
         return;
       }
@@ -121,7 +127,9 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <WebsocketContext value={websocket}>
-      <WebsocketDispatchContext value={dispatch}>{children}</WebsocketDispatchContext>
+      <WebsocketDispatchContext value={dispatch}>
+        {children}
+      </WebsocketDispatchContext>
     </WebsocketContext>
   );
 };

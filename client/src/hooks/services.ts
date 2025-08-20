@@ -1,7 +1,7 @@
 import axios, { isAxiosError } from 'axios';
-import { useUser, useUserDispatch } from '../contexts';
-import { configProvider, COOKIES, translateError } from '../utils';
-import { IUser, IUserDataForm, IUserRegister } from '../interfaces';
+import { useUser, useUserDispatch } from 'contexts';
+import { configProvider, COOKIES, translateError } from 'utils';
+import { IUser, IUserDataForm, IUserRegister } from 'interfaces';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router';
 

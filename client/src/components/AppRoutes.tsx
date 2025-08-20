@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router';
 import { App } from '../App';
-import { Home, LoginRegister, NotFound, UserAccount } from '../pages';
-import { configProvider } from '../utils';
+import { Home, LoginRegister, NotFound, UserAccount } from 'pages';
+import { configProvider } from 'utils';
 
 export const AppRoutes = () => {
   const { appRoot } = configProvider();

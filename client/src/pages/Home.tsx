@@ -1,5 +1,5 @@
-import { AppHelmet } from '../components';
 import { Box } from '@mui/material';
+import { AppHelmet } from 'components';
 
 export function Home() {
   return (

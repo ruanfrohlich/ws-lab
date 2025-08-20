@@ -1,9 +1,13 @@
 import { Box, Typography } from '@mui/material';
 import CodeOffIcon from '@mui/icons-material/CodeOff';
-import notFound from 'url:../assets/images/404.jpg';
-import { AppHelmet } from '../components';
+import { AppHelmet } from 'components';
 
 export const NotFound = () => {
+  const notFoundBG = new URL(
+    'url:../assets/images/404.jpg?as=webp',
+    import.meta.url,
+  );
+
   return (
     <Box
       sx={{
@@ -12,7 +16,7 @@ export const NotFound = () => {
         paddingTop: '15%',
         alignItems: 'center',
         height: 'calc(100vh - 30px)',
-        backgroundImage: `url(${notFound})`,
+        backgroundImage: `url(${notFoundBG})`,
         backgroundSize: 'cover',
         backgroundPosition: 'top center',
         backgroundRepeat: 'no-repeat',
