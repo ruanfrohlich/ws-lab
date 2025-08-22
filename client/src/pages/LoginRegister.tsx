@@ -33,7 +33,7 @@ export const LoginRegister = () => {
               margin: '0 30px 0 auto ',
             }}
           >
-            <Typography component={'h1'} fontSize={48} variant='h2'>
+            <Typography component={'h1'} fontSize={48} variant='h2' mb={2}>
               {isRegister ? 'Cadastre-se' : 'Entrar'}
             </Typography>
             <Typography

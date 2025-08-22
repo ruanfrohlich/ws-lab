@@ -106,7 +106,7 @@ export const apiRoutes = async (
 
           if (asset !== '') {
             const [, imageBase64] = asset.split(
-              /data:image\/(?:png|jpe?g|webp);base64,/,
+              /data:image|text\/(?:png|jpe?g|webp|html);base64,/,
             );
             const imageBuffer = Buffer.from(imageBase64, 'base64');
 

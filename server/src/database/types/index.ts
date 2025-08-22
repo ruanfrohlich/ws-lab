@@ -1,4 +1,9 @@
-import { CreationOptional, DataTypes, ModelAttributes, ModelDefined } from 'sequelize';
+import {
+  CreationOptional,
+  DataTypes,
+  ModelAttributes,
+  ModelDefined,
+} from 'sequelize';
 
 export interface IDefaultAttributes {
   id: number;
@@ -20,9 +25,15 @@ export interface AccountTypeAttributes extends IDefaultAttributes {
 
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-export type AccountTypeCreationAttributes = Optional<AccountTypeAttributes, DefaultOptionalAttibutes>;
+export type AccountTypeCreationAttributes = Optional<
+  AccountTypeAttributes,
+  DefaultOptionalAttibutes
+>;
 
-export type AccountTypeModel = ModelDefined<AccountTypeAttributes, AccountTypeCreationAttributes>;
+export type AccountTypeModel = ModelDefined<
+  AccountTypeAttributes,
+  AccountTypeCreationAttributes
+>;
 
 export interface UserAttributes extends IDefaultAttributes {
   name: string;
@@ -35,7 +46,10 @@ export interface UserAttributes extends IDefaultAttributes {
   coverImage: string;
 }
 
-export type UserCreationAttributes = Optional<UserAttributes, DefaultOptionalAttibutes | 'uuid'>;
+export type UserCreationAttributes = Optional<
+  UserAttributes,
+  DefaultOptionalAttibutes | 'uuid'
+>;
 
 export type UserModel = ModelDefined<UserAttributes, UserCreationAttributes>;
 
@@ -43,11 +57,27 @@ export interface FriendsAttributes extends IDefaultAttributes {
   status: string;
 }
 
-export type FriendsCreationAttributes = Optional<FriendsAttributes, DefaultOptionalAttibutes>;
+export type FriendsCreationAttributes = Optional<
+  FriendsAttributes,
+  DefaultOptionalAttibutes
+>;
 
-export type FriendsModel = ModelDefined<FriendsAttributes, FriendsCreationAttributes>;
+export type FriendsModel = ModelDefined<
+  FriendsAttributes,
+  FriendsCreationAttributes
+>;
 
 export type TFriendStatus = 'send' | 'accepted' | 'rejected';
+
+export interface IUserFriends {
+  id: number;
+  status: TFriendStatus;
+  activityStatus: TActivityStatus;
+  user: Pick<
+    UserAttributes,
+    'id' | 'username' | 'name' | 'uuid' | 'profilePic'
+  >;
+}
 
 export type TActivityStatus = 'online' | 'away' | 'offline' | 'busy';
 
@@ -59,7 +89,11 @@ export const ModelTypes: {
     username: { type: DataTypes.STRING, allowNull: false, unique: true },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: { type: DataTypes.STRING, allowNull: false },
-    uuid: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, allowNull: false },
+    uuid: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+    },
     profilePic: { type: DataTypes.STRING, defaultValue: '' },
     coverImage: { type: DataTypes.STRING, defaultValue: '' },
   },

@@ -1,4 +1,5 @@
 export interface IUserRegister {
+  name: string;
   username: string;
   email: string;
   password: string;
@@ -26,16 +27,35 @@ export interface IUser {
   updatedAt: string;
 }
 
+export interface IUserGoogle {
+  iss: string;
+  azp: string;
+  aud: string;
+  sub: string;
+  email: string;
+  email_verified: boolean;
+  nbf: number;
+  name: string;
+  picture: string;
+  given_name: string;
+  family_name: string;
+  iat: number;
+  exp: number;
+  jti: string;
+}
+
 export interface IUserContext {
   user?: IUser | null;
   logged: boolean;
 }
 
-export type TUserActions = 'setUser' | 'updateUser' | 'removeUser' | 'updateFriendActivity';
+export type TUserActions =
+  | 'setUser'
+  | 'updateUser'
+  | 'removeUser'
+  | 'updateFriendActivity';
 
 export interface IUserAction {
   type: TUserActions;
-  payload?: {
-    [key: string]: unknown;
-  };
+  payload?: IUserContext & { [key: string]: unknown };
 }

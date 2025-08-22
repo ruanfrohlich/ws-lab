@@ -1,9 +1,8 @@
 import { QueryTypes, Sequelize } from 'sequelize';
 import {
   FriendsModel,
+  IUserFriends,
   ModelTypes,
-  TActivityStatus,
-  TFriendStatus,
   UserAttributes,
   UserCreationAttributes,
   UserModel,
@@ -35,13 +34,19 @@ export const User = (sequelize: Sequelize) => {
     }
   };
 
-  const createUser = async (userData: UserCreationAttributes): Promise<{ user: UserAttributes }> => {
+  const createUser = async (
+    userData: UserCreationAttributes,
+  ): Promise<{
+    user: UserAttributes & {
+      friends: Array<IUserFriends>;
+    };
+  }> => {
     const { dataValues } = await Model.create({ ...userData });
 
     log(`User [${dataValues.username}] was saved to the database.`);
 
     return {
-      user: dataValues,
+      user: { ...dataValues, friends: [] },
     };
   };
 
@@ -50,12 +55,7 @@ export const User = (sequelize: Sequelize) => {
     friendsModel: FriendsModel,
   ): Promise<
     | (Omit<UserAttributes, 'password'> & {
-        friends: Array<{
-          id: number;
-          status: TFriendStatus;
-          activityStatus: TActivityStatus;
-          user: Pick<UserAttributes, 'id' | 'username' | 'name' | 'uuid' | 'profilePic'>;
-        }>;
+        friends: Array<IUserFriends>;
       })
     | null
   > => {
@@ -83,7 +83,13 @@ export const User = (sequelize: Sequelize) => {
             pick(
               {
                 ...friend.dataValues,
-                user: pick(friend.dataValues.User.dataValues, ['id', 'username', 'name', 'uuid', 'profilePic']),
+                user: pick(friend.dataValues.User.dataValues, [
+                  'id',
+                  'username',
+                  'name',
+                  'uuid',
+                  'profilePic',
+                ]),
               },
               ['id', 'status', 'activityStatus', 'user'],
             ),
@@ -105,7 +111,10 @@ export const User = (sequelize: Sequelize) => {
     return users;
   };
 
-  const updateUser = async (data: Omit<UserCreationAttributes, 'password'>, token: string) => {
+  const updateUser = async (
+    data: Omit<UserCreationAttributes, 'password'>,
+    token: string,
+  ) => {
     try {
       const user = await Model.findOne({
         where: {

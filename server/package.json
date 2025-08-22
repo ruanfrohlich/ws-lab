@@ -17,7 +17,8 @@
     ],
     "watch": [
       "src",
-      ".env.dev"
+      ".env.dev",
+      "../client/.env.dev"
     ],
     "ext": "ts",
     "exec": "tsx src/index.ts"

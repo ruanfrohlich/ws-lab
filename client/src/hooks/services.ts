@@ -1,9 +1,10 @@
 import axios, { isAxiosError } from 'axios';
 import { useUser, useUserDispatch } from 'contexts';
-import { configProvider, COOKIES, translateError } from 'utils';
+import { configProvider, COOKIES, decodeJWT, translateError } from 'utils';
 import { IUser, IUserDataForm, IUserRegister } from 'interfaces';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router';
+import { toLower } from 'lodash';
 
 const handler = axios.create({
   baseURL: process.env.ACCOUNT_API,
@@ -40,16 +41,34 @@ export const useServices = () => {
       if (res.status === 200) {
         const { user } = res.data;
 
+        if (user) {
+          userDispatch({
+            type: 'setUser',
+            payload: {
+              logged: true,
+              user,
+            },
+          });
+
+          return {
+            success: true,
+          };
+        }
+
         return {
-          user,
+          success: false,
         };
       }
 
-      return null;
+      return {
+        success: false,
+      };
     } catch (e) {
       console.log(e);
 
-      return null;
+      return {
+        success: false,
+      };
     }
   };
 
@@ -120,12 +139,13 @@ export const useServices = () => {
 
   const registerUser = async (
     fields: IUserRegister,
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string; user?: IUser }> => {
     try {
       const res = await handler.post<{ user: IUser }>('/register', fields);
 
       if (res.status === 201) {
         createAuthCookie(res.data.user.uuid);
+
         userDispatch({
           type: 'setUser',
           payload: {
@@ -136,6 +156,7 @@ export const useServices = () => {
 
         return {
           success: true,
+          user: res.data.user,
         };
       }
 
@@ -175,23 +196,15 @@ export const useServices = () => {
         };
       }
 
-      const res = await fetchUser(uuid);
+      const { success } = await fetchUser(uuid);
 
-      if (!res?.user) {
+      if (!success) {
         return {
           success: false,
         };
       }
 
       createAuthCookie(uuid);
-      userDispatch({
-        type: 'setUser',
-        payload: {
-          logged: true,
-          user: res?.user,
-        },
-      });
-
       nav(appRoot);
 
       return {
@@ -218,6 +231,55 @@ export const useServices = () => {
     nav(appRoot);
   };
 
+  const googleSignIn = () => {
+    if (window !== undefined) {
+      const { google } = window;
+
+      if (!google) return console.error('Google AuthAPI not loaded!');
+
+      google.accounts.id.initialize({
+        client_id: String(process.env.GOOGLE_CLIENT_ID),
+        callback: async (res) => {
+          const { email, sub, given_name, name, picture } = decodeJWT(
+            res.credential,
+          );
+          const req = await fetch(picture);
+          const imgBlob = await req.blob();
+
+          const getImageData = () =>
+            new Promise<string>((res, rej) => {
+              const reader = new FileReader();
+              reader.onloadend = () => res(String(reader.result));
+              reader.onerror = () => rej(reader.error);
+              reader.readAsDataURL(imgBlob);
+            });
+
+          const imgBase64 = await getImageData();
+
+          console.log(imgBase64);
+
+          const userExists = await findUser({
+            username: '',
+            email,
+          });
+
+          if (!userExists) {
+            await registerUser({
+              name,
+              email,
+              password: sub + given_name,
+              username: toLower(`${given_name}-${sub}`),
+            });
+            window.location.reload();
+          }
+        },
+        cancel_on_tap_outside: false,
+      });
+
+      google.accounts.id.prompt();
+    }
+  };
+
   const redirectHome = () => {
     nav(appRoot);
   };
@@ -231,5 +293,6 @@ export const useServices = () => {
     logout,
     redirectHome,
     hasAuthCookie,
+    googleSignIn,
   };
 };
