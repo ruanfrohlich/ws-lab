@@ -73,3 +73,12 @@ export const decodeJWT = (token: string): IUserGoogle => {
   );
   return JSON.parse(jsonPayload);
 };
+
+export const getDataURL = (blob: Blob) => {
+  return new Promise<string>((res, rej) => {
+    const reader = new FileReader();
+    reader.onloadend = () => res(String(reader.result));
+    reader.onerror = () => rej(reader.error);
+    reader.readAsDataURL(blob);
+  });
+};

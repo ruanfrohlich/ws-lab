@@ -1,10 +1,15 @@
 import axios, { isAxiosError } from 'axios';
 import { useUser, useUserDispatch } from 'contexts';
-import { configProvider, COOKIES, decodeJWT, translateError } from 'utils';
-import { IUser, IUserDataForm, IUserRegister } from 'interfaces';
+import {
+  configProvider,
+  COOKIES,
+  decodeJWT,
+  getDataURL,
+  translateError,
+} from 'utils';
+import { IUser, IUserDataForm, IUserGoogle, IUserRegister } from 'interfaces';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router';
-import { toLower } from 'lodash';
 
 const handler = axios.create({
   baseURL: process.env.ACCOUNT_API,
@@ -41,15 +46,15 @@ export const useServices = () => {
       if (res.status === 200) {
         const { user } = res.data;
 
-        if (user) {
-          userDispatch({
-            type: 'setUser',
-            payload: {
-              logged: true,
-              user,
-            },
-          });
+        userDispatch({
+          type: 'setUser',
+          payload: {
+            logged: true,
+            user,
+          },
+        });
 
+        if (user) {
           return {
             success: true,
           };
@@ -73,8 +78,8 @@ export const useServices = () => {
   };
 
   const findUser = async (user: {
-    username: string;
-    email: string;
+    username?: string;
+    email?: string;
   }): Promise<boolean> => {
     try {
       const { username, email } = user;
@@ -106,16 +111,14 @@ export const useServices = () => {
         },
       });
 
-      console.log(data);
-
-      if (data.success) {
+      if (data.success && user) {
         userDispatch({
           type: 'setUser',
           payload: {
             logged: true,
             user: {
               ...user,
-              ...(userData as IUser),
+              ...userData,
             },
           },
         });
@@ -139,12 +142,27 @@ export const useServices = () => {
 
   const registerUser = async (
     fields: IUserRegister,
-  ): Promise<{ success: boolean; error?: string; user?: IUser }> => {
+    google?: {
+      image: string;
+    },
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
+      const userExists = await findUser({
+        email: fields.email,
+      });
+
+      if (userExists) {
+        return {
+          success: false,
+          error: 'User already registered!',
+        };
+      }
+
       const res = await handler.post<{ user: IUser }>('/register', fields);
 
       if (res.status === 201) {
-        createAuthCookie(res.data.user.uuid);
+        const { uuid } = res.data.user;
+        createAuthCookie(uuid);
 
         userDispatch({
           type: 'setUser',
@@ -154,9 +172,15 @@ export const useServices = () => {
           },
         });
 
+        if (google) {
+          await updateUser({
+            ...res.data.user,
+            profilePic: google.image,
+          });
+        }
+
         return {
           success: true,
-          user: res.data.user,
         };
       }
 
@@ -232,52 +256,33 @@ export const useServices = () => {
   };
 
   const googleSignIn = () => {
-    if (window !== undefined) {
+    return new Promise<IUserGoogle>((res, rej) => {
+      if (window === undefined) rej('Window is not defined');
+
       const { google } = window;
 
-      if (!google) return console.error('Google AuthAPI not loaded!');
+      if (!google) return rej('Google AuthAPI not loaded!');
 
       google.accounts.id.initialize({
         client_id: String(process.env.GOOGLE_CLIENT_ID),
-        callback: async (res) => {
-          const { email, sub, given_name, name, picture } = decodeJWT(
-            res.credential,
-          );
-          const req = await fetch(picture);
-          const imgBlob = await req.blob();
+        callback: async (_res) => {
+          if (!_res.credential) rej("Failed to get Google's user data.");
 
-          const getImageData = () =>
-            new Promise<string>((res, rej) => {
-              const reader = new FileReader();
-              reader.onloadend = () => res(String(reader.result));
-              reader.onerror = () => rej(reader.error);
-              reader.readAsDataURL(imgBlob);
-            });
+          const data = decodeJWT(_res.credential);
+          const profileImg = await fetch(data.picture);
+          const imgBlob = await profileImg.blob();
+          const imgBase64 = await getDataURL(imgBlob);
 
-          const imgBase64 = await getImageData();
-
-          console.log(imgBase64);
-
-          const userExists = await findUser({
-            username: '',
-            email,
+          res({
+            ...data,
+            picture: imgBase64,
           });
-
-          if (!userExists) {
-            await registerUser({
-              name,
-              email,
-              password: sub + given_name,
-              username: toLower(`${given_name}-${sub}`),
-            });
-            window.location.reload();
-          }
         },
         cancel_on_tap_outside: false,
       });
 
       google.accounts.id.prompt();
-    }
+    });
   };
 
   const redirectHome = () => {

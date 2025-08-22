@@ -1,7 +1,7 @@
 import { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import { AppLink, AppLoading, Header } from 'components';
 import { Avatar, Box, Breadcrumbs, Button, Typography } from '@mui/material';
-import { appStyled, configProvider, translatePathname } from 'utils';
+import { appStyled, configProvider, COOKIES, translatePathname } from 'utils';
 import { useLocation } from 'react-router';
 import { useUser } from 'contexts';
 import { useServices } from 'hooks';
@@ -11,17 +11,54 @@ import {
   OndemandVideo,
   Storefront,
 } from '@mui/icons-material';
-import { capitalize } from 'lodash';
+import { capitalize, toLower, uniqueId } from 'lodash';
+import Cookies from 'js-cookie';
 
 export const AppLayout = (props: { children: ReactNode }) => {
   const { appRoot, assetsUrl } = configProvider();
   const [breadItems, setBreadItems] = useState<string[]>([]);
   const { pathname } = useLocation();
   const { user, logged } = useUser();
-  const { redirectHome, hasAuthCookie } = useServices();
+  const {
+    redirectHome,
+    hasAuthCookie,
+    fetchUser,
+    googleSignIn,
+    logout,
+    registerUser,
+  } = useServices();
   const [activityShow, setActivityShow] = useState<boolean>(false);
   const activityBox = useRef<HTMLElement>(null);
   const pageContent = useRef<HTMLElement>(null);
+
+  const checkUser = () => {
+    const userToken = Cookies.get(COOKIES.userToken);
+
+    (async () => {
+      if (!userToken) {
+        const googleUser = await googleSignIn();
+
+        if (!googleUser) return;
+
+        const userFormatted = {
+          email: googleUser.email,
+          name: googleUser.name,
+          password: uniqueId(googleUser.family_name),
+          username: toLower(
+            `${googleUser.given_name}-${googleUser.sub.slice(0, 6)}`,
+          ),
+        };
+
+        await registerUser(userFormatted, {
+          image: googleUser.picture,
+        });
+      } else {
+        const { success } = await fetchUser(userToken);
+
+        if (!success) return logout();
+      }
+    })();
+  };
 
   const handleActivityBar = () => {
     const { current: activity } = activityBox;
@@ -55,6 +92,8 @@ export const AppLayout = (props: { children: ReactNode }) => {
   useEffect(() => {
     if (logged) handleActivityBar();
   }, [logged]);
+
+  useEffect(checkUser, []);
 
   const StyledTitle = (props: { children: ReactNode }) => (
     <Typography
