@@ -8,8 +8,8 @@
     "ws:client": "yarn workspace client",
     "ws:server": "yarn workspace server",
     "dev": "yarn ws:server dev",
+    "build:client": "yarn ws:server build",
     "start": "yarn ws:server start",
-    "dev:api": "yarn ws:server dev:api",
     "lint": "eslint"
   },
   "engines": {

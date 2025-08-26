@@ -5,9 +5,7 @@
   "scripts": {
     "sqz": "sequelize",
     "dev": "nodemon",
-    "dev:api": "nodemon --api",
-    "start": "tsx src/index.ts --prod",
-    "start:api": "tsx src/index.ts --api"
+    "start": "tsx src/index.ts --prod"
   },
   "nodemonConfig": {
     "ignore": [
