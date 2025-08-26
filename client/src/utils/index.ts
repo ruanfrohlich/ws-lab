@@ -1,12 +1,13 @@
 import { capitalize } from '@mui/material';
+import { IUserGoogle } from 'interfaces';
 import { deburr, toLower } from 'lodash';
 import { CSSProperties } from 'react';
 
 export { configProvider } from './configProvider';
-export * from './enums';
-export const translateError = (error: string) => {
-  console.log(error);
 
+export * from './enums';
+
+export const translateError = (error: string) => {
   switch (error) {
     case 'User already exists': {
       return 'Esse usuário já está cadastrado.';
@@ -57,4 +58,39 @@ export const normalize = (str: string) => toLower(deburr(str));
 
 export const appStyled = (el: HTMLElement, styles: CSSProperties) => {
   return Object.assign(el.style, styles);
+};
+
+export const decodeJWT = (token: string): IUserGoogle => {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join(''),
+  );
+  return JSON.parse(jsonPayload);
+};
+
+export const getDataURL = (blob: Blob) => {
+  return new Promise<string>((res, rej) => {
+    const reader = new FileReader();
+    reader.onloadend = () => res(String(reader.result));
+    reader.onerror = () => rej(reader.error);
+    reader.readAsDataURL(blob);
+  });
+};
+
+export const randomPassword = (length: number) => {
+  const chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';
+  let password = '';
+
+  for (let i = 0; i < length; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  return password;
 };

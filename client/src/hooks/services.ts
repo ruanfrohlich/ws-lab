@@ -1,9 +1,11 @@
 import axios, { isAxiosError } from 'axios';
 import { useUser, useUserDispatch } from 'contexts';
-import { configProvider, COOKIES, translateError } from 'utils';
+import { configProvider, COOKIES, randomPassword, translateError } from 'utils';
 import { IUser, IUserDataForm, IUserRegister } from 'interfaces';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router';
+import { googleAuth } from 'integrations';
+import { toLower } from 'lodash';
 
 const handler = axios.create({
   baseURL: process.env.ACCOUNT_API,
@@ -15,6 +17,7 @@ export const useServices = () => {
   const { isDev, appRoot } = configProvider();
   const nav = useNavigate();
   const hasAuthCookie = !!Cookies.get(COOKIES.userToken);
+  const { startGoogleSignIn } = googleAuth();
 
   const createAuthCookie = (uuid: string) => {
     Cookies.set(COOKIES.userToken, uuid, {
@@ -40,39 +43,55 @@ export const useServices = () => {
       if (res.status === 200) {
         const { user } = res.data;
 
+        userDispatch({
+          type: 'setUser',
+          payload: {
+            logged: true,
+            user,
+          },
+        });
+
+        if (user) {
+          return {
+            success: true,
+          };
+        }
+
         return {
-          user,
+          success: false,
         };
       }
 
-      return null;
+      return {
+        success: false,
+      };
     } catch (e) {
       console.log(e);
 
-      return null;
+      return {
+        success: false,
+      };
     }
   };
 
-  const findUser = async (user: {
-    username: string;
-    email: string;
-  }): Promise<boolean> => {
+  const findUser = async (user: { username?: string; email?: string }) => {
     try {
       const { username, email } = user;
-      const { data } = await handler.post<{ found: boolean }>('/user', {
-        username,
-        email,
-      });
+      const { data } = await handler.post<{ found: boolean; uuid?: string }>(
+        '/user',
+        {
+          username,
+          email,
+        },
+      );
 
-      if (data.found) {
-        return true;
-      }
-
-      return false;
+      return data;
     } catch (e) {
       console.log(e);
 
-      return false;
+      return {
+        found: false,
+      };
     }
   };
 
@@ -87,16 +106,14 @@ export const useServices = () => {
         },
       });
 
-      console.log(data);
-
-      if (data.success) {
+      if (data.success && user) {
         userDispatch({
           type: 'setUser',
           payload: {
             logged: true,
             user: {
               ...user,
-              ...(userData as IUser),
+              ...userData,
             },
           },
         });
@@ -120,12 +137,17 @@ export const useServices = () => {
 
   const registerUser = async (
     fields: IUserRegister,
+    google?: {
+      image: string;
+    },
   ): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await handler.post<{ user: IUser }>('/register', fields);
 
       if (res.status === 201) {
-        createAuthCookie(res.data.user.uuid);
+        const { uuid } = res.data.user;
+        createAuthCookie(uuid);
+
         userDispatch({
           type: 'setUser',
           payload: {
@@ -133,6 +155,13 @@ export const useServices = () => {
             user: res.data.user,
           },
         });
+
+        if (google) {
+          await updateUser({
+            ...res.data.user,
+            profilePic: google.image,
+          });
+        }
 
         return {
           success: true,
@@ -144,8 +173,6 @@ export const useServices = () => {
       };
     } catch (e) {
       if (isAxiosError(e)) {
-        console.error(e.response?.data);
-
         return {
           success: false,
           error: translateError(e.response?.data.message),
@@ -175,23 +202,15 @@ export const useServices = () => {
         };
       }
 
-      const res = await fetchUser(uuid);
+      const { success } = await fetchUser(uuid);
 
-      if (!res?.user) {
+      if (!success) {
         return {
           success: false,
         };
       }
 
       createAuthCookie(uuid);
-      userDispatch({
-        type: 'setUser',
-        payload: {
-          logged: true,
-          user: res?.user,
-        },
-      });
-
       nav(appRoot);
 
       return {
@@ -218,6 +237,43 @@ export const useServices = () => {
     nav(appRoot);
   };
 
+  const googleSignIn = async () => {
+    const googleUser = await startGoogleSignIn();
+
+    if (!googleUser) return;
+
+    const userFormatted = {
+      email: googleUser.email,
+      name: googleUser.name,
+      password: randomPassword(8),
+      username: toLower(
+        `${googleUser.given_name}-${googleUser.sub.slice(0, 6)}`,
+      ),
+    };
+
+    const { found: userExists, uuid } = await findUser({
+      email: userFormatted.email,
+    });
+
+    if (userExists && uuid) {
+      createAuthCookie(uuid);
+      return await fetchUser(uuid);
+    }
+
+    const { success, error } = await registerUser(userFormatted, {
+      image: googleUser.picture,
+    });
+
+    if (!success && error) {
+      userDispatch({
+        type: 'setError',
+        payload: {
+          errors: [error],
+        },
+      });
+    }
+  };
+
   const redirectHome = () => {
     nav(appRoot);
   };
@@ -231,5 +287,6 @@ export const useServices = () => {
     logout,
     redirectHome,
     hasAuthCookie,
+    googleSignIn,
   };
 };

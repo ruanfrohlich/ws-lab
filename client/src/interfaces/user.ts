@@ -1,4 +1,5 @@
 export interface IUserRegister {
+  name: string;
   username: string;
   email: string;
   password: string;
@@ -28,14 +29,18 @@ export interface IUser {
 
 export interface IUserContext {
   user?: IUser | null;
-  logged: boolean;
+  logged?: boolean;
+  errors?: string[] | null;
 }
 
-export type TUserActions = 'setUser' | 'updateUser' | 'removeUser' | 'updateFriendActivity';
+export type TUserActions =
+  | 'setUser'
+  | 'updateUser'
+  | 'removeUser'
+  | 'updateFriendActivity'
+  | 'setError';
 
 export interface IUserAction {
   type: TUserActions;
-  payload?: {
-    [key: string]: unknown;
-  };
+  payload?: IUserContext & { [key: string]: unknown };
 }

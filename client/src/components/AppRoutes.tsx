@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router';
 import { App } from '../App';
-import { Home, LoginRegister, NotFound, UserAccount } from 'pages';
+import { Home, LoginRegister, UserAccount, Error } from 'pages';
 import { configProvider } from 'utils';
 
 export const AppRoutes = () => {
@@ -10,6 +10,7 @@ export const AppRoutes = () => {
     {
       path: appRoot,
       Component: App,
+      errorElement: <Error type='appError' />,
       children: [
         {
           index: true,
@@ -25,7 +26,7 @@ export const AppRoutes = () => {
         },
         {
           path: '*',
-          Component: NotFound,
+          element: <Error type='notFound' />,
         },
       ],
     },
