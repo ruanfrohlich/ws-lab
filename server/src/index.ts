@@ -1,4 +1,5 @@
-import { createServer } from 'https';
+import { createServer as createServerSSL } from 'https';
+import { createServer } from 'http';
 import { config } from 'dotenv';
 import { readFileSync } from 'fs';
 import { router } from './routes';
@@ -26,7 +27,11 @@ const serverOptions = {
     : await BuildClient();
 
   if (success) {
-    const server = createServer(serverOptions, router).listen(port, () => {
+    const server = isProd
+      ? createServer(router)
+      : createServerSSL(serverOptions, router);
+
+    server.listen(port, () => {
       console.log(
         `🌪️  Server is listening on https://localhost:${port}${onlyAPI ? '/api' : publicUrl}`,
       );
