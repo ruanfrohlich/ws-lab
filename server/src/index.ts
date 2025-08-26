@@ -13,12 +13,6 @@ config({
 
 const port = process.env.PORT ?? 3001;
 
-// HTTP Server
-const serverOptions = {
-  key: readFileSync(process.env.LOCALHOST_SSL_KEY ?? ''),
-  cert: readFileSync(process.env.LOCALHOST_SSL_CERT ?? ''),
-};
-
 (async () => {
   const { success, error } = onlyAPI
     ? {
@@ -29,7 +23,13 @@ const serverOptions = {
   if (success) {
     const server = isProd
       ? createServer(router)
-      : createServerSSL(serverOptions, router);
+      : createServerSSL(
+          {
+            key: readFileSync(process.env.LOCALHOST_SSL_KEY ?? ''),
+            cert: readFileSync(process.env.LOCALHOST_SSL_CERT ?? ''),
+          },
+          router,
+        );
 
     server.listen(port, () => {
       console.log(
