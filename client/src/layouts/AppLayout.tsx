@@ -11,7 +11,7 @@ import {
   OndemandVideo,
   Storefront,
 } from '@mui/icons-material';
-import { capitalize, toLower, uniqueId } from 'lodash';
+import { capitalize } from 'lodash';
 import Cookies from 'js-cookie';
 
 export const AppLayout = (props: { children: ReactNode }) => {
@@ -19,14 +19,8 @@ export const AppLayout = (props: { children: ReactNode }) => {
   const [breadItems, setBreadItems] = useState<string[]>([]);
   const { pathname } = useLocation();
   const { user, logged } = useUser();
-  const {
-    redirectHome,
-    hasAuthCookie,
-    fetchUser,
-    googleSignIn,
-    logout,
-    registerUser,
-  } = useServices();
+  const { redirectHome, hasAuthCookie, fetchUser, logout, googleSignIn } =
+    useServices();
   const [activityShow, setActivityShow] = useState<boolean>(false);
   const activityBox = useRef<HTMLElement>(null);
   const pageContent = useRef<HTMLElement>(null);
@@ -36,22 +30,7 @@ export const AppLayout = (props: { children: ReactNode }) => {
 
     (async () => {
       if (!userToken) {
-        const googleUser = await googleSignIn();
-
-        if (!googleUser) return;
-
-        const userFormatted = {
-          email: googleUser.email,
-          name: googleUser.name,
-          password: uniqueId(googleUser.family_name),
-          username: toLower(
-            `${googleUser.given_name}-${googleUser.sub.slice(0, 6)}`,
-          ),
-        };
-
-        await registerUser(userFormatted, {
-          image: googleUser.picture,
-        });
+        await googleSignIn();
       } else {
         const { success } = await fetchUser(userToken);
 

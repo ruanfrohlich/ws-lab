@@ -4,10 +4,10 @@ import { deburr, toLower } from 'lodash';
 import { CSSProperties } from 'react';
 
 export { configProvider } from './configProvider';
-export * from './enums';
-export const translateError = (error: string) => {
-  console.log(error);
 
+export * from './enums';
+
+export const translateError = (error: string) => {
   switch (error) {
     case 'User already exists': {
       return 'Esse usuário já está cadastrado.';
@@ -81,4 +81,16 @@ export const getDataURL = (blob: Blob) => {
     reader.onerror = () => rej(reader.error);
     reader.readAsDataURL(blob);
   });
+};
+
+export const randomPassword = (length: number) => {
+  const chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';
+  let password = '';
+
+  for (let i = 0; i < length; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  return password;
 };

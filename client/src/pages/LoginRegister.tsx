@@ -1,13 +1,16 @@
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { Alert, Box, Grid2 as Grid, Typography } from '@mui/material';
 import { AppHelmet, AppLink, FormLogin, FormRegister } from 'components';
 import { useUser } from 'contexts';
-import { Fragment, useEffect, useState } from 'react';
+import { googleAuth } from 'integrations';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 export const LoginRegister = () => {
   const [isRegister, setIsRegister] = useState<boolean>(false);
-  const { logged } = useUser();
+  const { logged, errors } = useUser();
   const nav = useNavigate();
+  const googleButton = useRef<HTMLDivElement>(null);
+  const { showGoogleButton } = googleAuth();
 
   const imageHero = new URL(
     'url:../assets/images/hero-login.jpg?as=webp&width=1200',
@@ -18,6 +21,13 @@ export const LoginRegister = () => {
 
   useEffect(() => {
     if (logged && !isRegister) nav('/app');
+    else {
+      if (googleButton.current) {
+        showGoogleButton(googleButton.current, () => {
+          console.log('Google button clicked');
+        });
+      }
+    }
   }, [logged]);
 
   return (
@@ -55,6 +65,12 @@ export const LoginRegister = () => {
               </Typography>{' '}
               agora mesmo!
             </Typography>
+            {errors &&
+              errors.map((error, index) => (
+                <Alert key={index} severity='error'>
+                  {error}
+                </Alert>
+              ))}
             {isRegister ? (
               <Fragment>
                 <FormRegister onCancel={() => setIsRegister(false)} />
@@ -83,6 +99,16 @@ export const LoginRegister = () => {
                 </Typography>
               </Fragment>
             )}
+            <Box
+              sx={{
+                marginTop: 3,
+              }}
+            >
+              <Typography component={'h3'} variant='body1' fontSize={12} mb={2}>
+                Conecte-se com sua conta social
+              </Typography>
+              <Box ref={googleButton} />
+            </Box>
           </Box>
         </Grid>
         <Grid

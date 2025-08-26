@@ -27,33 +27,18 @@ export interface IUser {
   updatedAt: string;
 }
 
-export interface IUserGoogle {
-  iss: string;
-  azp: string;
-  aud: string;
-  sub: string;
-  email: string;
-  email_verified: boolean;
-  nbf: number;
-  name: string;
-  picture: string;
-  given_name: string;
-  family_name: string;
-  iat: number;
-  exp: number;
-  jti: string;
-}
-
 export interface IUserContext {
   user?: IUser | null;
-  logged: boolean;
+  logged?: boolean;
+  errors?: string[] | null;
 }
 
 export type TUserActions =
   | 'setUser'
   | 'updateUser'
   | 'removeUser'
-  | 'updateFriendActivity';
+  | 'updateFriendActivity'
+  | 'setError';
 
 export interface IUserAction {
   type: TUserActions;

@@ -18,7 +18,10 @@ export const useValidate = (
           if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
             updateState('checkingEmail', true);
 
-            const hasUser = await findUser({ username: '', email: value });
+            const { found: hasUser } = await findUser({
+              username: '',
+              email: value,
+            });
 
             if (hasUser) {
               updateState('checkingEmail', false);
@@ -47,7 +50,10 @@ export const useValidate = (
           if (/^[aA-zZ0-9_-]{3,24}$/g.test(value)) {
             updateState('checkingUsername', true);
 
-            const hasUser = await findUser({ username: value, email: '' });
+            const { found: hasUser } = await findUser({
+              username: value,
+              email: '',
+            });
 
             if (hasUser) {
               updateState('checkingUsername', false);

@@ -46,6 +46,12 @@ export const userReducer = (
 
       return state;
     }
+    case 'setError': {
+      return {
+        ...state,
+        errors: action.payload?.errors,
+      };
+    }
     default: {
       throw Error('Unknown action: ' + action.type);
     }

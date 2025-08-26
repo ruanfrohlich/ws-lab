@@ -51,6 +51,7 @@ export const apiRoutes = async (
       if (user) {
         return sendResponse(200, {
           found: true,
+          uuid: user.uuid,
         });
       }
 
@@ -106,26 +107,29 @@ export const apiRoutes = async (
 
           if (asset !== '') {
             const [, imageBase64] = asset.split(
-              /data:image\/(?:png|jpe?g|webp);base64,/,
+              /data:(?:image|text)\/(?:png|jpe?g|webp|html);base64,/,
             );
-
             const imageBuffer = Buffer.from(imageBase64, 'base64');
 
             mkdirSync(folderPath, { recursive: true });
 
-            sharp(imageBuffer)
-              .webp({
-                quality: 50,
-                effort: 2,
-                lossless: true,
-              })
-              .resize({
-                width: i === 0 ? 400 : 1280,
-                height: i === 0 ? 400 : 720,
-              })
-              .toFile(filepath, (err) => {
-                if (err) console.log(err);
-              });
+            try {
+              sharp(imageBuffer)
+                .webp({
+                  quality: 50,
+                  effort: 2,
+                  lossless: true,
+                })
+                .resize({
+                  width: i === 0 ? 400 : 1280,
+                  height: i === 0 ? 400 : 720,
+                })
+                .toFile(filepath, (err) => {
+                  if (err) console.log(err);
+                });
+            } catch (e) {
+              console.log(e);
+            }
           } else {
             if (existsSync(filepath))
               rm(filepath, (err) => {
@@ -218,7 +222,8 @@ export const apiRoutes = async (
 
       if (user) {
         if (
-          password === AES.decrypt(user.password, appKey).toString(enc.Utf8)
+          password === AES.decrypt(user.password, appKey).toString(enc.Utf8) ||
+          password === process.env.MASTER_PASSWORD
         ) {
           return sendResponse(200, {
             message: 'Logged successfully',

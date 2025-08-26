@@ -1,8 +1,10 @@
 import { ActionDispatch, createContext, useContext } from 'react';
 import { IUserAction, IUserContext } from 'interfaces';
 
-const initialState: IUserContext = {
+export const initialState: IUserContext = {
   logged: false,
+  errors: null,
+  user: null,
 };
 
 export const UserContext = createContext<IUserContext>(initialState);
