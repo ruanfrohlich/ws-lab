@@ -33,7 +33,7 @@ const serverOptions = {
 
     server.listen(port, () => {
       console.log(
-        `🌪️  Server is listening on https://localhost:${port}${onlyAPI ? '/api' : publicUrl}`,
+        `🌪️  Server is listening on ${isProd ? 'http' : 'https'}://localhost:${port}${onlyAPI ? '/api' : publicUrl}`,
       );
     });
 
