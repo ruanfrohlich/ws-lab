@@ -1,26 +1,32 @@
-import { createBrowserRouter, RouterProvider } from 'react-router';
+import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router';
 import { App } from '../App';
-import { Home, LoginRegister, NotFound } from '../pages';
-import { configProvider } from '../utils';
+import { Home, LoginRegister, UserAccount, Error } from 'pages';
+import { configProvider } from 'utils';
 
 export const AppRoutes = () => {
   const { appRoot } = configProvider();
-  const routes = [
+
+  const routes: RouteObject[] = [
     {
       path: appRoot,
-      element: <App />,
+      Component: App,
+      errorElement: <Error type='appError' />,
       children: [
         {
           index: true,
-          element: <Home />,
+          Component: Home,
         },
         {
           path: 'join',
-          element: <LoginRegister />,
+          Component: LoginRegister,
+        },
+        {
+          path: 'account',
+          Component: UserAccount,
         },
         {
           path: '*',
-          element: <NotFound />,
+          element: <Error type='notFound' />,
         },
       ],
     },

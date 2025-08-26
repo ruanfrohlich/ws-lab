@@ -1,44 +1,18 @@
 export interface ISocketData {
-  type: 'chatMessage' | 'updateClientId';
-  clientId: string;
+  type: 'chatMessage' | 'updateActivityStatus' | 'error';
   content: {
-    from: string;
-    to: string;
-    user: {
-      name: string;
-    };
-    message: string;
+    [key: string]: unknown;
   };
 }
 
-export interface IWSState {
+export type TWebsocketActions = 'updateWSState';
+
+export interface IWebsocketAction {
+  type: TWebsocketActions;
+  payload?: IWebsocketContext;
+}
+
+export interface IWebsocketContext {
   socket?: WebSocket;
   connected: boolean;
-  username?: string;
-  clientId: string;
-  message?: string;
-  messagesHistory?: string[];
-  openChats: string[];
-  myMouse?: {
-    x: number;
-    y: number;
-  };
-  mouses?: {
-    id: string;
-    coordinates: {
-      x: number;
-      y: number;
-    };
-  };
-  receivedMessages: Array<{
-    id: string;
-    avatarColor?: string;
-    user?: {
-      name: string;
-    };
-    messages: string[];
-  }>;
-  receiver: {
-    id: string;
-  };
 }

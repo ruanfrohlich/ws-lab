@@ -1,5 +1,9 @@
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "prettier.configPath": ".prettierrc"
+  "prettier.configPath": ".prettierrc",
+  "eslint.enable": true,
+  "eslint.validate": ["ts", "tsx"],
+  "eslint.run": "onType",
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

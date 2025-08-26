@@ -1,7 +1,7 @@
 import { Theme } from '@emotion/react';
 import { Box, Button, SxProps, TextField, Typography } from '@mui/material';
 import { red } from '@mui/material/colors';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, RefObject, useState } from 'react';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
@@ -10,26 +10,29 @@ interface IAppInputProps {
   label: string;
   error: string;
   value: string;
+  autoComplete?: string;
   count?: {
     current: number;
     max: number;
   };
   onChange: (evt: ChangeEvent<HTMLInputElement>) => void;
+  ref?: RefObject<HTMLInputElement | null>;
 }
 
 export const AppInput = (props: IAppInputProps) => {
-  const { id, error, label, value, onChange, count } = props;
+  const { id, error, label, value, onChange, count, autoComplete, ref } = props;
   const inputStyles: SxProps<Theme> = {
     position: 'relative',
     backgroundColor: 'rgba(0,0,0,.6)',
   };
   const [pwVisible, setPwVisible] = useState<boolean>(false);
-
   const attributes: { [key: string]: unknown } = {
     id,
     label,
     value,
     onChange,
+    autoComplete,
+    ref,
   };
 
   if (id === 'password') {

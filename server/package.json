@@ -1,23 +1,47 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.ts",
   "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^22.10.10",
-    "@types/ws": "^8.5.14",
-    "cookie": "^1.0.2",
-    "dotenv": "^16.4.7",
-    "sequelize": "^6.37.5",
-    "sqlite3": "^5.1.7",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.3",
-    "ws": "^8.18.0"
+  "scripts": {
+    "sqz": "sequelize",
+    "dev": "nodemon",
+    "dev:api": "nodemon --api",
+    "start": "tsx src/index.ts --prod",
+    "start:api": "tsx src/index.ts --api"
   },
-  "dependencies": {
+  "nodemonConfig": {
+    "ignore": [
+      "**/node_modules/**",
+      "**/docs/**",
+      "**/test/**"
+    ],
+    "watch": [
+      "src",
+      ".env.dev",
+      "../client/.env.dev"
+    ],
+    "ext": "ts",
+    "exec": "tsx src/index.ts"
+  },
+  "devDependencies": {
+    "@parcel/config-default": "^2.x",
+    "@parcel/core": "^2.x",
     "@types/crypto-js": "^4.2.2",
     "@types/lodash": "^4.17.16",
+    "@types/node": "^24.3.0",
+    "@types/ws": "^8.5.14",
+    "cookie": "^1.0.2",
     "crypto-js": "^4.2.0",
-    "lodash": "^4.17.21"
+    "dotenv": "^16.4.7",
+    "loading-cli": "^1.1.2",
+    "lodash": "^4.17.21",
+    "nodemon": "^3.1.10",
+    "sequelize": "^6.37.5",
+    "sharp": "^0.34.3",
+    "sqlite3": "^5.1.7",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2",
+    "ws": "^8.18.0",
+    "zlib": "^1.0.5"
   }
 }

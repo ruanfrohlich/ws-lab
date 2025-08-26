@@ -1,48 +1,70 @@
 import { readFile } from 'fs';
 import { IncomingMessage, ServerResponse } from 'http';
-import { extname, relative } from 'path';
-import { cwd } from 'process';
+import { extname, join } from 'path';
+import { publicUrl, rootPath } from '../utils';
+import { createGzip } from 'zlib';
 
-export const clientRoutes = ({ url, method }: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
-  const appRoot = relative(cwd(), 'client/public');
+export const clientRoutes = (
+  { url }: IncomingMessage,
+  res: ServerResponse<IncomingMessage>,
+) => {
+  const appRoot = join(rootPath, '../client/public');
   let contentType = '';
-  let filePath = appRoot + url?.replace('/app', '');
+  let filePath = appRoot + url?.replace(publicUrl, '');
 
   filePath = filePath.replace(/\?\d*/g, '');
 
   const extName = extname(filePath);
 
-  switch (extName) {
-    case '.js':
+  switch (true) {
+    case extName === '.js':
       contentType = 'text/javascript';
       break;
-    case '.css':
+    case extName === '.css':
       contentType = 'text/css';
       break;
-    case '.json':
+    case extName === '.json':
       contentType = 'application/json';
       break;
-    case '.png':
+    case extName === '.png':
       contentType = 'image/png';
       break;
-    case '.jpg':
+    case /\.jpe?g/.test(extName):
       contentType = 'image/jpg';
       break;
-    case '.jpeg':
-      contentType = 'image/jpg';
+    case extName === '.webp':
+      contentType = 'image/webp';
       break;
-    case '.wav':
+    case extName === '.wav':
       contentType = 'audio/wav';
+      break;
+    case extName === '.woff':
+      contentType = 'font/woff';
+      break;
+    case extName === '.woff2':
+      contentType = 'font/woff2';
       break;
     default:
       filePath = appRoot + '/index.html';
       contentType = 'text/html';
   }
 
-  console.log(filePath);
-
   readFile(filePath, function (error, content) {
-    res.writeHead(200, { 'Content-Type': contentType });
-    res.end(content, 'utf-8');
+    if (error) {
+      res.writeHead(500);
+      return res.end('Server error');
+    }
+
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Cache-Control': 'max-age=31536000',
+      'Content-Encoding': 'gzip',
+    });
+
+    const gzip = createGzip();
+
+    gzip.pipe(res);
+
+    return gzip.end(content, 'utf-8');
   });
 };

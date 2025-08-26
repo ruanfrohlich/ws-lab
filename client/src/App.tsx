@@ -1,34 +1,21 @@
 import { Outlet } from 'react-router';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { useWebsocketContext } from './contexts';
-import { AppLayout } from './layouts/AppLayout';
-import { StrictMode } from 'react';
-import 'dotenv/config';
-
-const appTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#e7e7e7',
-      dark: '#1d1d1c',
-    },
-  },
-});
+import { AppLayout } from 'layouts/AppLayout';
+import { UserProvider, WebsocketProvider } from 'providers';
+import { ThemeProvider } from '@mui/material';
+import { appTheme } from 'utils';
 
 export function App() {
-  const { WebsocketContext, websocket } = useWebsocketContext();
-
   return (
-    <StrictMode>
-      <ThemeProvider theme={appTheme}>
-        <WebsocketContext.Provider value={websocket}>
+    <ThemeProvider theme={appTheme}>
+      <UserProvider>
+        <WebsocketProvider>
           <CssBaseline />
           <AppLayout>
             <Outlet />
           </AppLayout>
-        </WebsocketContext.Provider>
-      </ThemeProvider>
-    </StrictMode>
+        </WebsocketProvider>
+      </UserProvider>
+    </ThemeProvider>
   );
 }

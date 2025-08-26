@@ -1,12 +1,34 @@
-import { AppHelmet, AppLink, FormLogin, FormRegister } from '../components';
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import { Fragment, useState } from 'react';
-import hero from 'url:../assets/images/hero-login.jpg';
+import { Alert, Box, Grid2 as Grid, Typography } from '@mui/material';
+import { AppHelmet, AppLink, FormLogin, FormRegister } from 'components';
+import { useUser } from 'contexts';
+import { googleAuth } from 'integrations';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 
 export const LoginRegister = () => {
   const [isRegister, setIsRegister] = useState<boolean>(false);
+  const { logged, errors } = useUser();
+  const nav = useNavigate();
+  const googleButton = useRef<HTMLDivElement>(null);
+  const { showGoogleButton } = googleAuth();
+
+  const imageHero = new URL(
+    'url:../assets/images/hero-login.jpg?as=webp&width=1200',
+    import.meta.url,
+  ).toString();
 
   const handleRegister = () => setIsRegister(!isRegister);
+
+  useEffect(() => {
+    if (logged && !isRegister) nav('/app');
+    else {
+      if (googleButton.current) {
+        showGoogleButton(googleButton.current, () => {
+          console.log('Google button clicked');
+        });
+      }
+    }
+  }, [logged]);
 
   return (
     <Box>
@@ -21,13 +43,7 @@ export const LoginRegister = () => {
               margin: '0 30px 0 auto ',
             }}
           >
-            <Typography
-              component={'h1'}
-              fontSize={48}
-              sx={{
-                fontFamily: '"Boldonse", system-ui',
-              }}
-            >
+            <Typography component={'h1'} fontSize={48} variant='h2' mb={2}>
               {isRegister ? 'Cadastre-se' : 'Entrar'}
             </Typography>
             <Typography
@@ -39,15 +55,22 @@ export const LoginRegister = () => {
               <Typography
                 component={'span'}
                 fontSize={12}
-                sx={{
-                  fontFamily: '"Boldonse", system-ui',
+                variant='h2'
+                sx={({ palette }) => ({
                   textDecoration: 'underline',
-                }}
+                  color: palette.secondary.main,
+                })}
               >
                 gratuitamente
               </Typography>{' '}
               agora mesmo!
             </Typography>
+            {errors &&
+              errors.map((error, index) => (
+                <Alert key={index} severity='error'>
+                  {error}
+                </Alert>
+              ))}
             {isRegister ? (
               <Fragment>
                 <FormRegister onCancel={() => setIsRegister(false)} />
@@ -64,11 +87,28 @@ export const LoginRegister = () => {
                 <Typography variant='body1'>
                   Não possui conta?{' '}
                   <AppLink to={''} onClick={handleRegister}>
-                    Cadastre-se
+                    <Box
+                      component={'span'}
+                      sx={({ palette: { secondary } }) => ({
+                        color: secondary.main,
+                      })}
+                    >
+                      Cadastre-se
+                    </Box>
                   </AppLink>
                 </Typography>
               </Fragment>
             )}
+            <Box
+              sx={{
+                marginTop: 3,
+              }}
+            >
+              <Typography component={'h3'} variant='body1' fontSize={12} mb={2}>
+                Conecte-se com sua conta social
+              </Typography>
+              <Box ref={googleButton} />
+            </Box>
           </Box>
         </Grid>
         <Grid
@@ -89,8 +129,8 @@ export const LoginRegister = () => {
           >
             <Box
               component={'img'}
-              src={hero}
-              alt={'Imagem divulgação'}
+              src={imageHero}
+              alt={'Imagem decoração'}
               sx={{
                 width: '100%',
                 height: '100%',

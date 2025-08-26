@@ -1,19 +1,10 @@
-import { AppHelmet } from '../components';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
+import { AppHelmet } from 'components';
 
 export function Home() {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        paddingBlock: 3,
-      }}
-    >
-      <AppHelmet title='Home' description='Estudos com websocket + webRTC' />
-      <Typography variant='h3' component={'h1'}>
-        Home
-      </Typography>
+    <Box>
+      <AppHelmet description='Projeto para estudos com websocket + webRTC. Como conectar pares e estabelecer uma conexão para videochamadas.' />
     </Box>
   );
 }

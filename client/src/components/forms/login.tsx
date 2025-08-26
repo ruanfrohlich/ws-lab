@@ -1,18 +1,21 @@
-import { Box, Button } from '@mui/material';
+import { Alert, Box, Button, CircularProgress } from '@mui/material';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { Form } from 'react-router';
-import { ILoginFormState } from '../../interfaces';
+import { ILoginFormState } from 'interfaces';
 import { AppInput } from '../Input';
-import { commonRegEx } from '../../utils';
+import { commonRegEx } from 'utils';
+import { useServices } from 'hooks';
 
 export const FormLogin = () => {
+  const { login } = useServices();
   const [state, setState] = useState<ILoginFormState>({
     fields: {
       password: '',
       username: '',
     },
+    loading: false,
     showPassword: false,
     isValid: false,
+    loginError: false,
   });
 
   const handleChange = (evt: ChangeEvent<HTMLInputElement>) => {
@@ -32,7 +35,31 @@ export const FormLogin = () => {
   const handleSubmit = async (evt: FormEvent) => {
     evt.preventDefault();
 
-    console.log('Login submitted');
+    setState((state) => {
+      return { ...state, loading: true, loginError: false };
+    });
+
+    const {
+      fields: { username, password },
+    } = state;
+
+    const { success } = await login({
+      username,
+      password,
+    }).finally(() => {
+      setState((state) => {
+        return { ...state, loading: false };
+      });
+    });
+
+    if (!success) {
+      setState((state) => {
+        return {
+          ...state,
+          loginError: true,
+        };
+      });
+    }
   };
 
   useEffect(() => {
@@ -40,7 +67,8 @@ export const FormLogin = () => {
     const patterns = commonRegEx;
 
     const isValid =
-      (patterns.email.test(username) || patterns.username.test(username)) && patterns.password.test(password);
+      (patterns.email.test(username) || patterns.username.test(username)) &&
+      patterns.password.test(password);
 
     setState((state) => {
       return {
@@ -51,7 +79,13 @@ export const FormLogin = () => {
   }, [state.fields]);
 
   return (
-    <Form noValidate onSubmit={handleSubmit}>
+    <form noValidate onSubmit={handleSubmit}>
+      {state.loginError && (
+        <Alert severity='error'>
+          Opa! Parece que tivemos um problema ao conectar você, dá uma checada
+          no seus dados de acesso ou tente novamente em alguns minutos.
+        </Alert>
+      )}
       <Box
         sx={{
           display: 'flex',
@@ -66,12 +100,25 @@ export const FormLogin = () => {
           onChange={handleChange}
           error=''
           value={state.fields.username}
+          autoComplete='username'
         />
-        <AppInput id='password' label='Senha' error='' value={state.fields.password} onChange={handleChange} />
-        <Button type='submit' variant='contained' disabled={!state.isValid}>
-          Entrar
+        <AppInput
+          id='password'
+          label='Senha'
+          error=''
+          value={state.fields.password}
+          onChange={handleChange}
+          autoComplete='password'
+        />
+        <Button
+          type='submit'
+          variant='contained'
+          disabled={!state.isValid}
+          loading={state.loading}
+        >
+          {state.loading ? <CircularProgress size={20} /> : 'Entrar'}
         </Button>
       </Box>
-    </Form>
+    </form>
   );
 };

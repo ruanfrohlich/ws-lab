@@ -1,6 +1,8 @@
 import { IncomingMessage } from 'http';
+import { relative } from 'path';
+import { cwd } from 'process';
 
-const acceptedOrigins = ['https://localhost:3001'];
+const acceptedOrigins = ['https://localhost:3005'];
 
 export const log = (message: string) => {
   message = `(${new Date().toLocaleString('pt-BR')}) - ${message}.`;
@@ -11,8 +13,8 @@ export const originIsAllowed = (origin: string) => {
   if (acceptedOrigins.includes(origin)) return true;
 };
 
-export const getBody = (req: IncomingMessage): Promise<{ [key: string]: any } | null> => {
-  return new Promise((resolve) => {
+export const getBody = <T>(req: IncomingMessage): Promise<T> => {
+  return new Promise((resolve, reject) => {
     const data: Buffer[] = [];
 
     req
@@ -23,7 +25,13 @@ export const getBody = (req: IncomingMessage): Promise<{ [key: string]: any } | 
         const body = Buffer.concat(data).toString();
 
         if (body) resolve(JSON.parse(body));
-        else resolve(null);
+        else reject(null);
       });
   });
 };
+
+export const onlyAPI = process.argv.includes('--api');
+export const isProd = process.argv.includes('--prod');
+export const publicUrl = isProd ? '/ws-lab' : '/app';
+export const rootPath = cwd(); // path to /server
+export const clientRoot = relative(rootPath, '../client');

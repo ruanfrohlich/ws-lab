@@ -2,38 +2,29 @@
   "name": "web-socket-lab",
   "version": "1.0.0",
   "license": "MIT",
+  "type": "module",
+  "private": true,
   "scripts": {
-    "dev": "nodemon",
-    "dev:api": "nodemon --api",
-    "start": "rimraf -rf client/.parcel-cache client/public && NODE_ENV=production ts-node server/src/index.ts",
-    "start:api": "ts-node server/src/index.ts --api"
+    "ws:client": "yarn workspace client",
+    "ws:server": "yarn workspace server",
+    "dev": "yarn ws:server dev",
+    "start": "yarn ws:server start",
+    "dev:api": "yarn ws:server dev:api",
+    "lint": "eslint"
   },
   "engines": {
-    "node": "22"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "**/node_modules/**",
-      "**/docs/**",
-      "**/test/**"
-    ],
-    "watch": [
-      "server/src",
-      "server/.env.dev"
-    ],
-    "ext": "ts,tsx,js,jsx,html",
-    "exec": "ts-node server/src/index.ts"
+    "node": "^22.15.1",
+    "yarn": "^1.22.22"
   },
   "devDependencies": {
-    "loading-cli": "^1.1.2",
-    "nodemon": "^3.1.9",
+    "@eslint/js": "^9.28.0",
+    "eslint": "^9.28.0",
+    "eslint-plugin-react": "^7.37.5",
     "prettier": "^3.4.2",
-    "rimraf": "^6.0.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "typescript-eslint": "^8.34.0"
   },
-  "dependencies": {
-    "@parcel/config-default": "^2.13.3",
-    "@parcel/core": "^2.13.3"
-  }
+  "workspaces": [
+    "client",
+    "server"
+  ]
 }

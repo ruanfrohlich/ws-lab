@@ -1,19 +1,27 @@
 import { Box } from '@mui/material';
-import { IRegisterFormState } from '../interfaces';
+import { IRegisterFormState } from 'interfaces';
 import { Fragment } from 'react';
-import { userService } from '../services';
+import { useServices } from './services';
 
-export const useValidate = (updateState: (el: keyof IRegisterFormState, value: unknown) => void) => {
-  const { findUser } = userService();
+export const useValidate = (
+  updateState: (el: keyof IRegisterFormState, value: unknown) => void,
+) => {
+  const { findUser } = useServices();
 
   const validate = async (field: string, value: string) => {
     if (value !== '' && value.length > 3) {
       switch (field) {
+        case 'name': {
+          return true;
+        }
         case 'email': {
           if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
             updateState('checkingEmail', true);
 
-            const hasUser = await findUser({ username: '', email: value });
+            const { found: hasUser } = await findUser({
+              username: '',
+              email: value,
+            });
 
             if (hasUser) {
               updateState('checkingEmail', false);
@@ -32,7 +40,8 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
 
           updateState('checkingEmail', false);
           updateState('errors', {
-            email: 'A gente precisa do seu e-mail válido pra seguir com o cadastro.',
+            email:
+              'A gente precisa do seu e-mail válido pra seguir com o cadastro.',
           });
 
           return false;
@@ -41,7 +50,10 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
           if (/^[aA-zZ0-9_-]{3,24}$/g.test(value)) {
             updateState('checkingUsername', true);
 
-            const hasUser = await findUser({ username: value, email: '' });
+            const { found: hasUser } = await findUser({
+              username: value,
+              email: '',
+            });
 
             if (hasUser) {
               updateState('checkingUsername', false);
@@ -67,7 +79,9 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
         case 'password': {
           if (value.length < 8) return false;
 
-          if (/^(?=.*\d)(?=.*[aA-zZ])(?=.*[^\w\d\s:])([^\s]){8,}$/gm.test(value)) {
+          if (
+            /^(?=.*\d)(?=.*[aA-zZ])(?=.*[^\w\d\s:])([^\s]){8,}$/gm.test(value)
+          ) {
             updateState('errors', { password: '' });
             return true;
           }
@@ -75,7 +89,8 @@ export const useValidate = (updateState: (el: keyof IRegisterFormState, value: u
           updateState('errors', {
             password: (
               <Fragment>
-                Por favor, verifique a senha digitada. Precisa cumprir as seguintes regras:
+                Por favor, verifique a senha digitada. Precisa cumprir as
+                seguintes regras:
                 <Box component={'ul'}>
                   <li>Ter no mínimo 8 caracteres</li>
                   <li>1 letra maiúscula</li>

@@ -1,10 +1,22 @@
-import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
-import { ChangeEvent, FormEvent, Fragment, useEffect, useRef, useState } from 'react';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Typography,
+} from '@mui/material';
+import {
+  ChangeEvent,
+  FormEvent,
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { AppInput } from '../Input';
-import { useValidate } from '../../hooks';
-import { IRegisterFormFields, IRegisterFormState } from '../../interfaces';
+import { useServices, useValidate } from 'hooks';
+import { IRegisterFormFields, IRegisterFormState } from 'interfaces';
 import { pull } from 'lodash';
-import { userService } from '../../services';
 import { Link } from 'react-router';
 
 export const FormRegister = (props: { onCancel: () => void }) => {
@@ -18,13 +30,15 @@ export const FormRegister = (props: { onCancel: () => void }) => {
     validatedFields: [],
     registerSuccess: false,
     fields: {
+      name: '',
       username: '',
       email: '',
       password: '',
     },
   });
-  const { registerUser } = userService();
+  const { registerUser } = useServices();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateState = (el: keyof IRegisterFormState, value: any) => {
     setState((state) => {
       switch (el) {
@@ -84,7 +98,9 @@ export const FormRegister = (props: { onCancel: () => void }) => {
       updateState('validatedFields', [...updatedInvalid]);
     }
 
-    setRegisterFieldsHeight(registerFields.current?.getBoundingClientRect().height ?? 0);
+    setRegisterFieldsHeight(
+      registerFields.current?.getBoundingClientRect().height ?? 0,
+    );
 
     if (field === 'username' && !isValid) {
       setRegisterFieldsHeight(0);
@@ -94,7 +110,9 @@ export const FormRegister = (props: { onCancel: () => void }) => {
   useEffect(() => {
     updateState(
       'isValid',
-      Object.keys(state.fields).every((key) => state.validatedFields.includes(key)),
+      Object.keys(state.fields).every((key) =>
+        state.validatedFields.includes(key),
+      ),
     );
   }, [state.validatedFields]);
 
@@ -120,7 +138,8 @@ export const FormRegister = (props: { onCancel: () => void }) => {
       }
 
       return updateState('errors', {
-        register: 'Tivemos um probleminha ao tentar realizar seu cadastro. Tente novamente em alguns minutos.',
+        register:
+          'Tivemos um probleminha ao tentar realizar seu cadastro. Tente novamente em alguns minutos.',
       });
     } finally {
       updateState('loading', false);
@@ -136,18 +155,23 @@ export const FormRegister = (props: { onCancel: () => void }) => {
             component={'span'}
             fontSize={10}
             sx={{
-              fontFamily: '"Boldonse", system-ui',
               textDecoration: 'underline',
             }}
+            variant='h2'
           >
-            <Link style={{ textDecoration: 'none', color: 'inherit' }} to={'/app/account'}>
+            <Link
+              style={{ textDecoration: 'none', color: 'inherit' }}
+              to={'/app/account'}
+            >
               aqui
             </Link>
           </Typography>
           .
         </Alert>
       )}
-      {state.errors?.register && <Alert severity='error'>{state.errors?.register}</Alert>}
+      {state.errors?.register && (
+        <Alert severity='error'>{state.errors?.register}</Alert>
+      )}
       <form noValidate onSubmit={handleSubmit}>
         <Box sx={{ ...flex, paddingBlock: 2, gap: '0' }}>
           <Box
@@ -186,6 +210,14 @@ export const FormRegister = (props: { onCancel: () => void }) => {
           >
             <Box sx={flex} padding={0} ref={registerFields}>
               <AppInput
+                id='name'
+                label='Seu nome'
+                onChange={handleChange}
+                error={state.errors?.name ?? ''}
+                value={state.fields.name}
+              />
+
+              <AppInput
                 id='password'
                 label='Senha'
                 onChange={handleChange}
@@ -223,7 +255,12 @@ export const FormRegister = (props: { onCancel: () => void }) => {
                 }}
                 padding={0}
               >
-                <Button type='submit' variant='contained' fullWidth disabled={!state.isValid}>
+                <Button
+                  type='submit'
+                  variant='contained'
+                  fullWidth
+                  disabled={!state.isValid}
+                >
                   {state.loading ? <CircularProgress size={20} /> : 'Cadastrar'}
                 </Button>
                 <Button
