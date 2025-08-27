@@ -18,10 +18,12 @@ import { useServices, useValidate } from 'hooks';
 import { IRegisterFormFields, IRegisterFormState } from 'interfaces';
 import { pull } from 'lodash';
 import { Link } from 'react-router';
+import { configProvider } from 'utils';
 
 export const FormRegister = (props: { onCancel: () => void }) => {
   const [registerFieldsHeight, setRegisterFieldsHeight] = useState<number>(0);
   const registerFields = useRef<HTMLElement>(null);
+  const { appRoot } = configProvider();
   const [state, setState] = useState<IRegisterFormState>({
     loading: false,
     isValid: false,
@@ -161,7 +163,7 @@ export const FormRegister = (props: { onCancel: () => void }) => {
           >
             <Link
               style={{ textDecoration: 'none', color: 'inherit' }}
-              to={'/app/account'}
+              to={appRoot + '/account'}
             >
               aqui
             </Link>

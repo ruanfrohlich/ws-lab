@@ -2,7 +2,10 @@ import { IncomingMessage } from 'http';
 import { relative } from 'path';
 import { cwd } from 'process';
 
-const acceptedOrigins = ['https://localhost:3005'];
+const acceptedOrigins = [
+  'https://localhost:3005',
+  'https://ws-lab-server.onrender.com',
+];
 
 export const log = (message: string) => {
   message = `(${new Date().toLocaleString('pt-BR')}) - ${message}.`;
