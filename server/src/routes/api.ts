@@ -1,4 +1,4 @@
-import { IncomingMessage, ServerResponse } from 'http';
+import { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'http';
 import { AES, enc } from 'crypto-js';
 import database from '../database';
 import { getBody, rootPath } from '../utils';
@@ -19,11 +19,16 @@ export const apiRoutes = async (
   const { UserModel, FriendsModel } = await database();
   const appKey = process.env.APP_KEY ?? '';
 
-  const sendResponse = (status: number, message: object) => {
+  const sendResponse = (
+    status: number,
+    message: object,
+    headers?: OutgoingHttpHeaders,
+  ) => {
     res.writeHead(status, {
       'content-type': 'application/json',
-      'Cache-Control': 'max-age=31536000',
+      'cache-control': 'max-age=604800',
       'Content-Encoding': 'gzip',
+      ...headers,
     });
 
     const gzip = createGzip();
@@ -258,7 +263,7 @@ export const apiRoutes = async (
 
         res.writeHead(200, {
           'content-type': 'image/webp',
-          'cache-control': 'max-age=31536000',
+          'cache-control': 'max-age=604800',
         });
 
         return res.end(data);
