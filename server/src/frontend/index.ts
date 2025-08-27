@@ -121,3 +121,5 @@ export const BuildClient = async (): Promise<IWatchResponse> => {
     }
   });
 };
+
+export default BuildClient;
