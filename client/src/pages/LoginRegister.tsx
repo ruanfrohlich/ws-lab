@@ -4,6 +4,7 @@ import { useUser } from 'contexts';
 import { googleAuth } from 'integrations';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { configProvider } from 'utils';
 
 export const LoginRegister = () => {
   const [isRegister, setIsRegister] = useState<boolean>(false);
@@ -11,6 +12,7 @@ export const LoginRegister = () => {
   const nav = useNavigate();
   const googleButton = useRef<HTMLDivElement>(null);
   const { showGoogleButton } = googleAuth();
+  const { appRoot } = configProvider();
 
   const imageHero = new URL(
     'url:../assets/images/hero-login.jpg?as=webp&width=1200',
@@ -20,7 +22,7 @@ export const LoginRegister = () => {
   const handleRegister = () => setIsRegister(!isRegister);
 
   useEffect(() => {
-    if (logged && !isRegister) nav('/app');
+    if (logged && !isRegister) nav(appRoot);
     else {
       if (googleButton.current) {
         showGoogleButton(googleButton.current, () => {
