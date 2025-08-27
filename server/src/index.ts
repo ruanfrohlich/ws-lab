@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 import { readFileSync } from 'fs';
 import { router } from './routes';
 import { formatMB, isProd, publicUrl, rootPath } from './utils';
-import { BuildClient } from './frontend';
+import BuildClient from './frontend';
 import websocket from './websocket';
 
 config({

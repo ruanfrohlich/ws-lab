@@ -5,6 +5,7 @@
   "scripts": {
     "sqz": "sequelize",
     "dev": "nodemon",
+    "build": "tsx src/client.ts --prod",
     "start": "tsx src/index.ts --prod"
   },
   "nodemonConfig": {
