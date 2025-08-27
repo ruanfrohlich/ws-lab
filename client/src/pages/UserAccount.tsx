@@ -92,6 +92,7 @@ export const UserAccount = () => {
           onError={({ currentTarget }) => {
             currentTarget.src = 'https://picsum.photos/1920/1080';
           }}
+          fetchPriority='high'
           sx={imageStyles}
         />
         <Button

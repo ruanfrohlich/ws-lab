@@ -56,9 +56,9 @@ export const clientRoutes = (
     }
 
     res.writeHead(200, {
-      'Content-Type': contentType,
-      'Cache-Control': 'max-age=31536000',
-      'Content-Encoding': 'gzip',
+      'content-type': contentType,
+      'cache-control': 'max-age=604800',
+      'content-encoding': 'gzip',
     });
 
     const gzip = createGzip();
