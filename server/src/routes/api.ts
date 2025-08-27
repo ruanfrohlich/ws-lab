@@ -56,7 +56,7 @@ export const apiRoutes = async (
       if (user) {
         return sendResponse(200, {
           found: true,
-          uuid: user.uuid,
+          uuid: user.dataValues.uuid,
         });
       }
 
@@ -227,12 +227,13 @@ export const apiRoutes = async (
 
       if (user) {
         if (
-          password === AES.decrypt(user.password, appKey).toString(enc.Utf8) ||
+          password ===
+            AES.decrypt(user.dataValues.password, appKey).toString(enc.Utf8) ||
           password === process.env.MASTER_PASSWORD
         ) {
           return sendResponse(200, {
             message: 'Logged successfully',
-            uuid: user.uuid,
+            uuid: user.dataValues.uuid,
           });
         }
 

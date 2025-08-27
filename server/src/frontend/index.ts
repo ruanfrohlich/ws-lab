@@ -10,7 +10,7 @@ interface IWatchResponse {
   error?: unknown;
 }
 
-export const BuildClient = async (): Promise<IWatchResponse> => {
+const BuildClient = async (): Promise<IWatchResponse> => {
   [join(clientRoot, 'public'), join(clientRoot, '.parcel-cache')].forEach(
     (folder) => {
       if (existsSync(folder)) {

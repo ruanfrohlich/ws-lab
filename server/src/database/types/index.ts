@@ -5,7 +5,7 @@ import {
   ModelDefined,
 } from 'sequelize';
 
-export interface IDefaultAttributes {
+export interface DefaultAttributes {
   id: number;
   createdAt: CreationOptional<Date>;
   updatedAt: CreationOptional<Date>;
@@ -19,7 +19,7 @@ export enum AccountTypesEnum {
   CHANNEL = 'channel',
 }
 
-export interface AccountTypeAttributes extends IDefaultAttributes {
+export interface AccountTypeAttributes extends DefaultAttributes {
   label: AccountTypesEnum;
 }
 
@@ -35,7 +35,7 @@ export type AccountTypeModel = ModelDefined<
   AccountTypeCreationAttributes
 >;
 
-export interface UserAttributes extends IDefaultAttributes {
+export interface UserAttributes extends DefaultAttributes {
   name: string;
   type: AccountTypesEnum;
   username: string;
@@ -53,7 +53,7 @@ export type UserCreationAttributes = Optional<
 
 export type UserModel = ModelDefined<UserAttributes, UserCreationAttributes>;
 
-export interface FriendsAttributes extends IDefaultAttributes {
+export interface FriendsAttributes extends DefaultAttributes {
   status: string;
 }
 
@@ -81,39 +81,52 @@ export interface IUserFriends {
 
 export type TActivityStatus = 'online' | 'away' | 'offline' | 'busy';
 
+export interface FriendStatusAttributes extends DefaultAttributes {
+  status: TFriendStatus;
+}
+
+export type FriendStatusModel = ModelDefined<
+  FriendStatusAttributes,
+  Optional<FriendStatusAttributes, DefaultOptionalAttibutes>
+>;
+
 export const ModelTypes: {
   [key: string]: ModelAttributes;
 } = {
   User: {
     name: { type: DataTypes.STRING, allowNull: false },
-    username: { type: DataTypes.STRING, allowNull: false, unique: true },
-    email: { type: DataTypes.STRING, allowNull: false, unique: true },
+    username: { type: DataTypes.STRING, allowNull: false },
+    email: { type: DataTypes.STRING, allowNull: false },
     password: { type: DataTypes.STRING, allowNull: false },
     uuid: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
     },
-    profilePic: { type: DataTypes.STRING, defaultValue: '' },
-    coverImage: { type: DataTypes.STRING, defaultValue: '' },
+    profilePic: { type: DataTypes.TEXT, defaultValue: '' },
+    coverImage: { type: DataTypes.TEXT, defaultValue: '' },
   },
   AccountType: {
     label: {
-      type: DataTypes.ENUM(...Object.values(AccountTypesEnum)),
+      type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
   },
   Friends: {
     status: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING,
       allowNull: false,
       defaultValue: 'send',
     },
     activityStatus: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING,
       allowNull: false,
       defaultValue: 'offline',
+    },
+  },
+  FriendStatus: {
+    status: {
+      type: DataTypes.STRING,
     },
   },
 };

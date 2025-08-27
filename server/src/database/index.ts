@@ -1,30 +1,24 @@
 import { Sequelize } from 'sequelize';
-import { AccountType, Friends, User } from './models';
-import { join } from 'path';
-import { rootPath } from '../utils';
+import { AccountType, Friends, FriendStatus, User } from './models';
 
 const database = async () => {
-  const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: join(rootPath, '.db/db.sqlite3'),
+  const sequelize = new Sequelize(String(process.env.DB_URL), {
+    dialect: 'postgres',
     logging: false,
     define: {
       freezeTableName: true,
+    },
+    dialectOptions: {
+      ssl: {
+        rejectUnauthorized: false,
+      },
     },
   });
 
   const AccountTypeModel = AccountType(sequelize);
   const UserModel = User(sequelize);
   const FriendsModel = Friends(sequelize);
-
-  UserModel.Model.belongsTo(AccountTypeModel.Model, {
-    onUpdate: 'restrict',
-    targetKey: 'label',
-    foreignKey: {
-      name: 'type',
-      allowNull: false,
-    },
-  });
+  const FriendStatusModel = FriendStatus(sequelize);
 
   UserModel.Model.hasMany(FriendsModel.Model, {
     as: 'friends',
@@ -39,13 +33,25 @@ const database = async () => {
     });
   });
 
+  AccountTypeModel.Model.hasOne(UserModel.Model, {
+    sourceKey: 'label',
+    foreignKey: {
+      name: 'type',
+      allowNull: false,
+    },
+  });
+
   const close = () => sequelize.close();
+
+  const syncDB = async () => await sequelize.sync({ alter: true });
 
   return {
     AccountTypeModel,
     UserModel,
     FriendsModel,
+    FriendStatusModel,
     close,
+    syncDB,
   };
 };
 

@@ -1,4 +1,4 @@
-import { QueryTypes, Sequelize } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import {
   FriendsModel,
   IUserFriends,
@@ -8,25 +8,31 @@ import {
   UserModel,
 } from '../types';
 import { log } from '../../utils';
-import { isEmpty, omit, pick } from 'lodash';
+import { omit, pick } from 'lodash';
 
 export const User = (sequelize: Sequelize) => {
-  const Model: UserModel = sequelize.define('User', ModelTypes.User);
+  const Model: UserModel = sequelize.define('User', ModelTypes.User, {
+    indexes: [
+      {
+        unique: true,
+        fields: ['username', 'email'],
+      },
+    ],
+  });
 
   const getUser = async (data: { username: string; email: string }) => {
     try {
-      const query = await sequelize.query<UserAttributes>(
-        `SELECT * FROM User WHERE username="${data.username}" OR email="${data.email}"`,
-        {
-          type: QueryTypes.SELECT,
+      const user = await Model.findOne({
+        where: {
+          [Op.or]: [{ email: data.email }, { username: data.username }],
         },
-      );
+      });
 
-      if (isEmpty(query)) {
+      if (!user) {
         return null;
       }
 
-      return query[0];
+      return user;
     } catch (e) {
       console.log(e);
 

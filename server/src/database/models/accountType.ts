@@ -1,16 +1,27 @@
 import { Sequelize } from 'sequelize';
-import { AccountTypeModel, AccountTypesEnum, ModelTypes } from '../types';
+import { AccountTypeModel, ModelTypes } from '../types';
 
 export const AccountType = (sequelize: Sequelize) => {
-  const Model: AccountTypeModel = sequelize.define('AccountType', ModelTypes.AccountType);
+  const Model: AccountTypeModel = sequelize.define(
+    'AccountType',
+    ModelTypes.AccountType,
+    {
+      indexes: [
+        {
+          unique: true,
+          fields: ['label'],
+        },
+      ],
+    },
+  );
 
-  const createType = async (type: keyof typeof AccountTypesEnum) => {
+  ['user', 'server', 'channel'].forEach(async (type) => {
     await Model.findOrCreate({
       where: {
-        label: AccountTypesEnum[type],
+        label: type,
       },
     });
-  };
+  });
 
-  return { Model, createType };
+  return { Model };
 };

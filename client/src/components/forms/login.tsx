@@ -83,7 +83,7 @@ export const FormLogin = () => {
       {state.loginError && (
         <Alert severity='error'>
           Opa! Parece que tivemos um problema ao conectar você, dá uma checada
-          no seus dados de acesso ou tente novamente em alguns minutos.
+          nos seus dados de acesso ou tente novamente em alguns minutos.
         </Alert>
       )}
       <Box
