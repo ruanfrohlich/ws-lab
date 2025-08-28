@@ -15,9 +15,7 @@ config({
 const port = process.env.PORT ?? 3001;
 
 (async () => {
-  const { syncDB } = await database();
-
-  await syncDB();
+  (await database()).sync();
 
   const { success, error } =
     !isProd && !onlyServer

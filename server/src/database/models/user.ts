@@ -10,7 +10,7 @@ import {
 import { log } from '../../utils';
 import { omit, pick } from 'lodash';
 
-export const User = (sequelize: Sequelize) => {
+export const User = async (sequelize: Sequelize) => {
   const Model: UserModel = sequelize.define('User', ModelTypes.User, {
     indexes: [
       {
@@ -73,16 +73,12 @@ export const User = (sequelize: Sequelize) => {
         include: {
           model: friendsModel,
           as: 'friends',
-          include: [
-            {
-              model: Model,
-            },
-          ],
+          include: [Model],
         },
       });
 
       if (query) {
-        return {
+        const userWithFriends = {
           ...omit(query?.dataValues, ['password']),
           //@ts-expect-error friends created by association
           friends: query?.dataValues.friends.map((friend) =>
@@ -101,6 +97,8 @@ export const User = (sequelize: Sequelize) => {
             ),
           ),
         };
+
+        return userWithFriends;
       }
 
       return null;

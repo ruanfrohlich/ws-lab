@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 import { AccountTypeModel, ModelTypes } from '../types';
 
-export const AccountType = (sequelize: Sequelize) => {
+export const AccountType = async (sequelize: Sequelize) => {
   const Model: AccountTypeModel = sequelize.define(
     'AccountType',
     ModelTypes.AccountType,
@@ -14,6 +14,8 @@ export const AccountType = (sequelize: Sequelize) => {
       ],
     },
   );
+
+  await Model.sync();
 
   ['user', 'server', 'channel'].forEach(async (type) => {
     await Model.findOrCreate({

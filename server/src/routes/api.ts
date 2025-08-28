@@ -179,6 +179,8 @@ export const apiRoutes = async (
           password: AES.encrypt(body.password, appKey).toString(),
         };
 
+        console.log(data);
+
         const { user } = await UserModel.createUser(data);
 
         return sendResponse(201, {

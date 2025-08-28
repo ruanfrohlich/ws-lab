@@ -15,35 +15,36 @@ const database = async () => {
     },
   });
 
-  const AccountTypeModel = AccountType(sequelize);
-  const UserModel = User(sequelize);
-  const FriendsModel = Friends(sequelize);
-  const FriendStatusModel = FriendStatus(sequelize);
+  const AccountTypeModel = await AccountType(sequelize);
+  const UserModel = await User(sequelize);
+  const FriendsModel = await Friends(sequelize);
+  const FriendStatusModel = await FriendStatus(sequelize);
 
   UserModel.Model.hasMany(FriendsModel.Model, {
     as: 'friends',
-  });
-
-  ['userId', 'friendId'].forEach((id) => {
-    FriendsModel.Model.belongsTo(UserModel.Model, {
-      foreignKey: {
-        name: id,
-        allowNull: false,
-      },
-    });
-  });
-
-  AccountTypeModel.Model.hasOne(UserModel.Model, {
-    sourceKey: 'label',
+    sourceKey: 'id',
     foreignKey: {
-      name: 'type',
+      name: 'userId',
       allowNull: false,
     },
   });
 
+  FriendsModel.Model.belongsTo(UserModel.Model, {
+    targetKey: 'id',
+    foreignKey: {
+      name: 'friendId',
+      allowNull: false,
+    },
+  });
+
+  AccountTypeModel.Model.hasOne(UserModel.Model, {
+    sourceKey: 'label',
+    foreignKey: 'type',
+  });
+
   const close = () => sequelize.close();
 
-  const syncDB = async () => await sequelize.sync({ alter: true });
+  const sync = async () => await sequelize.sync({ alter: true });
 
   return {
     AccountTypeModel,
@@ -51,7 +52,7 @@ const database = async () => {
     FriendsModel,
     FriendStatusModel,
     close,
-    syncDB,
+    sync,
   };
 };
 
