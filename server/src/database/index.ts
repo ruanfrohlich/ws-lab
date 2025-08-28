@@ -27,6 +27,7 @@ const database = async () => {
       name: 'userId',
       allowNull: false,
     },
+    onDelete: 'cascade',
   });
 
   FriendsModel.Model.belongsTo(UserModel.Model, {
@@ -35,6 +36,7 @@ const database = async () => {
       name: 'friendId',
       allowNull: false,
     },
+    onDelete: 'cascade',
   });
 
   AccountTypeModel.Model.hasOne(UserModel.Model, {
