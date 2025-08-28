@@ -145,10 +145,16 @@ export const apiRoutes = async (
           }
         });
 
-        return sendResponse(200, {
-          success: true,
-          message: 'User updated successfully!',
-        });
+        return sendResponse(
+          200,
+          {
+            success: true,
+            message: 'User updated successfully!',
+          },
+          {
+            'Clear-Site-Data': 'cache',
+          },
+        );
       }
 
       return sendResponse(200, {
