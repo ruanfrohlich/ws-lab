@@ -26,7 +26,6 @@ export const apiRoutes = async (
   ) => {
     res.writeHead(status, {
       'content-type': 'application/json',
-      'cache-control': 'max-age=604800',
       'Content-Encoding': 'gzip',
       ...headers,
     });
@@ -272,7 +271,6 @@ export const apiRoutes = async (
 
         res.writeHead(200, {
           'content-type': 'image/webp',
-          'cache-control': 'max-age=604800',
         });
 
         return res.end(data);
