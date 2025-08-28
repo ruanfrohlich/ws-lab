@@ -1,51 +1,58 @@
 import { Sequelize } from 'sequelize';
-import { AccountType, Friends, User } from './models';
-import { join } from 'path';
-import { rootPath } from '../utils';
+import { AccountType, Friends, FriendStatus, User } from './models';
 
 const database = async () => {
-  const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: join(rootPath, '.db/db.sqlite3'),
+  const sequelize = new Sequelize(String(process.env.DB_URL), {
+    dialect: 'postgres',
     logging: false,
     define: {
       freezeTableName: true,
     },
+    dialectOptions: {
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    },
   });
 
-  const AccountTypeModel = AccountType(sequelize);
-  const UserModel = User(sequelize);
-  const FriendsModel = Friends(sequelize);
+  const AccountTypeModel = await AccountType(sequelize);
+  const UserModel = await User(sequelize);
+  const FriendsModel = await Friends(sequelize);
+  const FriendStatusModel = await FriendStatus(sequelize);
 
-  UserModel.Model.belongsTo(AccountTypeModel.Model, {
-    onUpdate: 'restrict',
-    targetKey: 'label',
+  UserModel.Model.hasMany(FriendsModel.Model, {
+    as: 'friends',
+    sourceKey: 'id',
     foreignKey: {
-      name: 'type',
+      name: 'userId',
       allowNull: false,
     },
   });
 
-  UserModel.Model.hasMany(FriendsModel.Model, {
-    as: 'friends',
+  FriendsModel.Model.belongsTo(UserModel.Model, {
+    targetKey: 'id',
+    foreignKey: {
+      name: 'friendId',
+      allowNull: false,
+    },
   });
 
-  ['userId', 'friendId'].forEach((id) => {
-    FriendsModel.Model.belongsTo(UserModel.Model, {
-      foreignKey: {
-        name: id,
-        allowNull: false,
-      },
-    });
+  AccountTypeModel.Model.hasOne(UserModel.Model, {
+    sourceKey: 'label',
+    foreignKey: 'type',
   });
 
   const close = () => sequelize.close();
+
+  const sync = async () => await sequelize.sync({ alter: true });
 
   return {
     AccountTypeModel,
     UserModel,
     FriendsModel,
+    FriendStatusModel,
     close,
+    sync,
   };
 };
 

@@ -17,7 +17,10 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
   });
 };
 
-export const WebsocketEvents = async (ws: WebSocket, { headers, url }: IncomingMessage) => {
+export const WebsocketEvents = async (
+  ws: WebSocket,
+  { headers, url }: IncomingMessage,
+) => {
   const { cookie, origin } = headers;
   const clientUUID = parse(cookie ?? '')['WS_AUTH'] ?? '';
 
