@@ -57,7 +57,6 @@ export const clientRoutes = (
 
     res.writeHead(200, {
       'content-type': contentType,
-      'cache-control': 'max-age=604800',
       'content-encoding': 'gzip',
     });
 
