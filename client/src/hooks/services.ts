@@ -76,12 +76,11 @@ export const useServices = () => {
 
   const findUser = async (user: { username?: string; email?: string }) => {
     try {
-      const { username, email } = user;
       const { data } = await handler.post<{ found: boolean; uuid?: string }>(
         '/user',
         {
-          username,
-          email,
+          username: user.username ?? '',
+          email: user.email ?? '',
         },
       );
 

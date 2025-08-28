@@ -33,7 +33,7 @@ export const getBody = <T>(req: IncomingMessage): Promise<T> => {
   });
 };
 
-export const onlyAPI = process.argv.includes('--api');
+export const onlyServer = process.argv.includes('--no-client');
 export const isProd = process.argv.includes('--prod');
 export const publicUrl = isProd ? '/ws-lab' : '/app';
 export const rootPath = cwd(); // path to /server

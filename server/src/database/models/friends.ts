@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize';
 import { FriendsAttributes, FriendsModel, ModelTypes } from '../types';
 import { isEmpty } from 'lodash';
 
-export const Friends = (sequelize: Sequelize) => {
+export const Friends = async (sequelize: Sequelize) => {
   const Model: FriendsModel = sequelize.define('Friends', ModelTypes.Friends);
 
   const getAllFriendsById = async (userId: number) => {
