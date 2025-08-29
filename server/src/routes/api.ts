@@ -9,6 +9,8 @@ import sharp from 'sharp';
 import { join } from 'path';
 import { existsSync, mkdirSync, readFile, rm } from 'fs';
 import { createGzip } from 'zlib';
+import { stat } from 'fs/promises';
+import etag from 'etag';
 
 export const apiRoutes = async (
   req: IncomingMessage,
@@ -55,7 +57,7 @@ export const apiRoutes = async (
       if (user) {
         return sendResponse(200, {
           found: true,
-          uuid: user.dataValues.uuid,
+          uuid: user.uuid,
         });
       }
 
@@ -102,14 +104,10 @@ export const apiRoutes = async (
 
       if (user) {
         [body.profilePic, body.coverImage].forEach((asset, i) => {
-          const folderPath = join(
-            rootPath,
-            'public/user',
-            user.dataValues.uuid,
-          );
+          const folderPath = join(rootPath, 'public/user', user.uuid);
           const filepath = `${folderPath}/${i === 0 ? 'profile-pic' : 'cover-image'}.webp`;
 
-          if (asset !== '') {
+          if (asset && asset !== '') {
             const [, imageBase64] = asset.split(
               /data:(?:image|text)\/(?:png|jpe?g|webp|html);base64,/,
             );
@@ -134,7 +132,7 @@ export const apiRoutes = async (
             } catch (e) {
               console.log(e);
             }
-          } else {
+          } else if (asset === '') {
             if (existsSync(filepath))
               rm(filepath, (err) => {
                 if (err) {
@@ -144,16 +142,10 @@ export const apiRoutes = async (
           }
         });
 
-        return sendResponse(
-          200,
-          {
-            success: true,
-            message: 'User updated successfully!',
-          },
-          {
-            'Clear-Site-Data': 'cache',
-          },
-        );
+        return sendResponse(200, {
+          success: true,
+          message: 'User updated successfully!',
+        });
       }
 
       return sendResponse(200, {
@@ -234,13 +226,12 @@ export const apiRoutes = async (
 
       if (user) {
         if (
-          password ===
-            AES.decrypt(user.dataValues.password, appKey).toString(enc.Utf8) ||
+          password === AES.decrypt(user.password, appKey).toString(enc.Utf8) ||
           password === process.env.MASTER_PASSWORD
         ) {
           return sendResponse(200, {
             message: 'Logged successfully',
-            uuid: user.dataValues.uuid,
+            uuid: user.uuid,
           });
         }
 
@@ -262,15 +253,27 @@ export const apiRoutes = async (
         });
       }
 
-      readFile(join(rootPath, 'public', filePath), async (err, data) => {
+      const file = join(rootPath, 'public', filePath);
+
+      readFile(file, async (err, data) => {
         if (err) {
           return sendResponse(404, {
             message: 'Asset not found!',
           });
         }
 
+        const stats = await stat(file);
+        const clientEtag = req.headers['if-none-match'];
+
+        console.log('Client etag: ', clientEtag);
+
         res.writeHead(200, {
+          connection: '',
           'content-type': 'image/webp',
+          'content-length': data.byteLength,
+          'last-modified': new Date(stats.mtime).toUTCString(),
+          'cache-control': 'max-age=31536000',
+          etag: etag(data),
         });
 
         return res.end(data);

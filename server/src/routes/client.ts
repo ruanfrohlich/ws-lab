@@ -58,6 +58,7 @@ export const clientRoutes = (
     res.writeHead(200, {
       'content-type': contentType,
       'content-encoding': 'gzip',
+      'cache-control': 'no-cache',
     });
 
     const gzip = createGzip();
