@@ -41,3 +41,4 @@ export const clientRoot = relative(rootPath, '../client');
 export const formatMB = (num: number) => {
   return Math.round((num / 1024 / 1024) * 100) / 100;
 };
+export { useCache } from './cache';

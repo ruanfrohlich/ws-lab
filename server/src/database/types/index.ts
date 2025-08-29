@@ -53,6 +53,10 @@ export type UserCreationAttributes = Optional<
 
 export type UserModel = ModelDefined<UserAttributes, UserCreationAttributes>;
 
+export interface IUser extends UserAttributes {
+  id: number;
+}
+
 export interface FriendsAttributes extends DefaultAttributes {
   status: string;
 }
@@ -89,6 +93,10 @@ export type FriendStatusModel = ModelDefined<
   FriendStatusAttributes,
   Optional<FriendStatusAttributes, DefaultOptionalAttibutes>
 >;
+
+export type IFindUserResponse = Omit<UserAttributes, 'password'> & {
+  friends: Array<IUserFriends>;
+};
 
 export const ModelTypes: {
   [key: string]: ModelAttributes;
