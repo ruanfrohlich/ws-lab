@@ -99,6 +99,10 @@ export const useServices = () => {
       const { data } = await handler.post<{
         success: boolean;
         message: string;
+        newAssets?: {
+          profilePic: string;
+          coverImage: string;
+        };
       }>('/user/update', userData, {
         headers: {
           Authorization: Cookies.get(COOKIES.userToken),
@@ -112,7 +116,8 @@ export const useServices = () => {
             logged: true,
             user: {
               ...user,
-              ...userData,
+              profilePic: data.newAssets?.profilePic ?? user.profilePic,
+              coverImage: data.newAssets?.coverImage ?? user.coverImage,
             },
           },
         });

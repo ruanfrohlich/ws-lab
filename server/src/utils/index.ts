@@ -33,6 +33,30 @@ export const getBody = <T>(req: IncomingMessage): Promise<T> => {
   });
 };
 
+export const assetURL = (
+  assetName: string,
+  type: 'user' | 'static',
+  userToken?: string,
+) => {
+  switch (type) {
+    case 'user': {
+      if (!userToken) return '';
+
+      return String(
+        process.env.SITE_URL?.concat(
+          '/api/assets/user/',
+          userToken,
+          '/',
+          assetName,
+        ),
+      );
+    }
+    default: {
+      return String(process.env.SITE_URL?.concat('/api/assets'));
+    }
+  }
+};
+
 export const onlyServer = process.argv.includes('--no-client');
 export const isProd = process.argv.includes('--prod');
 export const publicUrl = isProd ? '/ws-lab' : '/app';
