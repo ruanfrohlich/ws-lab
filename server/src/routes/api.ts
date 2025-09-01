@@ -8,7 +8,6 @@ import { AccountTypesEnum, UserCreationAttributes } from '../database/types';
 import sharp from 'sharp';
 import { join } from 'path';
 import { mkdirSync, readFile } from 'fs';
-import { createGzip } from 'zlib';
 import { stat } from 'fs/promises';
 
 export const apiRoutes = async (
@@ -23,18 +22,14 @@ export const apiRoutes = async (
   const sendResponse = (
     status: number,
     message: object,
-    headers?: OutgoingHttpHeaders,
+    resHeaders?: OutgoingHttpHeaders,
   ) => {
-    res.writeHead(status, {
-      'content-type': 'application/json',
-      'Content-Encoding': 'gzip',
-      ...headers,
-    });
-
-    const gzip = createGzip();
-    gzip.pipe(res);
-
-    gzip.end(JSON.stringify(message), 'utf-8');
+    return res
+      .writeHead(status, {
+        'content-type': 'application/json',
+        ...resHeaders,
+      })
+      .end(JSON.stringify(message));
   };
 
   const tokenError = () =>
@@ -203,8 +198,6 @@ export const apiRoutes = async (
           password: AES.encrypt(body.password, appKey).toString(),
         };
 
-        console.log(data);
-
         const { user } = await UserModel.createUser(data);
 
         return sendResponse(201, {
@@ -292,7 +285,6 @@ export const apiRoutes = async (
         const stats = await stat(file);
 
         res.writeHead(200, {
-          connection: '',
           'content-type': 'image/webp',
           'content-length': data.byteLength,
           'last-modified': new Date(stats.mtime).toUTCString(),
