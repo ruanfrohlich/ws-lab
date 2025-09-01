@@ -10,6 +10,12 @@ import { join } from 'path';
 import { mkdirSync, readFile } from 'fs';
 import { stat } from 'fs/promises';
 
+/**
+ * Manipulador principal das rotas da API REST
+ * Processa requisições HTTP para endpoints como login, registro, busca de usuários e assets
+ * @param req - Objeto de requisição HTTP
+ * @param res - Objeto de resposta HTTP
+ */
 export const apiRoutes = async (
   req: IncomingMessage,
   res: ServerResponse<IncomingMessage>,

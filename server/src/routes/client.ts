@@ -5,6 +5,12 @@ import { publicUrl, rootPath } from '../utils';
 import { stat } from 'fs/promises';
 import { OutgoingHttpHeaders } from 'http2';
 
+/**
+ * Manipulador de rotas para servir arquivos estáticos do cliente
+ * Determina o tipo de conteúdo baseado na extensão do arquivo e configura cache apropriado
+ * @param req - Objeto de requisição HTTP (apenas url é utilizada)
+ * @param res - Objeto de resposta HTTP
+ */
 export const clientRoutes = (
   { url }: IncomingMessage,
   res: ServerResponse<IncomingMessage>,

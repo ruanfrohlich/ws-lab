@@ -9,6 +9,11 @@ const connections: {
   [key: string]: WebSocket;
 } = {};
 
+/**
+ * Envia uma mensagem para múltiplos clientes WebSocket
+ * @param clients - Array de clientes WebSocket ativos
+ * @param message - Dados da mensagem a ser enviada
+ */
 const sendMessage = (clients: WebSocket[], message: IReturnData) => {
   clients.forEach((client) => {
     if (client) {
@@ -17,6 +22,12 @@ const sendMessage = (clients: WebSocket[], message: IReturnData) => {
   });
 };
 
+/**
+ * Manipulador principal dos eventos WebSocket
+ * Gerencia conexões, autenticação e troca de mensagens em tempo real
+ * @param ws - Instância da conexão WebSocket
+ * @param req - Objeto de requisição HTTP contendo headers e URL
+ */
 export const WebsocketEvents = async (
   ws: WebSocket,
   { headers, url }: IncomingMessage,

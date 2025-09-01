@@ -11,6 +11,11 @@ const handler = axios.create({
   baseURL: process.env.ACCOUNT_API,
 });
 
+/**
+ * Hook customizado para serviços de autenticação e gerenciamento de usuário
+ * Fornece métodos para login, registro, busca e atualização de usuários
+ * @returns Objeto contendo todos os métodos de serviço disponíveis
+ */
 export const useServices = () => {
   const { user } = useUser();
   const userDispatch = useUserDispatch();
@@ -19,6 +24,10 @@ export const useServices = () => {
   const hasAuthCookie = !!Cookies.get(COOKIES.userToken);
   const { startGoogleSignIn } = googleAuth();
 
+  /**
+   * Cria cookie de autenticação para o usuário
+   * @param uuid - UUID único do usuário autenticado
+   */
   const createAuthCookie = (uuid: string) => {
     Cookies.set(COOKIES.userToken, uuid, {
       domain: isDev ? 'localhost' : process.env.COOKIE_DOMAIN,
@@ -29,6 +38,11 @@ export const useServices = () => {
     });
   };
 
+  /**
+   * Busca dados do usuário pela API usando token de autenticação
+   * @param token - Token/UUID de autenticação do usuário
+   * @returns Resultado da operação com flag de sucesso
+   */
   const fetchUser = async (token: string) => {
     try {
       const res = await handler.get<{ found: boolean; user: IUser }>(
@@ -74,6 +88,11 @@ export const useServices = () => {
     }
   };
 
+  /**
+   * Verifica se um usuário existe por username ou email
+   * @param user - Dados do usuário para busca
+   * @returns Resultado indicando se o usuário foi encontrado e seu UUID
+   */
   const findUser = async (user: { username?: string; email?: string }) => {
     try {
       const { data } = await handler.post<{ found: boolean; uuid?: string }>(
@@ -94,6 +113,11 @@ export const useServices = () => {
     }
   };
 
+  /**
+   * Atualiza dados do usuário autenticado
+   * @param userData - Novos dados do usuário
+   * @returns Resultado da operação de atualização
+   */
   const updateUser = async (userData: IUserDataForm['fields']) => {
     try {
       const { data } = await handler.post<{
@@ -139,6 +163,12 @@ export const useServices = () => {
     }
   };
 
+  /**
+   * Registra um novo usuário no sistema
+   * @param fields - Dados de registro do usuário
+   * @param google - Dados adicionais para registro via Google (opcional)
+   * @returns Resultado da operação de registro
+   */
   const registerUser = async (
     fields: IUserRegister,
     google?: {
@@ -191,6 +221,11 @@ export const useServices = () => {
     }
   };
 
+  /**
+   * Realiza login do usuário com credenciais
+   * @param credentials - Credenciais de login (username e password)
+   * @returns Resultado da operação de login
+   */
   const login = async (credentials: { username: string; password: string }) => {
     try {
       const {
@@ -229,6 +264,9 @@ export const useServices = () => {
     }
   };
 
+  /**
+   * Realiza logout do usuário, removendo cookies e limpando estado
+   */
   const logout = () => {
     Cookies.remove(COOKIES.userToken);
     userDispatch({
@@ -241,6 +279,10 @@ export const useServices = () => {
     nav(appRoot);
   };
 
+  /**
+   * Realiza autenticação via Google OAuth
+   * Registra ou faz login do usuário baseado nos dados do Google
+   */
   const googleSignIn = async () => {
     const googleUser = await startGoogleSignIn();
 
@@ -278,6 +320,9 @@ export const useServices = () => {
     }
   };
 
+  /**
+   * Redireciona o usuário para a página inicial
+   */
   const redirectHome = () => {
     nav(appRoot);
   };

@@ -12,6 +12,11 @@ import {
 import { omit, pick } from 'lodash';
 import { log, useCache } from 'utils';
 
+/**
+ * Factory para criação do modelo User com métodos CRUD e cache
+ * @param sequelize - Instância do Sequelize para criação do modelo
+ * @returns Objeto contendo o modelo e métodos de operação com usuários
+ */
 export const User = async (sequelize: Sequelize) => {
   const Model: UserModel = sequelize.define('User', ModelTypes.User, {
     indexes: [
@@ -23,6 +28,11 @@ export const User = async (sequelize: Sequelize) => {
   });
   const { get, set, del } = await useCache();
 
+  /**
+   * Busca um usuário por username ou email com cache
+   * @param data - Dados de busca contendo username e email
+   * @returns Dados do usuário ou null se não encontrado
+   */
   const getUser = async (data: { username: string; email: string }) => {
     try {
       const { cachedUser, credential } = await new Promise<{
@@ -66,6 +76,11 @@ export const User = async (sequelize: Sequelize) => {
     }
   };
 
+  /**
+   * Cria um novo usuário no banco de dados
+   * @param userData - Dados do usuário a ser criado
+   * @returns Objeto contendo os dados do usuário criado com lista de amigos vazia
+   */
   const createUser = async (
     userData: UserCreationAttributes,
   ): Promise<{
@@ -82,6 +97,12 @@ export const User = async (sequelize: Sequelize) => {
     };
   };
 
+  /**
+   * Busca um usuário por UUID incluindo lista de amigos com cache
+   * @param uuid - UUID único do usuário
+   * @param friendsModel - Modelo de amigos para incluir na consulta
+   * @returns Dados completos do usuário com amigos ou null se não encontrado
+   */
   const getUserByUUID = async (
     uuid: string,
     friendsModel: FriendsModel,
@@ -140,6 +161,10 @@ export const User = async (sequelize: Sequelize) => {
     }
   };
 
+  /**
+   * Busca todos os usuários com cache
+   * @returns Lista de todos os usuários do sistema
+   */
   const getAllUsers = async () => {
     const allUsersCached = await get('allUsers');
 
@@ -153,6 +178,12 @@ export const User = async (sequelize: Sequelize) => {
     return users;
   };
 
+  /**
+   * Atualiza dados de um usuário e invalida cache relacionado
+   * @param data - Dados a serem atualizados (exceto password)
+   * @param token - UUID do usuário a ser atualizado
+   * @returns Dados atualizados do usuário ou null se não encontrado
+   */
   const updateUser = async (
     data: Omit<UserCreationAttributes, 'password'>,
     token: string,

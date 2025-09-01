@@ -1,6 +1,13 @@
 import { Box } from '@mui/material';
 import CycloneIcon from '@mui/icons-material/Cyclone';
 
+/**
+ * Componente de loading com animação personalizada
+ * Exibe indicador de carregamento em tela cheia com animação do ícone
+ * @param props - Propriedades do componente
+ * @param props.show - Controla a visibilidade do loading
+ * @returns JSX do componente de loading animado
+ */
 export const AppLoading = ({ show }: { show: boolean }) => {
   return (
     <Box

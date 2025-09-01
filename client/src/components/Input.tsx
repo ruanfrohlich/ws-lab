@@ -19,6 +19,12 @@ interface IAppInputProps {
   ref?: RefObject<HTMLInputElement | null>;
 }
 
+/**
+ * Componente de input customizado com validação e funcionalidades especiais
+ * Suporta visualização de senha, contagem de caracteres e validação visual
+ * @param props - Propriedades do componente de input
+ * @returns JSX do componente de input personalizado
+ */
 export const AppInput = (props: IAppInputProps) => {
   const { id, error, label, value, onChange, count, autoComplete, ref } = props;
   const inputStyles: SxProps<Theme> = {

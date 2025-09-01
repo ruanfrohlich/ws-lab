@@ -1,5 +1,12 @@
 import { IFriends, IUserAction, IUserContext } from 'interfaces';
 
+/**
+ * Reducer para gerenciamento do estado global do usuário
+ * Manipula ações de login, logout, atualização de amigos e erros
+ * @param state - Estado atual do contexto do usuário
+ * @param action - Ação a ser processada
+ * @returns Novo estado do contexto do usuário
+ */
 export const userReducer = (
   state: IUserContext,
   action: IUserAction,

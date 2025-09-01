@@ -7,6 +7,11 @@ export { configProvider } from './configProvider';
 
 export * from './enums';
 
+/**
+ * Traduz mensagens de erro da API para português brasileiro
+ * @param error - Mensagem de erro em inglês
+ * @returns Mensagem de erro traduzida
+ */
 export const translateError = (error: string) => {
   switch (error) {
     case 'User already exists': {
@@ -20,6 +25,11 @@ export const translateError = (error: string) => {
 
 export { appTheme } from './theme';
 
+/**
+ * Traduz nomes de rotas/páginas para português brasileiro
+ * @param path - Nome da rota em inglês
+ * @returns Nome da rota traduzido
+ */
 export const translatePathname = (path: string) => {
   switch (path) {
     case 'join': {
@@ -34,6 +44,11 @@ export const translatePathname = (path: string) => {
   }
 };
 
+/**
+ * Traduz tipos de conta para português brasileiro
+ * @param type - Tipo de conta em inglês
+ * @returns Tipo de conta traduzido
+ */
 export const translateAccountType = (type: string) => {
   switch (type) {
     case 'user': {
@@ -54,12 +69,28 @@ export const commonRegEx = {
   password: /^(?=.*\d)(?=.*[aA-zZ])(?=.*[^\w\d\s:])([^\s]){8,}$/,
 };
 
+/**
+ * Normaliza string removendo acentos e convertendo para minúsculas
+ * @param str - String a ser normalizada
+ * @returns String normalizada
+ */
 export const normalize = (str: string) => toLower(deburr(str));
 
+/**
+ * Aplica estilos CSS a um elemento DOM
+ * @param el - Elemento HTML a ser estilizado
+ * @param styles - Objeto com propriedades CSS
+ * @returns Estilo do elemento atualizado
+ */
 export const appStyled = (el: HTMLElement, styles: CSSProperties) => {
   return Object.assign(el.style, styles);
 };
 
+/**
+ * Decodifica um token JWT e extrai dados do usuário Google
+ * @param token - Token JWT a ser decodificado
+ * @returns Dados do usuário Google extraídos do token
+ */
 export const decodeJWT = (token: string): IUserGoogle => {
   const base64Url = token.split('.')[1];
   const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -74,6 +105,11 @@ export const decodeJWT = (token: string): IUserGoogle => {
   return JSON.parse(jsonPayload);
 };
 
+/**
+ * Converte um Blob em Data URL usando FileReader
+ * @param blob - Blob a ser convertido
+ * @returns Promise que resolve com a Data URL do blob
+ */
 export const getDataURL = (blob: Blob) => {
   return new Promise<string>((res, rej) => {
     const reader = new FileReader();
@@ -83,6 +119,11 @@ export const getDataURL = (blob: Blob) => {
   });
 };
 
+/**
+ * Gera uma senha aleatória com caracteres alfanuméricos e especiais
+ * @param length - Comprimento desejado da senha
+ * @returns Senha aleatória gerada
+ */
 export const randomPassword = (length: number) => {
   const chars =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';

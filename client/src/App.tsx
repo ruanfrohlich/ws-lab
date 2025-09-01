@@ -5,6 +5,11 @@ import { UserProvider, WebsocketProvider } from 'providers';
 import { ThemeProvider } from '@mui/material';
 import { appTheme } from 'utils';
 
+/**
+ * Componente raiz da aplicação
+ * Configura providers globais, tema e layout principal
+ * @returns Estrutura JSX da aplicação com todos os providers necessários
+ */
 export function App() {
   return (
     <ThemeProvider theme={appTheme}>

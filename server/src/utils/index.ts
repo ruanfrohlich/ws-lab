@@ -8,15 +8,33 @@ const acceptedOrigins = [
   'https://ws-lab-server.onrender.com',
 ];
 
+/**
+ * Registra uma mensagem no console com timestamp formatado para português brasileiro
+ * @param message - A mensagem a ser registrada
+ */
 export const log = (message: string) => {
   message = `(${new Date().toLocaleString('pt-BR')}) - ${message}.`;
   console.log(message);
 };
 
+/**
+ * Verifica se uma origem é permitida para requisições CORS
+ * @param origin - A origem a ser verificada
+ * @returns true se a origem for permitida, undefined caso contrário
+ */
 export const originIsAllowed = (origin: string) => {
   if (acceptedOrigins.includes(origin)) return true;
 };
 
+/**
+ * Envia uma resposta HTTP comprimida usando Brotli ou Gzip baseado no cabeçalho Accept-Encoding
+ * @param config - Configuração da resposta
+ * @param config.status - Código de status HTTP
+ * @param config.encodingHeader - Cabeçalho Accept-Encoding do cliente
+ * @param config.res - Objeto de resposta do servidor
+ * @param config.resHeaders - Cabeçalhos da resposta
+ * @param config.content - Conteúdo a ser enviado
+ */
 export const compressedReponse = (config: {
   status: number;
   encodingHeader: string;
@@ -53,6 +71,12 @@ export const compressedReponse = (config: {
   }
 };
 
+/**
+ * Extrai e parseia o corpo de uma requisição HTTP como JSON
+ * @template T - Tipo esperado do corpo da requisição
+ * @param req - Objeto de requisição HTTP
+ * @returns Promise que resolve com o corpo parseado ou rejeita em caso de erro
+ */
 export const getBody = <T>(req: IncomingMessage): Promise<T> => {
   return new Promise((resolve, reject) => {
     const data: Buffer[] = [];
@@ -70,6 +94,13 @@ export const getBody = <T>(req: IncomingMessage): Promise<T> => {
   });
 };
 
+/**
+ * Gera uma URL completa para acessar assets (recursos estáticos ou de usuário)
+ * @param assetName - Nome do arquivo do asset
+ * @param type - Tipo do asset ('user' para assets de usuário ou 'static' para assets estáticos)
+ * @param userToken - Token/UUID do usuário (obrigatório para type 'user')
+ * @returns URL completa para o asset ou string vazia se parâmetros inválidos
+ */
 export const assetURL = (
   assetName: string,
   type: 'user' | 'static',
@@ -99,6 +130,11 @@ export const isProd = process.argv.includes('--prod');
 export const publicUrl = isProd ? '/ws-lab' : '/app';
 export const rootPath = cwd(); // path to /server
 export const clientRoot = relative(rootPath, '../client');
+/**
+ * Converte bytes para megabytes com duas casas decimais
+ * @param num - Número em bytes
+ * @returns Valor convertido em megabytes
+ */
 export const formatMB = (num: number) => {
   return Math.round((num / 1024 / 1024) * 100) / 100;
 };

@@ -25,6 +25,11 @@ interface IActionsState {
   onClick?: () => void;
 }
 
+/**
+ * Componente de cabeçalho da aplicação com navegação adaptativa
+ * Exibe diferentes opções de navegação baseado no estado de autenticação do usuário
+ * @returns JSX do cabeçalho com navegação responsiva
+ */
 export const Header = () => {
   const navigate = useNavigate();
   const { appRoot } = configProvider();
@@ -50,10 +55,20 @@ export const Header = () => {
 
   const [actions, setActions] = useState<IActionsState[]>(initialActions);
 
+  /**
+   * Manipula mudanças de rota na navegação
+   * @param event - Evento sintético do React
+   * @param route - Rota de destino
+   */
   const handleChange = (event: SyntheticEvent, route: string) => {
     navigate(route);
   };
 
+  /**
+   * Gerencia seleção de item ativo na navegação
+   * @param item - Item a ser selecionado (opcional)
+   * @param cb - Callback adicional a ser executado (opcional)
+   */
   const handleSelected = (item?: string, cb?: () => void) => {
     if (item) {
       setSelected(item);
@@ -68,6 +83,10 @@ export const Header = () => {
     if (cb) cb();
   };
 
+  /**
+   * Atualiza as ações disponíveis baseado no estado de autenticação
+   * Adiciona opções de perfil e pesquisa para usuários logados
+   */
   const updateActions = () => {
     if (logged) {
       setActions((actions) => {
