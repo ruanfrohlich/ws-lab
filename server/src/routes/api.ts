@@ -1,16 +1,15 @@
 import { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'http';
 import { AES, enc } from 'crypto-js';
 import database from '../database';
-import { getBody, rootPath } from '../utils';
+import { assetURL, getBody, rootPath } from '../utils';
 import { IFindUser } from '../interfaces';
 import { omit } from 'lodash';
 import { AccountTypesEnum, UserCreationAttributes } from '../database/types';
 import sharp from 'sharp';
 import { join } from 'path';
-import { existsSync, mkdirSync, readFile, rm } from 'fs';
+import { mkdirSync, readFile } from 'fs';
 import { createGzip } from 'zlib';
 import { stat } from 'fs/promises';
-import etag from 'etag';
 
 export const apiRoutes = async (
   req: IncomingMessage,
@@ -100,17 +99,39 @@ export const apiRoutes = async (
       if (!headers.authorization) return tokenError();
 
       const body = await getBody<UserCreationAttributes>(req);
-      const user = await UserModel.updateUser(body, headers.authorization);
+
+      const user = await UserModel.getUser({
+        username: body.username,
+        email: '',
+      });
+
+      const newAssets: {
+        profilePic: string;
+        coverImage: string;
+      } = {
+        coverImage: user?.coverImage ?? '',
+        profilePic: user?.profilePic ?? '',
+      };
 
       if (user) {
-        [body.profilePic, body.coverImage].forEach((asset, i) => {
-          const folderPath = join(rootPath, 'public/user', user.uuid);
-          const filepath = `${folderPath}/${i === 0 ? 'profile-pic' : 'cover-image'}.webp`;
-
-          if (asset && asset !== '') {
+        [body.profilePic, body.coverImage].forEach(async (asset, i) => {
+          if (asset !== '') {
             const [, imageBase64] = asset.split(
               /data:(?:image|text)\/(?:png|jpe?g|webp|html);base64,/,
             );
+
+            const folderPath = join(rootPath, 'public/user', user.uuid);
+            const version = Date.now();
+            const fileName =
+              (i === 0 ? `pp.${version}` : `ci.${version}`) + '.webp';
+            const filePath = `${folderPath}/${fileName}`;
+
+            newAssets[i === 0 ? 'profilePic' : 'coverImage'] = assetURL(
+              fileName,
+              'user',
+              user.uuid,
+            );
+
             const imageBuffer = Buffer.from(imageBase64, 'base64');
 
             mkdirSync(folderPath, { recursive: true });
@@ -126,25 +147,31 @@ export const apiRoutes = async (
                   width: i === 0 ? 400 : 1280,
                   height: i === 0 ? 400 : 720,
                 })
-                .toFile(filepath, (err) => {
+                .toFile(filePath, (err) => {
                   if (err) console.log(err);
                 });
+
+              const changedData = omit(body, ['profilePic', 'coverImage']);
+
+              await UserModel.updateUser(
+                //@ts-expect-error i know
+                {
+                  ...changedData,
+                  [i === 0 ? 'profilePic' : 'coverImage']:
+                    i === 0 ? newAssets.profilePic : newAssets.coverImage,
+                },
+                user.uuid,
+              );
             } catch (e) {
               console.log(e);
             }
-          } else if (asset === '') {
-            if (existsSync(filepath))
-              rm(filepath, (err) => {
-                if (err) {
-                  console.log(err);
-                }
-              });
           }
         });
 
         return sendResponse(200, {
           success: true,
           message: 'User updated successfully!',
+          newAssets,
         });
       }
 
@@ -263,9 +290,6 @@ export const apiRoutes = async (
         }
 
         const stats = await stat(file);
-        const clientEtag = req.headers['if-none-match'];
-
-        console.log('Client etag: ', clientEtag);
 
         res.writeHead(200, {
           connection: '',
@@ -273,7 +297,6 @@ export const apiRoutes = async (
           'content-length': data.byteLength,
           'last-modified': new Date(stats.mtime).toUTCString(),
           'cache-control': 'max-age=31536000',
-          etag: etag(data),
         });
 
         return res.end(data);

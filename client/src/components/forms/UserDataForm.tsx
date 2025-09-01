@@ -15,8 +15,8 @@ export const UserDataForm = (props: IUserDataFormProps) => {
     fields: {
       username: user?.username ?? '',
       email: user?.email ?? '',
-      coverImage: user?.coverImage ?? '',
-      profilePic: user?.profilePic ?? '',
+      coverImage: '',
+      profilePic: '',
       name: user?.name ?? '',
     },
     loading: false,
@@ -64,8 +64,8 @@ export const UserDataForm = (props: IUserDataFormProps) => {
         ...state,
         fields: {
           ...state.fields,
-          coverImage: props.cover ?? user?.coverImage ?? '',
-          profilePic: props.image ?? user?.profilePic ?? '',
+          coverImage: props.cover ?? '',
+          profilePic: props.image ?? '',
         },
       };
     });
@@ -74,9 +74,9 @@ export const UserDataForm = (props: IUserDataFormProps) => {
   const isValid =
     formState.fields.email !== user?.email ||
     formState.fields.username !== user?.username ||
-    formState.fields.profilePic !== user?.profilePic ||
-    formState.fields.coverImage !== user?.coverImage ||
-    formState.fields.name !== user?.name;
+    formState.fields.name !== user?.name ||
+    formState.fields.coverImage !== '' ||
+    formState.fields.profilePic !== '';
 
   return (
     <Fragment>

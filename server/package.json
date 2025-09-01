@@ -44,11 +44,7 @@
     "sqlite3": "^5.1.7",
     "tsx": "^4.20.4",
     "typescript": "^5.9.2",
-    "ws": "^8.18.0",
-    "zlib": "^1.0.5"
+    "ws": "^8.18.0"
   },
-  "dependencies": {
-    "@types/etag": "^1.8.4",
-    "etag": "^1.8.1"
-  }
+  "dependencies": {}
 }

@@ -11,11 +11,16 @@ import { useNavigate } from 'react-router';
 
 export const UserAccount = () => {
   const { user } = useUser();
-  const { appRoot, assetsUrl } = configProvider();
+  const { appRoot } = configProvider();
   const photoRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
   const [userImage, setUserImage] = useState<string>();
   const [coverImage, setCoverImage] = useState<string>();
+  const [randomCover, setRandomCover] = useState<{
+    urls: {
+      regular: string;
+    };
+  }>();
   const nav = useNavigate();
 
   const handleRemovePhoto = () => {
@@ -63,6 +68,19 @@ export const UserAccount = () => {
     if (!Cookies.get(COOKIES.userToken)) nav(appRoot);
   }, [user]);
 
+  useEffect(() => {
+    (async () => {
+      const image = await fetch(
+        'https://api.unsplash.com/photos/random/?orientation=landscape&client_id=' +
+          process.env.UNSPLASH_API_KEY,
+      );
+
+      const data = await image.json();
+
+      setRandomCover(data);
+    })();
+  }, [user]);
+
   if (!user) return <></>;
 
   return (
@@ -85,15 +103,12 @@ export const UserAccount = () => {
       >
         <Box
           component={'img'}
-          src={
-            coverImage ??
-            assetsUrl.concat('user/', user.uuid, '/cover-image.webp')
-          }
-          onError={({ currentTarget }) => {
-            currentTarget.src = 'https://picsum.photos/1920/1080';
-          }}
+          src={coverImage ?? user.coverImage}
           fetchPriority='high'
           sx={imageStyles}
+          onError={(e) => {
+            e.currentTarget.src = String(randomCover?.urls.regular);
+          }}
         />
         <Button
           className='cover-btn'
@@ -157,10 +172,7 @@ export const UserAccount = () => {
           >
             <Avatar
               alt={user.name}
-              src={
-                userImage ??
-                assetsUrl.concat('user/', user.uuid, '/profile-pic.webp')
-              }
+              src={userImage ?? user.profilePic}
               sx={{ width: 150, height: 150, fontSize: '3rem' }}
             />
           </Box>
