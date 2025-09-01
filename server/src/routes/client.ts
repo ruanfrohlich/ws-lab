@@ -2,19 +2,16 @@ import { readFile } from 'fs';
 import { IncomingMessage, ServerResponse } from 'http';
 import { extname, join } from 'path';
 import { publicUrl, rootPath } from '../utils';
-import { createGzip, createBrotliCompress } from 'node:zlib';
 import { stat } from 'fs/promises';
 import { OutgoingHttpHeaders } from 'http2';
-import { chunk, fromPairs } from 'lodash';
 
 export const clientRoutes = (
-  { url, rawHeaders }: IncomingMessage,
+  { url }: IncomingMessage,
   res: ServerResponse<IncomingMessage>,
 ) => {
   const appRoot = join(rootPath, '../client/public');
   let contentType = '';
   let filePath = appRoot + url?.replace(publicUrl, '');
-  const reqHeaders = fromPairs(chunk(rawHeaders, 2));
 
   filePath = filePath.replace(/\?\d*/g, '');
 
@@ -61,38 +58,16 @@ export const clientRoutes = (
 
     const lastModified = await stat(filePath);
 
-    const headers: OutgoingHttpHeaders = {
+    const resHeaders: OutgoingHttpHeaders = {
       'content-type': contentType,
       'last-modified': new Date(lastModified.mtime).toUTCString(),
       'content-length': content.byteLength,
     };
 
     if (contentType !== 'text/html') {
-      headers['cache-control'] = 'max-age=31536000';
+      resHeaders['cache-control'] = 'max-age=31536000';
     }
 
-    const encodings = reqHeaders['Accept-Encoding'] as string;
-    const accept = (encode: string) => encodings.indexOf(encode) !== -1;
-
-    switch (true) {
-      case accept('br'): {
-        const br = createBrotliCompress();
-        headers['content-encoding'] = 'br';
-        res.writeHead(200, headers);
-        br.pipe(res);
-        return br.end(content, 'utf-8');
-      }
-      case accept('gzip'): {
-        const gzip = createGzip();
-        headers['content-encoding'] = 'gzip';
-        res.writeHead(200, headers);
-        gzip.pipe(res);
-        return gzip.end(content, 'utf-8');
-      }
-      default: {
-        res.writeHead(200, headers);
-        return res.end(content, 'utf-8');
-      }
-    }
+    return res.writeHead(200, resHeaders).end(content);
   });
 };

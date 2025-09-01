@@ -1,6 +1,7 @@
-import { IncomingMessage } from 'http';
+import { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'http';
 import { relative } from 'path';
 import { cwd } from 'process';
+import { createBrotliCompress, createGzip } from 'zlib';
 
 const acceptedOrigins = [
   'https://localhost:3005',
@@ -14,6 +15,42 @@ export const log = (message: string) => {
 
 export const originIsAllowed = (origin: string) => {
   if (acceptedOrigins.includes(origin)) return true;
+};
+
+export const compressedReponse = (config: {
+  status: number;
+  encodingHeader: string;
+  res: ServerResponse;
+  resHeaders: OutgoingHttpHeaders;
+  content: unknown;
+}) => {
+  const accept = (encode: string) =>
+    config.encodingHeader.indexOf(encode) !== -1;
+
+  switch (true) {
+    case accept('br'): {
+      const br = createBrotliCompress();
+      config.res.writeHead(config.status, {
+        ...config.resHeaders,
+        'content-encoding': 'br',
+      });
+      br.pipe(config.res);
+      return br.end(config.content, 'utf-8');
+    }
+    case accept('gzip'): {
+      const gzip = createGzip();
+      config.res.writeHead(config.status, {
+        ...config.resHeaders,
+        'content-encoding': 'gzip',
+      });
+      gzip.pipe(config.res);
+      return gzip.end(config.content, 'utf-8');
+    }
+    default: {
+      config.res.writeHead(config.status, config.resHeaders);
+      return config.res.end(config.content, 'utf-8');
+    }
+  }
 };
 
 export const getBody = <T>(req: IncomingMessage): Promise<T> => {
