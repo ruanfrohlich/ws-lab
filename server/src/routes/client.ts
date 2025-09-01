@@ -2,15 +2,19 @@ import { readFile } from 'fs';
 import { IncomingMessage, ServerResponse } from 'http';
 import { extname, join } from 'path';
 import { publicUrl, rootPath } from '../utils';
-import { createGzip } from 'zlib';
+import { createGzip, createBrotliCompress } from 'node:zlib';
+import { stat } from 'fs/promises';
+import { OutgoingHttpHeaders } from 'http2';
+import { chunk, fromPairs } from 'lodash';
 
 export const clientRoutes = (
-  { url }: IncomingMessage,
+  { url, rawHeaders }: IncomingMessage,
   res: ServerResponse<IncomingMessage>,
 ) => {
   const appRoot = join(rootPath, '../client/public');
   let contentType = '';
   let filePath = appRoot + url?.replace(publicUrl, '');
+  const reqHeaders = fromPairs(chunk(rawHeaders, 2));
 
   filePath = filePath.replace(/\?\d*/g, '');
 
@@ -49,22 +53,46 @@ export const clientRoutes = (
       contentType = 'text/html';
   }
 
-  readFile(filePath, function (error, content) {
+  readFile(filePath, async function (error, content) {
     if (error) {
       res.writeHead(500);
       return res.end('Server error');
     }
 
-    res.writeHead(200, {
+    const lastModified = await stat(filePath);
+
+    const headers: OutgoingHttpHeaders = {
       'content-type': contentType,
-      'content-encoding': 'gzip',
-      'cache-control': 'no-cache',
-    });
+      'last-modified': new Date(lastModified.mtime).toUTCString(),
+      'content-length': content.byteLength,
+    };
 
-    const gzip = createGzip();
+    if (contentType !== 'text/html') {
+      headers['cache-control'] = 'max-age=31536000';
+    }
 
-    gzip.pipe(res);
+    const encodings = reqHeaders['Accept-Encoding'] as string;
+    const accept = (encode: string) => encodings.indexOf(encode) !== -1;
 
-    return gzip.end(content, 'utf-8');
+    switch (true) {
+      case accept('br'): {
+        const br = createBrotliCompress();
+        headers['content-encoding'] = 'br';
+        res.writeHead(200, headers);
+        br.pipe(res);
+        return br.end(content, 'utf-8');
+      }
+      case accept('gzip'): {
+        const gzip = createGzip();
+        headers['content-encoding'] = 'gzip';
+        res.writeHead(200, headers);
+        gzip.pipe(res);
+        return gzip.end(content, 'utf-8');
+      }
+      default: {
+        res.writeHead(200, headers);
+        return res.end(content, 'utf-8');
+      }
+    }
   });
 };
