@@ -57,9 +57,6 @@ export const googleAuth = () => {
           color_scheme: 'dark',
           // auto_select: true,
           context: 'use',
-          intermediate_iframe_close_callback() {
-            console.log('Clicked on close button');
-          },
         });
 
         google = GOOGLE;
@@ -84,23 +81,17 @@ export const googleAuth = () => {
     google.accounts.id.prompt();
 
     return new Promise<IUserGoogle | undefined>((res, rej) => {
-      document.addEventListener(
-        'oneTapClick',
-        (e: CustomEvent<ITapEventDetail>) => {
-          const { success, user } = e.detail;
+      document.addEventListener('oneTapClick', (e: CustomEvent<ITapEventDetail>) => {
+        const { success, user } = e.detail;
 
-          if (!success) return rej('OneTap error!');
+        if (!success) return rej('OneTap error!');
 
-          return res(user);
-        },
-      );
+        return res(user);
+      });
     });
   };
 
-  const showGoogleButton = async (
-    buttonParent: HTMLElement,
-    cb?: () => void,
-  ) => {
+  const showGoogleButton = async (buttonParent: HTMLElement, cb?: () => void) => {
     if (!google) await init();
 
     google.accounts.id.renderButton(buttonParent, {

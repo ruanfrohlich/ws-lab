@@ -3,10 +3,7 @@ import { relative } from 'path';
 import { cwd } from 'process';
 import { createBrotliCompress, createGzip } from 'zlib';
 
-const acceptedOrigins = [
-  'https://localhost:3005',
-  'https://ws-lab-server.onrender.com',
-];
+const acceptedOrigins = ['https://localhost:3005', 'https://ws-lab-server.onrender.com'];
 
 /**
  * Registra uma mensagem no console com timestamp formatado para português brasileiro
@@ -42,8 +39,7 @@ export const compressedReponse = (config: {
   resHeaders: OutgoingHttpHeaders;
   content: unknown;
 }) => {
-  const accept = (encode: string) =>
-    config.encodingHeader.indexOf(encode) !== -1;
+  const accept = (encode: string) => config.encodingHeader.indexOf(encode) !== -1;
 
   switch (true) {
     case accept('br'): {
@@ -101,23 +97,12 @@ export const getBody = <T>(req: IncomingMessage): Promise<T> => {
  * @param userToken - Token/UUID do usuário (obrigatório para type 'user')
  * @returns URL completa para o asset ou string vazia se parâmetros inválidos
  */
-export const assetURL = (
-  assetName: string,
-  type: 'user' | 'static',
-  userToken?: string,
-) => {
+export const assetURL = (assetName: string, type: 'user' | 'static', userToken?: string) => {
   switch (type) {
     case 'user': {
       if (!userToken) return '';
 
-      return String(
-        process.env.SITE_URL?.concat(
-          '/api/assets/user/',
-          userToken,
-          '/',
-          assetName,
-        ),
-      );
+      return String(process.env.SITE_URL?.concat('/api/assets/user/', userToken, '/', assetName));
     }
     default: {
       return String(process.env.SITE_URL?.concat('/api/assets'));
@@ -130,6 +115,7 @@ export const isProd = process.argv.includes('--prod');
 export const publicUrl = isProd ? '/ws-lab' : '/app';
 export const rootPath = cwd(); // path to /server
 export const clientRoot = relative(rootPath, '../client');
+
 /**
  * Converte bytes para megabytes com duas casas decimais
  * @param num - Número em bytes

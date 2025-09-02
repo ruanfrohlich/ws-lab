@@ -11,16 +11,10 @@ import { OutgoingHttpHeaders } from 'http2';
  * @param req - Objeto de requisição HTTP (apenas url é utilizada)
  * @param res - Objeto de resposta HTTP
  */
-export const clientRoutes = (
-  { url }: IncomingMessage,
-  res: ServerResponse<IncomingMessage>,
-) => {
+export const clientRoutes = ({ url }: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
   const appRoot = join(rootPath, '../client/public');
   let contentType = '';
-  let filePath = appRoot + url?.replace(publicUrl, '');
-
-  filePath = filePath.replace(/\?\d*/g, '');
-
+  let filePath = appRoot + url?.replace(publicUrl, '').replace(/\?\d*/g, '');
   const extName = extname(filePath);
 
   switch (true) {
@@ -51,6 +45,10 @@ export const clientRoutes = (
     case extName === '.woff2':
       contentType = 'font/woff2';
       break;
+    case filePath.replace(appRoot, '') === '/robots.txt':
+      contentType = 'text/plain';
+      filePath = join(rootPath, 'public', 'robots.txt');
+      break;
     default:
       filePath = appRoot + '/index.html';
       contentType = 'text/html';
@@ -70,7 +68,7 @@ export const clientRoutes = (
       'content-length': content.byteLength,
     };
 
-    if (contentType !== 'text/html') {
+    if (!['text/html', 'text/plain'].includes(contentType)) {
       resHeaders['cache-control'] = 'max-age=31536000';
     }
 

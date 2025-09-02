@@ -11,21 +11,16 @@ interface IWatchResponse {
 }
 
 const BuildClient = async (): Promise<IWatchResponse> => {
-  [join(clientRoot, 'public'), join(clientRoot, '.parcel-cache')].forEach(
-    (folder) => {
-      if (existsSync(folder)) {
-        rmSync(folder, {
-          recursive: true,
-        });
-      }
-    },
-  );
+  [join(clientRoot, 'public'), join(clientRoot, '.parcel-cache')].forEach((folder) => {
+    if (existsSync(folder)) {
+      rmSync(folder, {
+        recursive: true,
+      });
+    }
+  });
 
   const clientEnvs = () => {
-    const envs = readFileSync(
-      join(clientRoot, isProd ? '.env.prd' : '.env.dev'),
-      'utf8',
-    );
+    const envs = readFileSync(join(clientRoot, isProd ? '.env.prd' : '.env.dev'), 'utf8');
     const parsed = parse(Buffer.from(envs));
 
     return parsed;
@@ -81,8 +76,7 @@ const BuildClient = async (): Promise<IWatchResponse> => {
           success: true,
         });
       } catch (err) {
-        loadBuild.fail();
-        console.log(err);
+        loadBuild.fail(err as string);
 
         res({
           success: false,
@@ -102,9 +96,7 @@ const BuildClient = async (): Promise<IWatchResponse> => {
         if (event?.type === 'buildSuccess') {
           const bundles = event.bundleGraph.getBundles();
 
-          loadBuild.succeed(
-            `Built ${bundles.length} bundles in ${event.buildTime}ms!`,
-          );
+          loadBuild.succeed(`Built ${bundles.length} bundles in ${event.buildTime}ms!`);
 
           res({
             success: true,
