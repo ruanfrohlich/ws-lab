@@ -19,13 +19,6 @@ const BuildClient = async (): Promise<IWatchResponse> => {
     }
   });
 
-  const clientEnvs = () => {
-    const envs = readFileSync(join(clientRoot, isProd ? '.env.prd' : '.env.dev'), 'utf8');
-    const parsed = parse(Buffer.from(envs));
-
-    return parsed;
-  };
-
   const loadBuild = loading({
     text: 'Building the client',
   }).start();
@@ -36,9 +29,7 @@ const BuildClient = async (): Promise<IWatchResponse> => {
     entries: join(clientRoot, 'src/index.html'),
     defaultConfig: '@parcel/config-default',
     env: {
-      TEST: 'test',
       NODE_ENV: mode,
-      ...clientEnvs(),
     },
     defaultTargetOptions: {
       publicUrl,
@@ -52,12 +43,19 @@ const BuildClient = async (): Promise<IWatchResponse> => {
   };
 
   if (!isProd) {
+    const devEnvs = readFileSync(join(clientRoot, '.env.dev'), 'utf8');
+    const parsed = parse(Buffer.from(devEnvs));
+
     parcelConfig = {
       ...parcelConfig,
       watchDir: join(clientRoot, 'src/'),
       shouldAutoInstall: true,
       hmrOptions: {
         port: parseInt(process.env.HMR_PORT ?? '3001'),
+      },
+      env: {
+        ...parcelConfig.env,
+        ...parsed,
       },
     };
   }
