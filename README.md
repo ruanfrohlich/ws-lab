@@ -147,6 +147,7 @@ web-socket-lab/
 │   │   ├── interfaces/     # TypeScript interfaces
 │   │   └── utils/          # Utility functions
 │   └── public/             # Compiled frontend
+│
 ├── server/                 # Node.js backend
 │   ├── src/
 │   │   ├── database/       # Database models and types
