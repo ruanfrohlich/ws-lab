@@ -34,20 +34,12 @@ export const googleAuth = () => {
             }
 
             const data = decodeJWT(_res.credential);
-            const profileImg = await fetch(data.picture);
-            const imgBlob = await profileImg.blob();
-            const imgBase64 = await getDataURL(imgBlob);
-
-            const user = {
-              ...data,
-              picture: imgBase64,
-            };
 
             tapEvent = new CustomEvent('oneTapClick', {
               cancelable: false,
               detail: {
                 success: true,
-                user,
+                user: data,
               },
             });
 

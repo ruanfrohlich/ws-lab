@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize';
 import { AccountType, Friends, FriendStatus, User } from './models';
+import { searchAccounts } from './querys';
 
 const database = async () => {
   const sequelize = new Sequelize(String(process.env.DB_URL), {
@@ -55,6 +56,7 @@ const database = async () => {
     FriendStatusModel,
     close,
     sync,
+    searchAccounts: async (term: string, userId: number) => await searchAccounts(term, userId, sequelize),
   };
 };
 

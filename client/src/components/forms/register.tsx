@@ -1,18 +1,5 @@
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Typography,
-} from '@mui/material';
-import {
-  ChangeEvent,
-  FormEvent,
-  Fragment,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
+import { ChangeEvent, FormEvent, Fragment, useEffect, useRef, useState } from 'react';
 import { AppInput } from '../Input';
 import { useServices, useValidate } from 'hooks';
 import { IRegisterFormFields, IRegisterFormState } from 'interfaces';
@@ -100,9 +87,7 @@ export const FormRegister = (props: { onCancel: () => void }) => {
       updateState('validatedFields', [...updatedInvalid]);
     }
 
-    setRegisterFieldsHeight(
-      registerFields.current?.getBoundingClientRect().height ?? 0,
-    );
+    setRegisterFieldsHeight(registerFields.current?.getBoundingClientRect().height ?? 0);
 
     if (field === 'username' && !isValid) {
       setRegisterFieldsHeight(0);
@@ -112,9 +97,7 @@ export const FormRegister = (props: { onCancel: () => void }) => {
   useEffect(() => {
     updateState(
       'isValid',
-      Object.keys(state.fields).every((key) =>
-        state.validatedFields.includes(key),
-      ),
+      Object.keys(state.fields).every((key) => state.validatedFields.includes(key)),
     );
   }, [state.validatedFields]);
 
@@ -140,8 +123,7 @@ export const FormRegister = (props: { onCancel: () => void }) => {
       }
 
       return updateState('errors', {
-        register:
-          'Tivemos um probleminha ao tentar realizar seu cadastro. Tente novamente em alguns minutos.',
+        register: 'Tivemos um probleminha ao tentar realizar seu cadastro. Tente novamente em alguns minutos.',
       });
     } finally {
       updateState('loading', false);
@@ -161,24 +143,20 @@ export const FormRegister = (props: { onCancel: () => void }) => {
             }}
             variant='h2'
           >
-            <Link
-              style={{ textDecoration: 'none', color: 'inherit' }}
-              to={appRoot + '/account'}
-            >
+            <Link style={{ textDecoration: 'none', color: 'inherit' }} to={appRoot + '/account'}>
               aqui
             </Link>
           </Typography>
           .
         </Alert>
       )}
-      {state.errors?.register && (
-        <Alert severity='error'>{state.errors?.register}</Alert>
-      )}
+      {state.errors?.register && <Alert severity='error'>{state.errors?.register}</Alert>}
       <form noValidate onSubmit={handleSubmit}>
         <Box sx={{ ...flex, paddingBlock: 2, gap: '0' }}>
           <Box
             sx={{
               position: 'relative',
+              marginBottom: '24px',
             }}
           >
             <AppInput
@@ -205,12 +183,12 @@ export const FormRegister = (props: { onCancel: () => void }) => {
           <Box
             sx={{
               transition: '600ms ease-in-out',
-              maxHeight: registerFieldsHeight + 32,
-              paddingTop: '32px',
+              maxHeight: registerFieldsHeight,
               overflow: 'hidden',
+              paddingTop: '6px',
             }}
           >
-            <Box sx={flex} padding={0} ref={registerFields}>
+            <Box sx={flex} ref={registerFields}>
               <AppInput
                 id='name'
                 label='Seu nome'
@@ -257,12 +235,7 @@ export const FormRegister = (props: { onCancel: () => void }) => {
                 }}
                 padding={0}
               >
-                <Button
-                  type='submit'
-                  variant='contained'
-                  fullWidth
-                  disabled={!state.isValid}
-                >
+                <Button type='submit' variant='contained' fullWidth disabled={!state.isValid}>
                   {state.loading ? <CircularProgress size={20} /> : 'Cadastrar'}
                 </Button>
                 <Button

@@ -1,37 +1,33 @@
 import { alpha, Box, LinearProgress } from '@mui/material';
-import { IBaseModalProps, IFindModalResult } from 'interfaces';
+import { IAccountSearch, IBaseModalProps, IFindModalResult } from 'interfaces';
 import BaseModal from './BaseModal';
 import { AppInput } from '../Input';
 import { useEffect, useRef, useState } from 'react';
-import mockDB from 'data/mockDB.json';
 import { AvatarCard } from '../cards';
 import { AppLink } from '../AppLink';
-import { isEmpty } from 'lodash';
-import { normalize } from 'utils';
+import { debounce, isEmpty } from 'lodash';
+import { useServices } from 'hooks';
 
 export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [term, setTerm] = useState<string>('');
-  const [results, setResults] = useState<IFindModalResult[] | null>(null);
+  const [results, setResults] = useState<IAccountSearch>();
+  const { searchAccount } = useServices();
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleSearch = async () => {
-    setResults(null);
+    setResults(undefined);
+    setIsSearching(true);
 
-    const fetch = () =>
-      new Promise<IFindModalResult[] | null>((res) => {
-        setTimeout(() => {
-          const user =
-            mockDB.filter((el) =>
-              normalize(el.name).includes(normalize(term)),
-            ) ?? null;
+    const delay = Math.round(Math.random() * 1000) + 500;
 
-          res(user);
-        }, 2000);
-      });
+    const search = debounce(async () => {
+      const data = await searchAccount(term);
+      setIsSearching(false);
+      setResults(data);
+    }, delay);
 
-    const res = await fetch();
-
-    setResults(res);
+    search();
   };
 
   useEffect(() => {
@@ -43,6 +39,12 @@ export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
       handleSearch();
     }
   }, [term]);
+
+  useEffect(() => {
+    if (results) {
+      console.log(results);
+    }
+  }, [results]);
 
   return (
     <BaseModal canClose={false} closeFocus {...{ onClose }}>
@@ -60,14 +62,14 @@ export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
           onChange={({ target: { value } }) => setTerm(value)}
           autoComplete='off'
         />
-        {!isEmpty(term) && !results && (
+        {isSearching && (
           <LinearProgress
             sx={{
               marginTop: '10px',
             }}
           />
         )}
-        {!isEmpty(results) && (
+        {!isEmpty(results?.accounts) && (
           <Box
             component={'ul'}
             sx={{
@@ -80,7 +82,7 @@ export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
               flexWrap: 'wrap',
             }}
           >
-            {results?.map((item) => (
+            {results?.accounts.map((item) => (
               <Box
                 component={'li'}
                 key={item.slug}
@@ -93,10 +95,7 @@ export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
                   },
                 })}
               >
-                <AppLink
-                  to={`${item.type}?slug=${item.slug}`}
-                  onClick={onClose}
-                >
+                <AppLink to={`${item.type}?slug=${item.slug}`} onClick={onClose}>
                   <AvatarCard data={item} />
                 </AppLink>
               </Box>

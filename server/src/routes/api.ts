@@ -2,9 +2,8 @@ import { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'http';
 import { AES, enc } from 'crypto-js';
 import database from '../database';
 import { assetURL, getBody, rootPath } from '../utils';
-import { IFindUser } from '../interfaces';
 import { omit } from 'lodash';
-import { AccountTypesEnum, UserCreationAttributes } from '../database/types';
+import { AccountTypesEnum, IFindUserResponse, UserCreationAttributes } from '../database/types';
 import sharp from 'sharp';
 import { join } from 'path';
 import { mkdirSync, readFile } from 'fs';
@@ -16,53 +15,74 @@ import { stat } from 'fs/promises';
  * @param req - Objeto de requisição HTTP
  * @param res - Objeto de resposta HTTP
  */
-export const apiRoutes = async (
-  req: IncomingMessage,
-  res: ServerResponse<IncomingMessage>,
-) => {
+export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
   const { url, method, headers } = req;
-  const endpoint = url?.split('/api')[1];
-  const { UserModel, FriendsModel } = await database();
+  const urlFormatted = new URL(String(url), process.env.SITE_URL);
+  const endpoint = urlFormatted.pathname.split('/api')[1];
+  const { UserModel, FriendsModel, searchAccounts } = await database();
   const appKey = process.env.APP_KEY ?? '';
 
-  const sendResponse = (
-    status: number,
-    message: object,
-    resHeaders?: OutgoingHttpHeaders,
-  ) => {
-    return res
-      .writeHead(status, {
-        'content-type': 'application/json',
-        ...resHeaders,
-      })
-      .end(JSON.stringify(message));
+  const sendResponse = (status: number, message: object, resHeaders?: OutgoingHttpHeaders) => {
+    return res.writeHead(status, { 'content-type': 'application/json', ...resHeaders }).end(JSON.stringify(message));
   };
 
-  const tokenError = () =>
-    sendResponse(401, {
-      message: 'Token not provided!',
-    });
+  const validateUser = async () => {
+    if (!headers.authorization) {
+      return sendResponse(401, {
+        message: 'Auth token not provided!',
+      });
+    }
+
+    const user = await UserModel.getUserByUUID(headers.authorization, FriendsModel.Model);
+
+    if (!user) {
+      return sendResponse(401, {
+        message: 'Invalid auth token!',
+      });
+    }
+
+    return user;
+  };
 
   switch (true) {
     case endpoint === '/user': {
-      if (method !== 'POST') {
+      if (method !== 'GET') {
         return sendResponse(405, {
           message: 'Invalid method',
         });
       }
 
-      const body = await getBody<IFindUser>(req);
-      const user = await UserModel.getUser(body);
+      const email = urlFormatted.searchParams.get('email') ?? '';
+      const username = urlFormatted.searchParams.get('username') ?? '';
 
-      if (user) {
-        return sendResponse(200, {
-          found: true,
-          uuid: user.uuid,
+      const user = await UserModel.getUser({
+        email,
+        username,
+      });
+
+      return sendResponse(200, {
+        found: !!user,
+      });
+    }
+    case endpoint === '/user/social': {
+      if (method !== 'GET') {
+        return sendResponse(405, {
+          message: 'Invalid method',
         });
       }
 
+      const token = urlFormatted.searchParams.get('token');
+
+      if (!token) {
+        return sendResponse(400, {
+          message: 'Token not provided',
+        });
+      }
+
+      const socialAccount = await UserModel.getSocialAccount(token, FriendsModel.Model);
+
       return sendResponse(200, {
-        found: false,
+        socialAccount,
       });
     }
     case endpoint === '/user/find': {
@@ -72,22 +92,13 @@ export const apiRoutes = async (
         });
       }
 
-      if (!headers.authorization) return tokenError();
+      const user = (await validateUser()) as IFindUserResponse;
 
-      const user = await UserModel.getUserByUUID(
-        headers.authorization,
-        FriendsModel.Model,
-      );
-
-      if (user) {
-        return sendResponse(200, {
-          found: true,
-          user,
-        });
-      }
+      if (!user.id) break;
 
       return sendResponse(200, {
-        found: false,
+        found: true,
+        user,
       });
     }
     case endpoint === '/user/update': {
@@ -97,88 +108,71 @@ export const apiRoutes = async (
         });
       }
 
-      if (!headers.authorization) return tokenError();
+      const user = (await validateUser()) as IFindUserResponse;
+
+      if (!user.id) break;
 
       const body = await getBody<UserCreationAttributes>(req);
-
-      const user = await UserModel.getUser({
-        username: body.username,
-        email: '',
-      });
 
       const newAssets: {
         profilePic: string;
         coverImage: string;
       } = {
-        coverImage: user?.coverImage ?? '',
-        profilePic: user?.profilePic ?? '',
+        coverImage: user.coverImage ?? '',
+        profilePic: user.profilePic ?? '',
       };
 
-      if (user) {
-        [body.profilePic, body.coverImage].forEach(async (asset, i) => {
-          if (asset !== '') {
-            const [, imageBase64] = asset.split(
-              /data:(?:image|text)\/(?:png|jpe?g|webp|html);base64,/,
-            );
+      [body.profilePic, body.coverImage].forEach(async (asset, i) => {
+        if (asset && asset !== '') {
+          const [, imageBase64] = asset.split(/data:(?:image|text)\/(?:png|jpe?g|webp|html);base64,/);
 
-            const folderPath = join(rootPath, 'public/user', user.uuid);
-            const version = Date.now();
-            const fileName =
-              (i === 0 ? `pp.${version}` : `ci.${version}`) + '.webp';
-            const filePath = `${folderPath}/${fileName}`;
+          const folderPath = join(rootPath, 'public/user', String(user.id));
+          const version = Date.now();
+          const fileName = (i === 0 ? `pp.${version}` : `ci.${version}`) + '.webp';
+          const filePath = `${folderPath}/${fileName}`;
+          const assetLink = assetURL(fileName, 'user', String(user.id));
 
-            newAssets[i === 0 ? 'profilePic' : 'coverImage'] = assetURL(
-              fileName,
-              'user',
+          newAssets[i === 0 ? 'profilePic' : 'coverImage'] = assetLink;
+
+          const imageBuffer = Buffer.from(imageBase64, 'base64');
+
+          mkdirSync(folderPath, { recursive: true });
+
+          try {
+            sharp(imageBuffer)
+              .webp({
+                quality: 50,
+                effort: 2,
+                lossless: true,
+              })
+              .resize({
+                width: i === 0 ? 400 : 1280,
+                height: i === 0 ? 400 : 720,
+              })
+              .toFile(filePath, (err) => {
+                if (err) console.log(err);
+              });
+
+            const changedData = omit(body, ['profilePic', 'coverImage']);
+
+            await UserModel.updateUser(
+              //@ts-expect-error i know
+              {
+                ...changedData,
+                [i === 0 ? 'profilePic' : 'coverImage']: i === 0 ? newAssets.profilePic : newAssets.coverImage,
+              },
               user.uuid,
             );
-
-            const imageBuffer = Buffer.from(imageBase64, 'base64');
-
-            mkdirSync(folderPath, { recursive: true });
-
-            try {
-              sharp(imageBuffer)
-                .webp({
-                  quality: 50,
-                  effort: 2,
-                  lossless: true,
-                })
-                .resize({
-                  width: i === 0 ? 400 : 1280,
-                  height: i === 0 ? 400 : 720,
-                })
-                .toFile(filePath, (err) => {
-                  if (err) console.log(err);
-                });
-
-              const changedData = omit(body, ['profilePic', 'coverImage']);
-
-              await UserModel.updateUser(
-                //@ts-expect-error i know
-                {
-                  ...changedData,
-                  [i === 0 ? 'profilePic' : 'coverImage']:
-                    i === 0 ? newAssets.profilePic : newAssets.coverImage,
-                },
-                user.uuid,
-              );
-            } catch (e) {
-              console.log(e);
-            }
+          } catch (e) {
+            console.log(e);
           }
-        });
-
-        return sendResponse(200, {
-          success: true,
-          message: 'User updated successfully!',
-          newAssets,
-        });
-      }
+        }
+      });
 
       return sendResponse(200, {
-        success: false,
-        message: 'User not found with provided token!',
+        success: true,
+        message: 'User updated successfully!',
+        newAssets,
       });
     }
     case endpoint === '/register': {
@@ -188,8 +182,16 @@ export const apiRoutes = async (
         });
       }
 
-      const body = await getBody<UserCreationAttributes>(req);
-      const user = await UserModel.getUser(body);
+      const body = await getBody<{
+        fields: UserCreationAttributes;
+        social: {
+          image: string;
+          provider: string;
+          token: string;
+        };
+      }>(req);
+
+      const user = await UserModel.getUser(body.fields);
 
       if (user) {
         return sendResponse(400, {
@@ -198,13 +200,13 @@ export const apiRoutes = async (
       }
 
       try {
-        const data: UserCreationAttributes = {
-          ...body,
+        const data = {
+          ...body.fields,
           type: AccountTypesEnum['USER'],
-          password: AES.encrypt(body.password, appKey).toString(),
+          password: AES.encrypt(body.fields.password, appKey).toString(),
         };
 
-        const { user } = await UserModel.createUser(data);
+        const { user } = await UserModel.createUser(data, body.social);
 
         return sendResponse(201, {
           message: 'User created successfully',
@@ -268,6 +270,31 @@ export const apiRoutes = async (
 
       return sendResponse(401, {
         message: 'User not found',
+      });
+    }
+    case /\/accounts\/search/.test(String(endpoint)): {
+      if (method !== 'GET') {
+        return sendResponse(405, {
+          message: 'Invalid method',
+        });
+      }
+
+      const user = (await validateUser()) as IFindUserResponse;
+
+      if (!user.id) break;
+
+      const term = urlFormatted.searchParams.get('term');
+
+      if (!term) {
+        return sendResponse(400, {
+          message: 'Term not provided',
+        });
+      }
+
+      const accounts = await searchAccounts(term, user.id);
+
+      return sendResponse(200, {
+        accounts,
       });
     }
     case /\/assets/.test(String(endpoint)): {

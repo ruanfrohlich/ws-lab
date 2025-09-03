@@ -70,16 +70,15 @@ export const UserAccount = () => {
 
   useEffect(() => {
     (async () => {
-      const image = await fetch(
-        'https://api.unsplash.com/photos/random/?orientation=landscape&client_id=' +
-          process.env.UNSPLASH_API_KEY,
+      const unsplash = await fetch(
+        'https://api.unsplash.com/photos/random/?orientation=landscape&client_id=' + process.env.UNSPLASH_API_KEY,
       );
 
-      const data = await image.json();
+      const data = await unsplash.json();
 
       setRandomCover(data);
     })();
-  }, [user]);
+  }, []);
 
   if (!user) return <></>;
 
@@ -103,12 +102,13 @@ export const UserAccount = () => {
       >
         <Box
           component={'img'}
-          src={coverImage ?? user.coverImage}
+          src={(() => {
+            if (coverImage) return coverImage;
+            if (user.coverImage !== '') return user.coverImage;
+            return String(randomCover?.urls.regular);
+          })()}
           fetchPriority='high'
           sx={imageStyles}
-          onError={(e) => {
-            e.currentTarget.src = String(randomCover?.urls.regular);
-          }}
         />
         <Button
           className='cover-btn'
@@ -127,13 +127,7 @@ export const UserAccount = () => {
         >
           Alterar capa
         </Button>
-        <input
-          ref={coverRef}
-          type='file'
-          id='cover-input'
-          onChange={handleInputFile}
-          hidden
-        />
+        <input ref={coverRef} type='file' id='cover-input' onChange={handleInputFile} hidden />
       </Box>
       <Wrapper
         sx={{
@@ -149,13 +143,7 @@ export const UserAccount = () => {
             marginBottom: '25px',
           }}
         >
-          <input
-            ref={photoRef}
-            type='file'
-            id='image-input'
-            hidden
-            onChange={handleInputFile}
-          />
+          <input ref={photoRef} type='file' id='image-input' hidden onChange={handleInputFile} />
           <Box
             component={'picture'}
             sx={{
@@ -195,13 +183,7 @@ export const UserAccount = () => {
             >
               Alterar
             </Button>
-            <Button
-              variant='contained'
-              color='error'
-              size='small'
-              endIcon={<Delete />}
-              onClick={handleRemovePhoto}
-            >
+            <Button variant='contained' color='error' size='small' endIcon={<Delete />} onClick={handleRemovePhoto}>
               Remover
             </Button>
           </Box>

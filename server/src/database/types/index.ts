@@ -1,9 +1,4 @@
-import {
-  CreationOptional,
-  DataTypes,
-  ModelAttributes,
-  ModelDefined,
-} from 'sequelize';
+import { CreationOptional, DataTypes, ModelAttributes, ModelDefined } from 'sequelize';
 
 export interface DefaultAttributes {
   id: number;
@@ -25,15 +20,9 @@ export interface AccountTypeAttributes extends DefaultAttributes {
 
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-export type AccountTypeCreationAttributes = Optional<
-  AccountTypeAttributes,
-  DefaultOptionalAttibutes
->;
+export type AccountTypeCreationAttributes = Optional<AccountTypeAttributes, DefaultOptionalAttibutes>;
 
-export type AccountTypeModel = ModelDefined<
-  AccountTypeAttributes,
-  AccountTypeCreationAttributes
->;
+export type AccountTypeModel = ModelDefined<AccountTypeAttributes, AccountTypeCreationAttributes>;
 
 export interface UserAttributes extends DefaultAttributes {
   name: string;
@@ -46,10 +35,7 @@ export interface UserAttributes extends DefaultAttributes {
   coverImage: string;
 }
 
-export type UserCreationAttributes = Optional<
-  UserAttributes,
-  DefaultOptionalAttibutes | 'uuid'
->;
+export type UserCreationAttributes = Optional<UserAttributes, DefaultOptionalAttibutes | 'uuid'>;
 
 export type UserModel = ModelDefined<UserAttributes, UserCreationAttributes>;
 
@@ -57,19 +43,23 @@ export interface IUser extends UserAttributes {
   id: number;
 }
 
+export interface SocialAccountAttributes extends DefaultAttributes {
+  provider: string;
+  token: string;
+  userId: number;
+}
+
+export type SocialAccountCreationAttributes = Optional<SocialAccountAttributes, DefaultOptionalAttibutes>;
+
+export type SocialAccountModel = ModelDefined<SocialAccountAttributes, SocialAccountCreationAttributes>;
+
 export interface FriendsAttributes extends DefaultAttributes {
   status: string;
 }
 
-export type FriendsCreationAttributes = Optional<
-  FriendsAttributes,
-  DefaultOptionalAttibutes
->;
+export type FriendsCreationAttributes = Optional<FriendsAttributes, DefaultOptionalAttibutes>;
 
-export type FriendsModel = ModelDefined<
-  FriendsAttributes,
-  FriendsCreationAttributes
->;
+export type FriendsModel = ModelDefined<FriendsAttributes, FriendsCreationAttributes>;
 
 export type TFriendStatus = 'send' | 'accepted' | 'rejected';
 
@@ -77,10 +67,7 @@ export interface IUserFriends {
   id: number;
   status: TFriendStatus;
   activityStatus: TActivityStatus;
-  user: Pick<
-    UserAttributes,
-    'id' | 'username' | 'name' | 'uuid' | 'profilePic'
-  >;
+  user: Pick<UserAttributes, 'id' | 'username' | 'name' | 'uuid' | 'profilePic'>;
 }
 
 export type TActivityStatus = 'online' | 'away' | 'offline' | 'busy';
@@ -135,6 +122,16 @@ export const ModelTypes: {
   FriendStatus: {
     status: {
       type: DataTypes.STRING,
+    },
+  },
+  SocialAccount: {
+    provider: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    token: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
   },
 };

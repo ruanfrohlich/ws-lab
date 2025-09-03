@@ -8,6 +8,7 @@ import {
   UserAttributes,
   UserCreationAttributes,
   UserModel,
+  SocialAccountModel,
 } from '../types';
 import { omit, pick } from 'lodash';
 import { log, useCache } from 'utils';
@@ -26,6 +27,17 @@ export const User = async (sequelize: Sequelize) => {
       },
     ],
   });
+  const SocialAccountModel: SocialAccountModel = sequelize.define('SocialAccount', ModelTypes.SocialAccount);
+
+  SocialAccountModel.belongsTo(Model, {
+    as: 'user',
+    foreignKey: {
+      name: 'userId',
+      allowNull: false,
+    },
+    onDelete: 'CASCADE',
+  });
+
   const { get, set, del } = await useCache();
 
   /**
@@ -83,17 +95,36 @@ export const User = async (sequelize: Sequelize) => {
    */
   const createUser = async (
     userData: UserCreationAttributes,
+    social?: {
+      image: string;
+      provider: string;
+      token: string;
+    },
   ): Promise<{
     user: UserAttributes & {
       friends: Array<IUserFriends>;
     };
   }> => {
-    const { dataValues } = await Model.create({ ...userData });
+    const user = await Model.create({ ...userData });
 
-    log(`User [${dataValues.username}] was saved to the database.`);
+    if (social) {
+      const resizedImage = social.image.replace(/s\d+/, 's400');
+
+      user.set('profilePic', resizedImage);
+
+      await user.save();
+
+      await SocialAccountModel.create({
+        provider: social.provider,
+        token: social.token,
+        userId: user.dataValues.id,
+      });
+    }
+
+    log(`User [${user.dataValues.username}] was saved to the database.`);
 
     return {
-      user: { ...dataValues, friends: [] },
+      user: { ...user.toJSON(), friends: [] },
     };
   };
 
@@ -103,10 +134,7 @@ export const User = async (sequelize: Sequelize) => {
    * @param friendsModel - Modelo de amigos para incluir na consulta
    * @returns Dados completos do usuário com amigos ou null se não encontrado
    */
-  const getUserByUUID = async (
-    uuid: string,
-    friendsModel: FriendsModel,
-  ): Promise<IFindUserResponse | null> => {
+  const getUserByUUID = async (uuid: string, friendsModel: FriendsModel): Promise<IFindUserResponse | null> => {
     try {
       const cachedUser = await get<IFindUserResponse>(uuid);
 
@@ -135,13 +163,7 @@ export const User = async (sequelize: Sequelize) => {
             pick(
               {
                 ...friend.dataValues,
-                user: pick(friend.dataValues.User.dataValues, [
-                  'id',
-                  'username',
-                  'name',
-                  'uuid',
-                  'profilePic',
-                ]),
+                user: pick(friend.dataValues.User.dataValues, ['id', 'username', 'name', 'uuid', 'profilePic']),
               },
               ['id', 'status', 'activityStatus', 'user'],
             ),
@@ -184,10 +206,7 @@ export const User = async (sequelize: Sequelize) => {
    * @param token - UUID do usuário a ser atualizado
    * @returns Dados atualizados do usuário ou null se não encontrado
    */
-  const updateUser = async (
-    data: Omit<UserCreationAttributes, 'password'>,
-    token: string,
-  ) => {
+  const updateUser = async (data: Omit<UserCreationAttributes, 'password'>, token: string) => {
     try {
       const user = await Model.findOne({
         where: {
@@ -215,6 +234,33 @@ export const User = async (sequelize: Sequelize) => {
     }
   };
 
+  const getSocialAccount = async (token: string, friendsModel: FriendsModel) => {
+    const socialAccount = await SocialAccountModel.findOne({
+      attributes: ['id', 'provider'],
+      where: {
+        token,
+      },
+      include: {
+        model: Model,
+        as: 'user',
+        attributes: {
+          exclude: ['password'],
+        },
+        include: {
+          //@ts-expect-error i know
+          model: friendsModel,
+          as: 'friends',
+          include: [Model],
+          attributes: {
+            exclude: ['password', 'uuid'],
+          },
+        },
+      },
+    });
+
+    return socialAccount?.toJSON();
+  };
+
   return {
     Model,
     getUser,
@@ -222,5 +268,6 @@ export const User = async (sequelize: Sequelize) => {
     getAllUsers,
     createUser,
     updateUser,
+    getSocialAccount,
   };
 };

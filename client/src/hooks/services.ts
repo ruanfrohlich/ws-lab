@@ -1,11 +1,11 @@
 import axios, { isAxiosError } from 'axios';
 import { useUser, useUserDispatch } from 'contexts';
 import { configProvider, COOKIES, randomPassword, translateError } from 'utils';
-import { IUser, IUserDataForm, IUserRegister } from 'interfaces';
+import { IAccountSearch, IUser, IUserDataForm, IUserRegister } from 'interfaces';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router';
 import { googleAuth } from 'integrations';
-import { toLower } from 'lodash';
+import { omit, toLower } from 'lodash';
 
 const handler = axios.create({
   baseURL: process.env.ACCOUNT_API,
@@ -45,14 +45,11 @@ export const useServices = () => {
    */
   const fetchUser = async (token: string) => {
     try {
-      const res = await handler.get<{ found: boolean; user: IUser }>(
-        `/user/find`,
-        {
-          headers: {
-            Authorization: token,
-          },
+      const res = await handler.get<{ found: boolean; user: IUser }>(`/user/find`, {
+        headers: {
+          Authorization: token,
         },
-      );
+      });
 
       if (res.status === 200) {
         const { user } = res.data;
@@ -95,12 +92,8 @@ export const useServices = () => {
    */
   const findUser = async (user: { username?: string; email?: string }) => {
     try {
-      const { data } = await handler.post<{ found: boolean; uuid?: string }>(
-        '/user',
-        {
-          username: user.username ?? '',
-          email: user.email ?? '',
-        },
+      const { data } = await handler.get<{ found: boolean; uuid?: string }>(
+        `/user?username=${user.username}&email=${user.email}`,
       );
 
       return data;
@@ -171,12 +164,14 @@ export const useServices = () => {
    */
   const registerUser = async (
     fields: IUserRegister,
-    google?: {
+    social?: {
       image: string;
+      provider: string;
+      token: string;
     },
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const res = await handler.post<{ user: IUser }>('/register', fields);
+      const res = await handler.post<{ user: IUser }>('/register', { fields, social });
 
       if (res.status === 201) {
         const { uuid } = res.data.user;
@@ -189,13 +184,6 @@ export const useServices = () => {
             user: res.data.user,
           },
         });
-
-        if (google) {
-          await updateUser({
-            ...res.data.user,
-            profilePic: google.image,
-          });
-        }
 
         return {
           success: true,
@@ -219,6 +207,15 @@ export const useServices = () => {
         success: false,
       };
     }
+  };
+
+  const searchAccount = async (term: string) => {
+    const { data } = await handler.get<IAccountSearch>(`/accounts/search?term=${term}`, {
+      headers: {
+        Authorization: Cookies.get(COOKIES.userToken),
+      },
+    });
+    return data;
   };
 
   /**
@@ -292,22 +289,40 @@ export const useServices = () => {
       email: googleUser.email,
       name: googleUser.name,
       password: randomPassword(8),
-      username: toLower(
-        `${googleUser.given_name}-${googleUser.sub.slice(0, 6)}`,
-      ),
+      username: toLower(`${googleUser.given_name}-${googleUser.sub.slice(0, 6)}`),
     };
 
-    const { found: userExists, uuid } = await findUser({
-      email: userFormatted.email,
+    const {
+      data: { socialAccount },
+    } = await handler.get<{
+      socialAccount: {
+        id: number;
+        provider: string;
+        user: IUser;
+      };
+    }>(`/user/social`, {
+      params: {
+        token: googleUser.sub,
+      },
     });
 
-    if (userExists && uuid) {
-      createAuthCookie(uuid);
-      return await fetchUser(uuid);
+    console.log(socialAccount);
+
+    if (socialAccount && socialAccount.user) {
+      createAuthCookie(socialAccount.user.uuid);
+      return userDispatch({
+        type: 'setUser',
+        payload: {
+          logged: true,
+          user: socialAccount.user,
+        },
+      });
     }
 
     const { success, error } = await registerUser(userFormatted, {
       image: googleUser.picture,
+      provider: 'google',
+      token: googleUser.sub,
     });
 
     if (!success && error) {
@@ -337,5 +352,6 @@ export const useServices = () => {
     redirectHome,
     hasAuthCookie,
     googleSignIn,
+    searchAccount,
   };
 };

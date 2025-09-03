@@ -8,6 +8,7 @@
     "ws:client": "yarn workspace client",
     "ws:server": "yarn workspace server",
     "dev": "yarn ws:server dev",
+    "dev:client": "yarn ws:server dev:client",
     "dev:server": "yarn dev --no-client",
     "build": "yarn ws:server build",
     "start": "yarn ws:server start",
