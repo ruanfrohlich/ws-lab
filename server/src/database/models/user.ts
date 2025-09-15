@@ -163,7 +163,7 @@ export const User = async (sequelize: Sequelize) => {
             pick(
               {
                 ...friend.dataValues,
-                user: pick(friend.dataValues.User.dataValues, ['id', 'username', 'name', 'uuid', 'profilePic']),
+                user: omit(friend.dataValues.User.dataValues, ['uuid', 'password']),
               },
               ['id', 'status', 'activityStatus', 'user'],
             ),

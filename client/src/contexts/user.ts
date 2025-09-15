@@ -8,9 +8,9 @@ export const initialState: IUserContext = {
 };
 
 export const UserContext = createContext<IUserContext>(initialState);
-export const UserDispatchContext = createContext<
-  ActionDispatch<[action: IUserAction]>
->(() => initialState);
+export const UserDispatchContext = createContext<ActionDispatch<[action: IUserAction]>>(() => initialState);
+
+UserContext.displayName = 'User';
 
 export function useUser() {
   return useContext(UserContext);

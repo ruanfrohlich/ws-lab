@@ -5,6 +5,7 @@ import { ChangeEvent, FormEvent, Fragment, useEffect, useState } from 'react';
 import { IUserDataForm, IUserDataFormProps } from 'interfaces';
 import { useServices } from 'hooks';
 import { LogoutModal } from '../modals';
+import { reduce } from 'lodash';
 
 export const UserDataForm = (props: IUserDataFormProps) => {
   const { user } = useUser();
@@ -15,8 +16,8 @@ export const UserDataForm = (props: IUserDataFormProps) => {
     fields: {
       username: user?.username ?? '',
       email: user?.email ?? '',
-      coverImage: '',
-      profilePic: '',
+      coverImage: user?.coverImage ?? '',
+      profilePic: user?.profilePic ?? '',
       name: user?.name ?? '',
     },
     loading: false,
@@ -46,7 +47,18 @@ export const UserDataForm = (props: IUserDataFormProps) => {
     });
 
     try {
-      await updateUser(formState.fields);
+      const filtered = reduce(
+        formState.fields,
+        (acc, value, key) => {
+          if (value !== '' && value !== user?.[key]) {
+            acc[key] = value;
+          }
+          return acc;
+        },
+        {},
+      ) as IUserDataForm['fields'];
+
+      await updateUser(filtered);
 
       setFormState((state) => {
         return { ...state, loading: false, success: true };
@@ -80,9 +92,7 @@ export const UserDataForm = (props: IUserDataFormProps) => {
 
   return (
     <Fragment>
-      {isOpenModal && (
-        <LogoutModal canClose onClose={() => setIsOpenModal(false)} />
-      )}
+      {isOpenModal && <LogoutModal canClose onClose={() => setIsOpenModal(false)} />}
       <Snackbar
         open={formState.success}
         autoHideDuration={5000}
@@ -106,8 +116,7 @@ export const UserDataForm = (props: IUserDataFormProps) => {
         }}
       >
         <Alert color='error' variant='outlined' sx={{ width: '100%' }}>
-          Tivemos um problema ao atualizar seus dados, tente novamente em alguns
-          minutos!
+          Tivemos um problema ao atualizar seus dados, tente novamente em alguns minutos!
         </Alert>
       </Snackbar>
       <Box
@@ -130,43 +139,15 @@ export const UserDataForm = (props: IUserDataFormProps) => {
             gap: 2,
           }}
         >
-          <AppInput
-            id='username'
-            label='Username'
-            error=''
-            value={formState.fields.username}
-            onChange={handleChange}
-          />
-          <AppInput
-            id='name'
-            label='Seu nome'
-            error=''
-            value={formState.fields.name}
-            onChange={handleChange}
-          />
-          <AppInput
-            id='email'
-            label='E-mail'
-            error=''
-            value={formState.fields.email}
-            onChange={handleChange}
-          />
+          <AppInput id='username' label='Username' error='' value={formState.fields.username} onChange={handleChange} />
+          <AppInput id='name' label='Seu nome' error='' value={formState.fields.name} onChange={handleChange} />
+          <AppInput id='email' label='E-mail' error='' value={formState.fields.email} onChange={handleChange} />
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Button
-            variant='contained'
-            color='primary'
-            type='submit'
-            disabled={!isValid}
-          >
+          <Button variant='contained' color='primary' type='submit' disabled={!isValid}>
             Atualizar
           </Button>
-          <Button
-            variant='contained'
-            color='error'
-            type='button'
-            onClick={() => setIsOpenModal(true)}
-          >
+          <Button variant='contained' color='error' type='button' onClick={() => setIsOpenModal(true)}>
             Desconectar
           </Button>
         </Box>

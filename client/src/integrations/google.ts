@@ -9,8 +9,9 @@ export const googleAuth = () => {
 
   const init = () => {
     const script = document.createElement('script');
-    script.setAttribute('async', '');
     script.setAttribute('src', clientLib);
+    script.setAttribute('async', '');
+    script.setAttribute('defer', '');
 
     return new Promise<IGoogle>((res, rej) => {
       script.addEventListener('load', () => {
@@ -47,7 +48,7 @@ export const googleAuth = () => {
           },
           cancel_on_tap_outside: false,
           color_scheme: 'dark',
-          // auto_select: true,
+          auto_select: true,
           context: 'use',
         });
 

@@ -5,12 +5,7 @@ import { appStyled, configProvider, COOKIES, translatePathname } from 'utils';
 import { useLocation } from 'react-router';
 import { useUser } from 'contexts';
 import { useServices } from 'hooks';
-import {
-  ArrowBackIosRounded,
-  EmojiPeople,
-  OndemandVideo,
-  Storefront,
-} from '@mui/icons-material';
+import { ArrowBackIosRounded, EmojiPeople, OndemandVideo, Storefront } from '@mui/icons-material';
 import { capitalize } from 'lodash';
 import Cookies from 'js-cookie';
 
@@ -19,8 +14,7 @@ export const AppLayout = (props: { children: ReactNode }) => {
   const [breadItems, setBreadItems] = useState<string[]>([]);
   const { pathname } = useLocation();
   const { user, logged } = useUser();
-  const { redirectHome, hasAuthCookie, fetchUser, logout, googleSignIn } =
-    useServices();
+  const { redirectHome, hasAuthCookie, fetchUser, logout, googleSignIn } = useServices();
   const [activityShow, setActivityShow] = useState<boolean>(false);
   const activityBox = useRef<HTMLElement>(null);
   const pageContent = useRef<HTMLElement>(null);
@@ -46,14 +40,10 @@ export const AppLayout = (props: { children: ReactNode }) => {
     if (activity && content) {
       appStyled(activity, {
         opacity: 1,
-        right: activityShow
-          ? '0px'
-          : `-${activity.getBoundingClientRect().width - 10}px`,
+        right: activityShow ? '0px' : `-${activity.getBoundingClientRect().width - 10}px`,
       });
       appStyled(content, {
-        marginLeft: activityShow
-          ? `-${activity.getBoundingClientRect().width - 10}px`
-          : '0',
+        marginLeft: activityShow ? `-${activity.getBoundingClientRect().width - 10}px` : '0',
       });
     }
 
@@ -115,9 +105,7 @@ export const AppLayout = (props: { children: ReactNode }) => {
           if (breadItems.length - 1 === i) {
             return (
               <Typography key={el} sx={{ color: 'text.primary' }}>
-                {el === appRoot.replace('/', '')
-                  ? 'Início'
-                  : translatePathname(el)}
+                {el === appRoot.replace('/', '') ? 'Início' : translatePathname(el)}
               </Typography>
             );
           }
@@ -247,11 +235,7 @@ export const AppLayout = (props: { children: ReactNode }) => {
                               border: '1px solid currentColor',
                             }}
                             alt={friend.user.name}
-                            src={assetsUrl.concat(
-                              'user/',
-                              friend.user.uuid,
-                              '/profile-pic.webp',
-                            )}
+                            src={assetsUrl.concat('user/', friend.user.uuid, '/profile-pic.webp')}
                           />
                           <Typography>
                             {friend.user.name}{' '}
@@ -260,8 +244,7 @@ export const AppLayout = (props: { children: ReactNode }) => {
                               sx={{
                                 display: 'block',
                                 fontSize: '10px',
-                                color: ({ palette }) =>
-                                  `${palette[getStatusColor()].main}`,
+                                color: ({ palette }) => `${palette[getStatusColor()].main}`,
                               }}
                             >
                               {capitalize(friend.activityStatus)}

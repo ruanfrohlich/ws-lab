@@ -55,6 +55,8 @@ export type SocialAccountModel = ModelDefined<SocialAccountAttributes, SocialAcc
 
 export interface FriendsAttributes extends DefaultAttributes {
   status: string;
+  userId: number;
+  friendId: number;
 }
 
 export type FriendsCreationAttributes = Optional<FriendsAttributes, DefaultOptionalAttibutes>;
@@ -108,11 +110,6 @@ export const ModelTypes: {
     },
   },
   Friends: {
-    status: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'send',
-    },
     activityStatus: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -122,6 +119,8 @@ export const ModelTypes: {
   FriendStatus: {
     status: {
       type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
     },
   },
   SocialAccount: {

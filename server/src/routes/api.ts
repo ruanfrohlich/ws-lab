@@ -19,7 +19,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
   const { url, method, headers } = req;
   const urlFormatted = new URL(String(url), process.env.SITE_URL);
   const endpoint = urlFormatted.pathname.split('/api')[1];
-  const { UserModel, FriendsModel, searchAccounts } = await database();
+  const { UserModel, FriendsModel, querys } = await database();
   const appKey = process.env.APP_KEY ?? '';
 
   const sendResponse = (status: number, message: object, resHeaders?: OutgoingHttpHeaders) => {
@@ -54,11 +54,21 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
       const email = urlFormatted.searchParams.get('email') ?? '';
       const username = urlFormatted.searchParams.get('username') ?? '';
+      const searchType = urlFormatted.searchParams.get('type');
 
       const user = await UserModel.getUser({
         email,
         username,
       });
+
+      if (user && searchType === 'full') {
+        const fullUser = await UserModel.getUserByUUID(user.uuid, FriendsModel.Model);
+
+        return sendResponse(200, {
+          found: true,
+          user: omit(fullUser, ['password', 'uuid']),
+        });
+      }
 
       return sendResponse(200, {
         found: !!user,
@@ -94,6 +104,8 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
       const user = (await validateUser()) as IFindUserResponse;
 
+      console.log(user);
+
       if (!user.id) break;
 
       return sendResponse(200, {
@@ -114,65 +126,74 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
       const body = await getBody<UserCreationAttributes>(req);
 
-      const newAssets: {
-        profilePic: string;
-        coverImage: string;
-      } = {
-        coverImage: user.coverImage ?? '',
-        profilePic: user.profilePic ?? '',
-      };
+      if (body.coverImage || body.profilePic) {
+        const newAssets: {
+          profilePic: string;
+          coverImage: string;
+        } = {
+          coverImage: user.coverImage ?? '',
+          profilePic: user.profilePic ?? '',
+        };
 
-      [body.profilePic, body.coverImage].forEach(async (asset, i) => {
-        if (asset && asset !== '') {
-          const [, imageBase64] = asset.split(/data:(?:image|text)\/(?:png|jpe?g|webp|html);base64,/);
+        [body.profilePic, body.coverImage].forEach(async (asset, i) => {
+          if (asset && asset !== '') {
+            const [, imageBase64] = asset.split(/data:(?:image|text)\/(?:png|jpe?g|webp|html);base64,/);
 
-          const folderPath = join(rootPath, 'public/user', String(user.id));
-          const version = Date.now();
-          const fileName = (i === 0 ? `pp.${version}` : `ci.${version}`) + '.webp';
-          const filePath = `${folderPath}/${fileName}`;
-          const assetLink = assetURL(fileName, 'user', String(user.id));
+            const folderPath = join(rootPath, 'public/user', String(user.id));
+            const version = Date.now();
+            const fileName = (i === 0 ? `pp.${version}` : `ci.${version}`) + '.webp';
+            const filePath = `${folderPath}/${fileName}`;
+            const assetLink = assetURL(fileName, 'user', String(user.id));
 
-          newAssets[i === 0 ? 'profilePic' : 'coverImage'] = assetLink;
+            newAssets[i === 0 ? 'profilePic' : 'coverImage'] = assetLink;
 
-          const imageBuffer = Buffer.from(imageBase64, 'base64');
+            const imageBuffer = Buffer.from(imageBase64, 'base64');
 
-          mkdirSync(folderPath, { recursive: true });
+            mkdirSync(folderPath, { recursive: true });
 
-          try {
-            sharp(imageBuffer)
-              .webp({
-                quality: 50,
-                effort: 2,
-                lossless: true,
-              })
-              .resize({
-                width: i === 0 ? 400 : 1280,
-                height: i === 0 ? 400 : 720,
-              })
-              .toFile(filePath, (err) => {
-                if (err) console.log(err);
-              });
+            try {
+              sharp(imageBuffer)
+                .webp({
+                  quality: 50,
+                  effort: 2,
+                  lossless: true,
+                })
+                .resize({
+                  width: i === 0 ? 400 : 1280,
+                  height: i === 0 ? 400 : 720,
+                })
+                .toFile(filePath, (err) => {
+                  if (err) console.log(err);
+                });
 
-            const changedData = omit(body, ['profilePic', 'coverImage']);
+              const changedData = omit(body, ['profilePic', 'coverImage']);
 
-            await UserModel.updateUser(
-              //@ts-expect-error i know
-              {
-                ...changedData,
-                [i === 0 ? 'profilePic' : 'coverImage']: i === 0 ? newAssets.profilePic : newAssets.coverImage,
-              },
-              user.uuid,
-            );
-          } catch (e) {
-            console.log(e);
+              await UserModel.updateUser(
+                //@ts-expect-error i know
+                {
+                  ...changedData,
+                  [i === 0 ? 'profilePic' : 'coverImage']: i === 0 ? newAssets.profilePic : newAssets.coverImage,
+                },
+                user.uuid,
+              );
+            } catch (e) {
+              console.log(e);
+            }
           }
-        }
-      });
+        });
+
+        return sendResponse(200, {
+          success: true,
+          message: 'User updated successfully!',
+          newAssets,
+        });
+      }
+
+      await UserModel.updateUser(body, user.uuid);
 
       return sendResponse(200, {
         success: true,
         message: 'User updated successfully!',
-        newAssets,
       });
     }
     case endpoint === '/register': {
@@ -272,6 +293,43 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         message: 'User not found',
       });
     }
+    case endpoint === '/user/send-invite': {
+      if (method !== 'POST') {
+        return sendResponse(405, {
+          message: 'Invalid method',
+        });
+      }
+
+      const user = (await validateUser()) as IFindUserResponse;
+
+      if (!user.id) break;
+
+      const body = await getBody<{ friendId: number }>(req);
+
+      if (!body.friendId) {
+        return sendResponse(400, {
+          message: 'Friend ID not provided',
+        });
+      }
+
+      const friend = await FriendsModel.Model.create({
+        userId: user.id,
+        friendId: body.friendId,
+        status: 'sent',
+      });
+
+      if (friend) {
+        return sendResponse(200, {
+          success: true,
+          message: 'Friend invite sent successfully',
+        });
+      }
+
+      return sendResponse(500, {
+        success: false,
+        message: 'Failed to send friend invite',
+      });
+    }
     case /\/accounts\/search/.test(String(endpoint)): {
       if (method !== 'GET') {
         return sendResponse(405, {
@@ -291,7 +349,7 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const accounts = await searchAccounts(term, user.id);
+      const accounts = await querys.getAccounts(term, user.id);
 
       return sendResponse(200, {
         accounts,

@@ -38,9 +38,57 @@ export const translatePathname = (path: string) => {
     case 'account': {
       return 'Minha Conta';
     }
+    case 'user': {
+      return 'Perfil';
+    }
     default: {
       return capitalize(path);
     }
+  }
+};
+
+export const translateActivityStatus = (status: string) => {
+  switch (status) {
+    case 'online': {
+      return 'Online';
+    }
+    case 'away': {
+      return 'Ausente';
+    }
+    case 'offline': {
+      return 'Offline';
+    }
+    case 'busy': {
+      return 'Ocupado';
+    }
+  }
+};
+
+export const formatDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    const months = [
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
+    ];
+
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+
+    return `${day} de ${month} de ${year}`;
+  } catch {
+    return 'Data não disponível';
   }
 };
 
@@ -125,8 +173,7 @@ export const getDataURL = (blob: Blob) => {
  * @returns Senha aleatória gerada
  */
 export const randomPassword = (length: number) => {
-  const chars =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';
   let password = '';
 
   for (let i = 0; i < length; i++) {

@@ -38,6 +38,12 @@ export const useServices = () => {
     });
   };
 
+  const getUser = async (username: string, type: 'full' | 'compact') => {
+    const { data } = await handler.get(`/user?username=${username}&type=${type}`);
+
+    return data;
+  };
+
   /**
    * Busca dados do usuário pela API usando token de autenticação
    * @param token - Token/UUID de autenticação do usuário
@@ -306,8 +312,6 @@ export const useServices = () => {
       },
     });
 
-    console.log(socialAccount);
-
     if (socialAccount && socialAccount.user) {
       createAuthCookie(socialAccount.user.uuid);
       return userDispatch({
@@ -353,5 +357,6 @@ export const useServices = () => {
     hasAuthCookie,
     googleSignIn,
     searchAccount,
+    getUser,
   };
 };

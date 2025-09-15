@@ -4,10 +4,7 @@ import { AppHelmet } from 'components';
 import { appStyled } from 'utils';
 
 export const Error = (props: { type: 'notFound' | 'appError' }) => {
-  const errorBG = new URL(
-    'url:../assets/images/404.jpg?as=webp',
-    import.meta.url,
-  );
+  const errorBG = new URL('url:../assets/images/404.jpg?as=webp', import.meta.url);
 
   if (props.type === 'appError') {
     appStyled(document.body, {
@@ -30,11 +27,7 @@ export const Error = (props: { type: 'notFound' | 'appError' }) => {
       }}
     >
       <AppHelmet
-        title={
-          props.type === 'notFound'
-            ? 'Página não encontrada'
-            : 'Tivemos um problema'
-        }
+        title={props.type === 'notFound' ? 'Página não encontrada' : 'Tivemos um problema'}
         description='Tivemos um problema ao tentar exibir essa página.'
       />
       <Box
@@ -60,11 +53,12 @@ export const Error = (props: { type: 'notFound' | 'appError' }) => {
           borderRadius: 4,
           padding: 2,
           backgroundColor: 'rgba(0,0,0,0.3)',
+          maxWidth: '600px',
         }}
       >
         {props.type === 'appError'
           ? 'Opa! Tivemos um problema ao tentar exibir essa página (ᴗ˳ᴗ)'
-          : 'Opa! Essa página ainda não foi criada (ᴗ˳ᴗ)'}
+          : 'Opa! Parece que o que você procurava não está mais aqui (ᴗ˳ᴗ)'}
       </Typography>
     </Box>
   );

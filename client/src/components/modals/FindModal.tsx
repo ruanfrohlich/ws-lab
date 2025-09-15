@@ -95,7 +95,7 @@ export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
                   },
                 })}
               >
-                <AppLink to={`${item.type}?slug=${item.slug}`} onClick={onClose}>
+                <AppLink to={`${item.type}/${item.slug}`} onClick={onClose}>
                   <AvatarCard data={item} />
                 </AppLink>
               </Box>

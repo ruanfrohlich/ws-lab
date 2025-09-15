@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router';
 import { App } from '../App';
-import { Home, LoginRegister, UserAccount, Error } from 'pages';
+import { Home, LoginRegister, UserAccount, Error, User } from 'pages';
 import { configProvider } from 'utils';
 
 export const AppRoutes = () => {
@@ -21,8 +21,12 @@ export const AppRoutes = () => {
           Component: LoginRegister,
         },
         {
-          path: 'account',
+          path: 'user',
           Component: UserAccount,
+        },
+        {
+          path: 'user/:username',
+          Component: User,
         },
         {
           path: '*',

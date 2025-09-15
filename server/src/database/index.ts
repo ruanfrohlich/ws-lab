@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 import { AccountType, Friends, FriendStatus, User } from './models';
-import { searchAccounts } from './querys';
+import querys from './querys';
 
 const database = async () => {
   const sequelize = new Sequelize(String(process.env.DB_URL), {
@@ -45,6 +45,14 @@ const database = async () => {
     foreignKey: 'type',
   });
 
+  FriendStatusModel.Model.hasOne(FriendsModel.Model, {
+    sourceKey: 'status',
+    foreignKey: {
+      name: 'status',
+      allowNull: false,
+    },
+  });
+
   const close = () => sequelize.close();
 
   const sync = async () => await sequelize.sync({ alter: true });
@@ -56,7 +64,7 @@ const database = async () => {
     FriendStatusModel,
     close,
     sync,
-    searchAccounts: async (term: string, userId: number) => await searchAccounts(term, userId, sequelize),
+    querys: querys(sequelize),
   };
 };
 

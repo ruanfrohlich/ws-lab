@@ -1,19 +1,7 @@
-import {
-  Fragment,
-  ReactNode,
-  SyntheticEvent,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { Fragment, ReactNode, SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { AccountCircle, Home, Person, Search } from '@mui/icons-material';
-import {
-  alpha,
-  BottomNavigation,
-  BottomNavigationAction,
-  Box,
-} from '@mui/material';
+import { alpha, BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
 import { configProvider } from 'utils';
 import { useUser } from 'contexts';
 import { FindModal } from './modals';
@@ -91,12 +79,10 @@ export const Header = () => {
     if (logged) {
       setActions((actions) => {
         return [
-          ...actions.filter(
-            (el) => el.value !== 'join' && el.value !== 'account',
-          ),
+          ...actions.filter((el) => el.value !== 'join' && el.value !== 'user'),
           {
             label: 'Meu Perfil',
-            value: 'account',
+            value: 'user',
             icon: <Person />,
           },
           {
@@ -157,11 +143,9 @@ export const Header = () => {
               value={action.value}
               icon={action.icon}
               sx={({ palette: { primary, secondary } }) => ({
-                color:
-                  action.value === selected ? secondary.main : primary.main,
+                color: action.value === selected ? secondary.main : primary.main,
                 svg: {
-                  fill:
-                    action.value === selected ? secondary.main : primary.main,
+                  fill: action.value === selected ? secondary.main : primary.main,
                 },
                 ':hover': {
                   span: {

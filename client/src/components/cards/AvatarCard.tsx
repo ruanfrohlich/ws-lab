@@ -1,4 +1,4 @@
-import { alpha, Box, Typography } from '@mui/material';
+import { alpha, Avatar, Box, Typography } from '@mui/material';
 import { IFindModalResult } from 'interfaces';
 import { translateAccountType } from 'utils';
 
@@ -11,29 +11,7 @@ export const AvatarCard = ({ data }: { data: IFindModalResult }) => {
         gap: '12px',
       }}
     >
-      <Box
-        component={'picture'}
-        sx={{
-          display: 'inline-block',
-          position: 'relative',
-          width: '50px',
-          height: '50px',
-          borderRadius: '50%',
-          border: '1px solid white',
-          overflow: 'hidden',
-        }}
-      >
-        <Box
-          component={'img'}
-          src={data.avatar}
-          sx={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'top center',
-          }}
-        />
-      </Box>
+      <Avatar src={data.avatar} alt={data.name} />
       <Box
         sx={{
           display: 'flex',

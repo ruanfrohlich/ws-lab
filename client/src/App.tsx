@@ -4,7 +4,6 @@ import { AppLayout } from 'layouts/AppLayout';
 import { UserProvider, WebsocketProvider } from 'providers';
 import { ThemeProvider } from '@mui/material';
 import { appTheme } from 'utils';
-
 /**
  * Componente raiz da aplicação
  * Configura providers globais, tema e layout principal
