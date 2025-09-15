@@ -1,10 +1,10 @@
 import { Avatar, Box, Typography, Paper, Chip, Grid, Card, CardContent, alpha, Divider, Button } from '@mui/material';
 import { PersonAdd, DateRange, Email, AccountCircle, Group } from '@mui/icons-material';
 import { useUser } from 'contexts';
-import { formatDate, translateActivityStatus } from 'utils';
+import { configProvider, formatDate, translateActivityStatus } from 'utils';
 import { useEffect, useState } from 'react';
 import { IUser } from 'interfaces';
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useServices } from 'hooks';
 
 export const User = () => {
@@ -13,12 +13,20 @@ export const User = () => {
   const { getUser } = useServices();
   const { user: loggedUser } = useUser();
   const defaultCover = new URL('url:../assets/images/generic-cover.jpeg?as=webp', import.meta.url);
+  const nav = useNavigate();
+  const { appRoot } = configProvider();
 
   const fetchUser = () => {
     (async () => {
-      if (!username) return;
+      if (!username) {
+        return nav(appRoot);
+      }
 
       const res = await getUser(username, 'full');
+
+      if (!res.user) {
+        return nav(appRoot);
+      }
 
       setUser(res.user);
     })();
