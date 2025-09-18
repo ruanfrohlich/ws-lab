@@ -1,4 +1,3 @@
-import LogoutModal from './LogoutModal';
-import { FindModal } from './FindModal';
-
-export { LogoutModal, FindModal };
+export { LogoutModal } from './LogoutModal';
+export { FindModal } from './FindModal';
+export { EditUserDataModal } from './EditUserData';

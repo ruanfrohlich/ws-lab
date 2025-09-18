@@ -1,20 +1,40 @@
-import { Avatar, Box, Typography, Paper, Chip, Grid, Card, CardContent, alpha, Divider, Button } from '@mui/material';
-import { PersonAdd, DateRange, Email, AccountCircle, Group } from '@mui/icons-material';
+import {
+  Avatar,
+  Box,
+  Typography,
+  Paper,
+  Chip,
+  Grid,
+  Card,
+  CardContent,
+  alpha,
+  Divider,
+  Button,
+} from '@mui/material';
+import {
+  PersonAdd,
+  DateRange,
+  Email,
+  AccountCircle,
+  Group,
+  Edit,
+} from '@mui/icons-material';
 import { useUser } from 'contexts';
 import { configProvider, formatDate, translateActivityStatus } from 'utils';
 import { useEffect, useState } from 'react';
 import { IUser } from 'interfaces';
 import { useNavigate, useParams } from 'react-router';
 import { useServices } from 'hooks';
+import { EditUserDataModal } from 'components/modals';
 
 export const User = () => {
   const [user, setUser] = useState<Omit<IUser, 'uuid'>>();
+  const [editModal, setEditModal] = useState<boolean>(false);
   const { username } = useParams();
   const { getUser } = useServices();
   const { user: loggedUser } = useUser();
-  const defaultCover = new URL('url:../assets/images/generic-cover.jpeg?as=webp', import.meta.url);
   const nav = useNavigate();
-  const { appRoot } = configProvider();
+  const { appRoot, defaultCover } = configProvider();
 
   const fetchUser = () => {
     (async () => {
@@ -22,13 +42,17 @@ export const User = () => {
         return nav(appRoot);
       }
 
-      const res = await getUser(username, 'full');
+      if (username === loggedUser?.username) {
+        setUser(loggedUser);
+      } else {
+        const res = await getUser(username, 'full');
 
-      if (!res.user) {
-        return nav(appRoot);
+        if (!res.user) {
+          return nav(appRoot);
+        }
+
+        setUser(res.user);
       }
-
-      setUser(res.user);
     })();
   };
 
@@ -38,10 +62,21 @@ export const User = () => {
 
   if (!user) return;
 
-  const friend = loggedUser?.friends.find((friend) => friend.user?.id === user.id);
+  const itsMe = user.username === loggedUser?.username;
+
+  const friend = loggedUser?.friends.find(
+    (friend) => friend.user?.id === user.id,
+  );
+
+  const handleEditModal = () => {
+    setEditModal(!editModal);
+  };
 
   return (
     <Box sx={{ maxWidth: '1200px', margin: '0 auto', padding: 2 }}>
+      {/* EditModal */}
+      <EditUserDataModal open={editModal} closeModal={handleEditModal} />
+
       {/* Cover Image and Profile Section */}
       <Paper
         elevation={3}
@@ -71,7 +106,8 @@ export const User = () => {
             bottom: 0,
             left: 0,
             right: 0,
-            background: ({ palette }) => `linear-gradient(transparent, ${alpha(palette.background.paper, 0.9)})`,
+            background: ({ palette }) =>
+              `linear-gradient(transparent, ${alpha(palette.background.paper, 0.9)})`,
             padding: 3,
           }}
         >
@@ -111,13 +147,27 @@ export const User = () => {
               >
                 @{user.username}
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}
+              >
                 <DateRange sx={{ fontSize: 16 }} />
                 <Typography variant='body2' color='text.secondary'>
                   Membro desde {formatDate(user.createdAt)}
                 </Typography>
               </Box>
             </Box>
+
+            {/* Edit data */}
+            {itsMe && (
+              <Button
+                variant='outlined'
+                startIcon={<Edit />}
+                size='small'
+                onClick={handleEditModal}
+              >
+                Editar dados
+              </Button>
+            )}
           </Box>
         </Box>
       </Paper>
@@ -141,7 +191,9 @@ export const User = () => {
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <AccountCircle sx={{ fontSize: 18, color: 'text.secondary' }} />
+                  <AccountCircle
+                    sx={{ fontSize: 18, color: 'text.secondary' }}
+                  />
                   <Typography variant='body2' color='text.secondary'>
                     ID: {user.id}
                   </Typography>
@@ -158,7 +210,7 @@ export const User = () => {
           </Card>
 
           {/* Activity Status */}
-          {friend && (
+          {friend && !itsMe && (
             <Card elevation={2}>
               <CardContent>
                 <Typography variant='h6' gutterBottom>
@@ -192,12 +244,24 @@ export const User = () => {
         <Grid item xs={12} md={8}>
           <Card elevation={2}>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
                 <Typography variant='h6'>
-                  Amigos ({user.friends.filter((f) => f.status === 'accepted').length})
+                  Amigos (
+                  {user.friends.filter((f) => f.status === 'accepted').length})
                 </Typography>
-                {!friend && (
-                  <Button variant='outlined' startIcon={<PersonAdd />} size='small'>
+                {!friend && !itsMe && (
+                  <Button
+                    variant='outlined'
+                    startIcon={<PersonAdd />}
+                    size='small'
+                  >
                     Adicionar Amigo
                   </Button>
                 )}
@@ -235,17 +299,31 @@ export const User = () => {
                           }}
                         >
                           <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1.5,
+                              }}
+                            >
                               <Avatar
                                 src={friend.user.profilePic}
                                 alt={friend.user.name}
                                 sx={{ width: 40, height: 40 }}
                               />
                               <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <Typography variant='subtitle2' noWrap sx={{ fontWeight: 'medium' }}>
+                                <Typography
+                                  variant='subtitle2'
+                                  noWrap
+                                  sx={{ fontWeight: 'medium' }}
+                                >
                                   {friend.user.name}
                                 </Typography>
-                                <Typography variant='caption' color='text.secondary' noWrap>
+                                <Typography
+                                  variant='caption'
+                                  color='text.secondary'
+                                  noWrap
+                                >
                                   @{friend.user.username}
                                 </Typography>
                               </Box>
@@ -267,7 +345,8 @@ export const User = () => {
                   })}
               </Grid>
 
-              {user.friends.filter((f) => f.status === 'accepted').length === 0 && (
+              {user.friends.filter((f) => f.status === 'accepted').length ===
+                0 && (
                 <Box
                   sx={{
                     textAlign: 'center',
@@ -277,7 +356,6 @@ export const User = () => {
                 >
                   <Group sx={{ fontSize: 48, opacity: 0.3, mb: 1 }} />
                   <Typography variant='body1'>Nenhum amigo ainda</Typography>
-                  <Typography variant='body2'>Comece adicionando alguns amigos para ver sua rede!</Typography>
                 </Box>
               )}
             </CardContent>

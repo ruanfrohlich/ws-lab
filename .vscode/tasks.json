@@ -7,23 +7,28 @@
       "label": "Dev client",
       "type": "shell",
       "command": "yarn run dev:client",
-      "problemMatcher": ["$eslint-stylish", "$tsc"]
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true,
+        "group": "ws-lab"
+      }
     },
     {
       "label": "Dev server",
       "type": "shell",
       "command": "yarn run dev:server",
-      "problemMatcher": ["$eslint-stylish", "$tsc"]
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true,
+        "group": "ws-lab"
+      }
     },
     {
       "label": "Dev",
       "dependsOn": ["Dev client", "Dev server"],
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      }
+      "problemMatcher": ["$eslint-stylish", "$tsc"]
     }
   ]
 }

@@ -3,7 +3,9 @@ import BaseModal from './BaseModal';
 import { useServices } from 'hooks';
 import { IBaseModalProps } from 'interfaces';
 
-export default (props: Pick<IBaseModalProps, 'canClose' | 'onClose'>) => {
+export const LogoutModal = (
+  props: Pick<IBaseModalProps, 'canClose' | 'onClose'>,
+) => {
   const { logout } = useServices();
 
   return (

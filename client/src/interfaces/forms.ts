@@ -9,10 +9,14 @@ export interface ILoginFormFields {
 export interface IUserDataFormProps {
   image?: string;
   cover?: string;
+  onCancel?: () => void;
 }
 
 export interface IUserDataForm {
-  fields: Pick<IUser, 'username' | 'email' | 'profilePic' | 'coverImage' | 'name'>;
+  fields: Pick<
+    IUser,
+    'username' | 'email' | 'profilePic' | 'coverImage' | 'name'
+  >;
   loading: boolean;
   success: boolean;
   error: boolean;
