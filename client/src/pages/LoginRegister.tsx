@@ -14,10 +14,7 @@ export const LoginRegister = () => {
   const { showGoogleButton } = googleAuth();
   const { appRoot } = configProvider();
 
-  const imageHero = new URL(
-    'url:../assets/images/hero-login.jpg?as=webp&width=1200',
-    import.meta.url,
-  ).toString();
+  const imageHero = new URL('url:../assets/images/hero-login.jpg?as=webp&width=1200', import.meta.url).toString();
 
   const handleRegister = () => setIsRegister(!isRegister);
 
@@ -25,9 +22,7 @@ export const LoginRegister = () => {
     if (logged && !isRegister) nav(appRoot);
     else {
       if (googleButton.current) {
-        showGoogleButton(googleButton.current, () => {
-          console.log('Google button clicked');
-        });
+        showGoogleButton(googleButton.current);
       }
     }
   }, [logged]);

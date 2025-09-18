@@ -4,6 +4,7 @@
   "prettier.configPath": ".prettierrc",
   "eslint.enable": true,
   "eslint.validate": ["ts", "tsx"],
-  "eslint.run": "onType",
+  "eslint.run": "onSave",
+  "eslint.useFlatConfig": true,
   "typescript.tsdk": "node_modules/typescript/lib"
 }
