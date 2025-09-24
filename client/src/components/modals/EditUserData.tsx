@@ -19,6 +19,8 @@ export const EditUserDataModal = (props: {
   const [userImage, setUserImage] = useState<string>();
   const [coverImage, setCoverImage] = useState<string>();
   const nav = useNavigate();
+  const modalContent = useRef<HTMLDivElement>(null);
+  const modalContainer = useRef<HTMLDivElement>(null);
 
   const handleRemovePhoto = () => {
     setUserImage('');
@@ -65,10 +67,29 @@ export const EditUserDataModal = (props: {
     if (!Cookies.get(COOKIES.userToken)) nav(appRoot);
   }, [user]);
 
+  useEffect(() => {
+    const { current: content } = modalContent;
+    const { current: container } = modalContainer;
+
+    if (props.open && content && container) {
+      let { className } = content;
+      className = className.replaceAll(' ', '.');
+
+      container.addEventListener('click', (evt) => {
+        const clickedEl = evt.target as HTMLElement;
+        const isOutside = !clickedEl.closest(`.${className}`);
+
+        if (isOutside) {
+          props.closeModal();
+        }
+      });
+    }
+  }, [props.open]);
+
   if (!user) return <></>;
 
   return (
-    <Modal open={props.open}>
+    <Modal ref={modalContainer} open={props.open} keepMounted>
       <Slide direction='down' in={props.open} mountOnEnter unmountOnExit>
         <Box
           sx={{
@@ -78,6 +99,7 @@ export const EditUserDataModal = (props: {
             borderRadius: '12px',
             margin: '0 auto',
           }}
+          ref={modalContent}
         >
           <Box
             component={'picture'}
