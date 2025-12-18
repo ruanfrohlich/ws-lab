@@ -5,7 +5,7 @@ export interface IBaseModalProps {
   canClose: boolean;
   onClose?: () => void;
   closeFocus?: boolean;
-  isOpen?: boolean;
+  isOpen: boolean;
 }
 
 export interface IFindModalResult {

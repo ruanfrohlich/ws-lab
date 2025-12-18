@@ -3,7 +3,11 @@ import { AES, enc } from 'crypto-js';
 import database from '../database';
 import { assetURL, getBody, rootPath } from '../utils';
 import { omit } from 'lodash';
-import { AccountTypesEnum, IFindUserResponse, UserCreationAttributes } from '../database/types';
+import {
+  AccountTypesEnum,
+  IFindUserResponse,
+  UserCreationAttributes,
+} from '../database/types';
 import sharp from 'sharp';
 import { join } from 'path';
 import { mkdirSync, readFile } from 'fs';
@@ -15,15 +19,24 @@ import { stat } from 'fs/promises';
  * @param req - Objeto de requisição HTTP
  * @param res - Objeto de resposta HTTP
  */
-export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
+export const apiRoutes = async (
+  req: IncomingMessage,
+  res: ServerResponse<IncomingMessage>,
+) => {
   const { url, method, headers } = req;
   const urlFormatted = new URL(String(url), process.env.SITE_URL);
   const endpoint = urlFormatted.pathname.split('/api')[1];
   const { UserModel, FriendsModel, querys } = await database();
   const appKey = process.env.APP_KEY ?? '';
 
-  const sendResponse = (status: number, message: object, resHeaders?: OutgoingHttpHeaders) => {
-    return res.writeHead(status, { 'content-type': 'application/json', ...resHeaders }).end(JSON.stringify(message));
+  const sendResponse = (
+    status: number,
+    message: object,
+    resHeaders?: OutgoingHttpHeaders,
+  ) => {
+    return res
+      .writeHead(status, { 'content-type': 'application/json', ...resHeaders })
+      .end(JSON.stringify(message));
   };
 
   const validateUser = async () => {
@@ -33,7 +46,10 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
       });
     }
 
-    const user = await UserModel.getUserByUUID(headers.authorization, FriendsModel.Model);
+    const user = await UserModel.getUserByUUID(
+      headers.authorization,
+      FriendsModel.Model,
+    );
 
     if (!user) {
       return sendResponse(401, {
@@ -62,7 +78,10 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
       });
 
       if (user && searchType === 'full') {
-        const fullUser = await UserModel.getUserByUUID(user.uuid, FriendsModel.Model);
+        const fullUser = await UserModel.getUserByUUID(
+          user.uuid,
+          FriendsModel.Model,
+        );
 
         return sendResponse(200, {
           found: true,
@@ -89,7 +108,10 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const socialAccount = await UserModel.getSocialAccount(token, FriendsModel.Model);
+      const socialAccount = await UserModel.getSocialAccount(
+        token,
+        FriendsModel.Model,
+      );
 
       return sendResponse(200, {
         socialAccount,
@@ -103,8 +125,6 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
       }
 
       const user = (await validateUser()) as IFindUserResponse;
-
-      console.log(user);
 
       if (!user.id) break;
 
@@ -137,11 +157,14 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
 
         [body.profilePic, body.coverImage].forEach(async (asset, i) => {
           if (asset && asset !== '') {
-            const [, imageBase64] = asset.split(/data:(?:image|text)\/(?:png|jpe?g|webp|html);base64,/);
+            const [, imageBase64] = asset.split(
+              /data:(?:image|text)\/(?:png|jpe?g|webp|html);base64,/,
+            );
 
             const folderPath = join(rootPath, 'public/user', String(user.id));
             const version = Date.now();
-            const fileName = (i === 0 ? `pp.${version}` : `ci.${version}`) + '.webp';
+            const fileName =
+              (i === 0 ? `pp.${version}` : `ci.${version}`) + '.webp';
             const filePath = `${folderPath}/${fileName}`;
             const assetLink = assetURL(fileName, 'user', String(user.id));
 
@@ -172,7 +195,8 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
                 //@ts-expect-error i know
                 {
                   ...changedData,
-                  [i === 0 ? 'profilePic' : 'coverImage']: i === 0 ? newAssets.profilePic : newAssets.coverImage,
+                  [i === 0 ? 'profilePic' : 'coverImage']:
+                    i === 0 ? newAssets.profilePic : newAssets.coverImage,
                 },
                 user.uuid,
               );
@@ -312,17 +336,21 @@ export const apiRoutes = async (req: IncomingMessage, res: ServerResponse<Incomi
         });
       }
 
-      const friend = await FriendsModel.Model.create({
-        userId: user.id,
-        friendId: body.friendId,
-        status: 'sent',
-      });
+      try {
+        [user.id, body.friendId].forEach(async (_, i) => {
+          await FriendsModel.Model.create({
+            userId: i === 0 ? user.id : body.friendId,
+            friendId: i === 0 ? body.friendId : user.id,
+            status: 'sent',
+          });
+        });
 
-      if (friend) {
         return sendResponse(200, {
           success: true,
           message: 'Friend invite sent successfully',
         });
+      } catch (e) {
+        console.log(e);
       }
 
       return sendResponse(500, {

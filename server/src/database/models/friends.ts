@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { FriendsAttributes, FriendsModel, ModelTypes } from '../types';
 import { isEmpty } from 'lodash';
 
@@ -9,7 +9,7 @@ export const Friends = async (sequelize: Sequelize) => {
     const friends: FriendsAttributes[] = [];
     const query = await Model.findAll({
       where: {
-        id: userId,
+        [Op.or]: [{ userId }, { friendId: userId }],
       },
     });
 

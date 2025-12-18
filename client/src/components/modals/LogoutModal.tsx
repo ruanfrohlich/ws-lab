@@ -4,7 +4,7 @@ import { useServices } from 'hooks';
 import { IBaseModalProps } from 'interfaces';
 
 export const LogoutModal = (
-  props: Pick<IBaseModalProps, 'canClose' | 'onClose'>,
+  props: Pick<IBaseModalProps, 'canClose' | 'onClose' | 'isOpen'>,
 ) => {
   const { logout } = useServices();
 

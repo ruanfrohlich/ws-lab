@@ -27,7 +27,11 @@ export const User = async (sequelize: Sequelize) => {
       },
     ],
   });
-  const SocialAccountModel: SocialAccountModel = sequelize.define('SocialAccount', ModelTypes.SocialAccount);
+
+  const SocialAccountModel: SocialAccountModel = sequelize.define(
+    'SocialAccount',
+    ModelTypes.SocialAccount,
+  );
 
   SocialAccountModel.belongsTo(Model, {
     as: 'user',
@@ -134,7 +138,10 @@ export const User = async (sequelize: Sequelize) => {
    * @param friendsModel - Modelo de amigos para incluir na consulta
    * @returns Dados completos do usuário com amigos ou null se não encontrado
    */
-  const getUserByUUID = async (uuid: string, friendsModel: FriendsModel): Promise<IFindUserResponse | null> => {
+  const getUserByUUID = async (
+    uuid: string,
+    friendsModel: FriendsModel,
+  ): Promise<IFindUserResponse | null> => {
     try {
       const cachedUser = await get<IFindUserResponse>(uuid);
 
@@ -163,7 +170,10 @@ export const User = async (sequelize: Sequelize) => {
             pick(
               {
                 ...friend.dataValues,
-                user: omit(friend.dataValues.User.dataValues, ['uuid', 'password']),
+                user: omit(friend.dataValues.User.dataValues, [
+                  'uuid',
+                  'password',
+                ]),
               },
               ['id', 'status', 'activityStatus', 'user'],
             ),
@@ -206,7 +216,10 @@ export const User = async (sequelize: Sequelize) => {
    * @param token - UUID do usuário a ser atualizado
    * @returns Dados atualizados do usuário ou null se não encontrado
    */
-  const updateUser = async (data: Omit<UserCreationAttributes, 'password'>, token: string) => {
+  const updateUser = async (
+    data: Omit<UserCreationAttributes, 'password'>,
+    token: string,
+  ) => {
     try {
       const user = await Model.findOne({
         where: {
@@ -234,7 +247,10 @@ export const User = async (sequelize: Sequelize) => {
     }
   };
 
-  const getSocialAccount = async (token: string, friendsModel: FriendsModel) => {
+  const getSocialAccount = async (
+    token: string,
+    friendsModel: FriendsModel,
+  ) => {
     const socialAccount = await SocialAccountModel.findOne({
       attributes: ['id', 'provider'],
       where: {

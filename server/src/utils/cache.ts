@@ -1,6 +1,6 @@
 import Cache from 'file-system-cache';
 import { relative } from 'path';
-import { rootPath } from '.';
+import { isProd, rootPath } from '.';
 
 /**
  * Configuração e utilitários para cache em sistema de arquivos
@@ -22,7 +22,7 @@ export const useCache = async () => {
   const get = async <T>(item: string): Promise<T | null> => {
     const result = await cache.get(item);
 
-    if (result) {
+    if (result && isProd) {
       return result;
     }
 

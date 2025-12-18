@@ -18,6 +18,7 @@ import {
   AccountCircle,
   Group,
   Edit,
+  Logout,
 } from '@mui/icons-material';
 import { useUser } from 'contexts';
 import { configProvider, formatDate, translateActivityStatus } from 'utils';
@@ -25,11 +26,12 @@ import { useEffect, useState } from 'react';
 import { IUser } from 'interfaces';
 import { useNavigate, useParams } from 'react-router';
 import { useServices } from 'hooks';
-import { EditUserDataModal } from 'components/modals';
+import { EditUserDataModal, LogoutModal } from 'components/modals';
 
 export const User = () => {
   const [user, setUser] = useState<Omit<IUser, 'uuid'>>();
   const [editModal, setEditModal] = useState<boolean>(false);
+  const [logoutModal, setLogoutModal] = useState<boolean>(false);
   const { username } = useParams();
   const { getUser } = useServices();
   const { user: loggedUser } = useUser();
@@ -63,8 +65,8 @@ export const User = () => {
   if (!user) return;
 
   const itsMe = user.username === loggedUser?.username;
-
-  const friend = loggedUser?.friends.find(
+  const friends = user.friends.filter((f) => f.status === 'accepted');
+  const myFriend = loggedUser?.friends.find(
     (friend) => friend.user?.id === user.id,
   );
 
@@ -72,10 +74,17 @@ export const User = () => {
     setEditModal(!editModal);
   };
 
+  const handleLogout = () => {
+    setLogoutModal(!logoutModal);
+  };
+
   return (
     <Box sx={{ maxWidth: '1200px', margin: '0 auto', padding: 2 }}>
       {/* EditModal */}
       <EditUserDataModal open={editModal} closeModal={handleEditModal} />
+
+      {/* LogoutModal */}
+      <LogoutModal canClose onClose={handleLogout} isOpen={logoutModal} />
 
       {/* Cover Image and Profile Section */}
       <Paper
@@ -159,14 +168,25 @@ export const User = () => {
 
             {/* Edit data */}
             {itsMe && (
-              <Button
-                variant='outlined'
-                startIcon={<Edit />}
-                size='small'
-                onClick={handleEditModal}
-              >
-                Editar dados
-              </Button>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button
+                  variant='outlined'
+                  startIcon={<Edit />}
+                  size='small'
+                  onClick={handleEditModal}
+                >
+                  Editar dados
+                </Button>
+                <Button
+                  variant='outlined'
+                  startIcon={<Logout />}
+                  size='small'
+                  color='error'
+                  onClick={handleLogout}
+                >
+                  Sair
+                </Button>
+              </Box>
             )}
           </Box>
         </Box>
@@ -202,7 +222,7 @@ export const User = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Group sx={{ fontSize: 18, color: 'text.secondary' }} />
                   <Typography variant='body2' color='text.secondary'>
-                    {user.friends.length} amigos
+                    {friends.length} amigos
                   </Typography>
                 </Box>
               </Box>
@@ -210,7 +230,7 @@ export const User = () => {
           </Card>
 
           {/* Activity Status */}
-          {friend && !itsMe && (
+          {myFriend && !itsMe && (
             <Card elevation={2}>
               <CardContent>
                 <Typography variant='h6' gutterBottom>
@@ -218,9 +238,9 @@ export const User = () => {
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <Chip
-                  label={translateActivityStatus(friend.activityStatus)}
+                  label={translateActivityStatus(myFriend.activityStatus)}
                   color={(() => {
-                    switch (friend.activityStatus) {
+                    switch (myFriend.activityStatus) {
                       case 'online': {
                         return 'success';
                       }
@@ -252,11 +272,8 @@ export const User = () => {
                   mb: 2,
                 }}
               >
-                <Typography variant='h6'>
-                  Amigos (
-                  {user.friends.filter((f) => f.status === 'accepted').length})
-                </Typography>
-                {!friend && !itsMe && (
+                <Typography variant='h6'>Amigos ({friends.length})</Typography>
+                {!myFriend && !itsMe && (
                   <Button
                     variant='outlined'
                     startIcon={<PersonAdd />}
@@ -269,84 +286,85 @@ export const User = () => {
               <Divider sx={{ mb: 2 }} />
 
               <Grid container spacing={2}>
-                {user.friends
-                  .filter((friend) => friend.status === 'accepted')
-                  .map((friend) => {
-                    const getStatusColor = () => {
-                      switch (friend.activityStatus) {
-                        case 'away':
-                          return 'warning';
-                        case 'busy':
-                          return 'error';
-                        case 'online':
-                          return 'success';
-                        default:
-                          return 'default';
-                      }
-                    };
+                {friends.map((friend) => {
+                  const getStatusColor = () => {
+                    switch (friend.activityStatus) {
+                      case 'away':
+                        return 'warning';
+                      case 'busy':
+                        return 'error';
+                      case 'online':
+                        return 'success';
+                      default:
+                        return 'default';
+                    }
+                  };
 
-                    return (
-                      <Grid item xs={12} sm={6} md={4} key={friend.id}>
-                        <Card
-                          variant='outlined'
-                          sx={{
-                            transition: 'all 0.2s',
-                            cursor: 'pointer',
-                            '&:hover': {
-                              boxShadow: 2,
-                              transform: 'translateY(-2px)',
-                            },
-                          }}
-                        >
-                          <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1.5,
-                              }}
-                            >
-                              <Avatar
-                                src={friend.user.profilePic}
-                                alt={friend.user.name}
-                                sx={{ width: 40, height: 40 }}
-                              />
-                              <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <Typography
-                                  variant='subtitle2'
-                                  noWrap
-                                  sx={{ fontWeight: 'medium' }}
-                                >
-                                  {friend.user.name}
-                                </Typography>
-                                <Typography
-                                  variant='caption'
-                                  color='text.secondary'
-                                  noWrap
-                                >
-                                  @{friend.user.username}
-                                </Typography>
-                              </Box>
-                              <Chip
-                                label={friend.activityStatus}
-                                color={getStatusColor()}
-                                size='small'
-                                sx={{
-                                  fontSize: '0.6rem',
-                                  height: 20,
-                                  textTransform: 'capitalize',
-                                }}
-                              />
+                  return (
+                    <Grid item xs={12} sm={6} md={4} key={friend.id}>
+                      <Card
+                        variant='outlined'
+                        onClick={() =>
+                          nav(`${appRoot}/user/${friend.user.username}`)
+                        }
+                        sx={{
+                          transition: 'all 0.2s',
+                          minWidth: 300,
+                          cursor: 'pointer',
+                          '&:hover': {
+                            boxShadow: 2,
+                            transform: 'translateY(-2px)',
+                          },
+                        }}
+                      >
+                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1.5,
+                            }}
+                          >
+                            <Avatar
+                              src={friend.user.profilePic}
+                              alt={friend.user.name}
+                              sx={{ width: 50, height: 50 }}
+                            />
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                              <Typography
+                                variant='subtitle2'
+                                noWrap
+                                sx={{ fontWeight: 'medium' }}
+                              >
+                                {friend.user.name}
+                              </Typography>
+                              <Typography
+                                variant='caption'
+                                color='text.secondary'
+                                noWrap
+                              >
+                                @{friend.user.username}
+                              </Typography>
                             </Box>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    );
-                  })}
+                            <Chip
+                              label={friend.activityStatus}
+                              color={getStatusColor()}
+                              size='small'
+                              sx={{
+                                fontSize: '0.6rem',
+                                height: 20,
+                                textTransform: 'capitalize',
+                              }}
+                            />
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  );
+                })}
               </Grid>
 
-              {user.friends.filter((f) => f.status === 'accepted').length ===
-                0 && (
+              {friends.length === 0 && (
                 <Box
                   sx={{
                     textAlign: 'center',
