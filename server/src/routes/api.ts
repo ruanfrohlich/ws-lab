@@ -113,6 +113,9 @@ export const apiRoutes = async (
         FriendsModel.Model,
       );
 
+      console.log(socialAccount);
+      
+
       return sendResponse(200, {
         socialAccount,
       });

@@ -162,27 +162,26 @@ export const User = async (sequelize: Sequelize) => {
         },
       });
 
-      if (query) {
-        const userWithFriends = {
-          ...omit(query?.dataValues, ['password']),
+      const user = query?.toJSON();
+
+      if (user) {
+        const formatted = {
+          ...omit(user, ['password']),
           //@ts-expect-error friends created by association
-          friends: query?.dataValues.friends.map((friend) =>
+          friends: user.friends.map((friend) =>
             pick(
               {
-                ...friend.dataValues,
-                user: omit(friend.dataValues.User.dataValues, [
-                  'uuid',
-                  'password',
-                ]),
+                ...friend,
+                user: omit(friend.User, ['uuid', 'password']),
               },
               ['id', 'status', 'activityStatus', 'user'],
             ),
           ),
         };
 
-        await set(uuid, userWithFriends);
+        await set(uuid, formatted);
 
-        return userWithFriends;
+        return formatted;
       }
 
       return null;
@@ -251,7 +250,7 @@ export const User = async (sequelize: Sequelize) => {
     token: string,
     friendsModel: FriendsModel,
   ) => {
-    const socialAccount = await SocialAccountModel.findOne({
+    const query = await SocialAccountModel.findOne({
       attributes: ['id', 'provider'],
       where: {
         token,
@@ -268,13 +267,37 @@ export const User = async (sequelize: Sequelize) => {
           as: 'friends',
           include: [Model],
           attributes: {
-            exclude: ['password', 'uuid'],
+            exclude: ['userId', 'friendId'],
           },
         },
       },
     });
 
-    return socialAccount?.toJSON();
+    const socialAccount = query.toJSON();
+
+    if (socialAccount) {
+      const formatted = {
+        ...socialAccount,
+        user: {
+          //@ts-expect-error created by association
+          ...socialAccount.user,
+          //@ts-expect-error created by association
+          friends: socialAccount.user.friends.map((friend) => {
+            return pick(
+              {
+                ...friend,
+                user: omit(friend.User, ['uuid', 'password']),
+              },
+              ['id', 'status', 'activityStatus', 'user'],
+            );
+          }),
+        },
+      };
+
+      return formatted;
+    }
+
+    return null;
   };
 
   return {

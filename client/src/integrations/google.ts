@@ -1,11 +1,12 @@
 import { IGoogle, ITapEventDetail, IUserGoogle } from 'interfaces';
-import { decodeJWT, getDataURL } from 'utils';
+import { configProvider, decodeJWT } from 'utils';
 
 const clientLib = 'https://accounts.google.com/gsi/client';
 
 export const googleAuth = () => {
   let google: IGoogle;
   let tapEvent: CustomEvent<ITapEventDetail>;
+  const { isDev } = configProvider();
 
   const init = () => {
     const script = document.createElement('script');
@@ -48,7 +49,7 @@ export const googleAuth = () => {
           },
           cancel_on_tap_outside: false,
           color_scheme: 'dark',
-          auto_select: true,
+          auto_select: !isDev,
           context: 'use',
         });
 
@@ -74,17 +75,23 @@ export const googleAuth = () => {
     google.accounts.id.prompt();
 
     return new Promise<IUserGoogle | undefined>((res, rej) => {
-      document.addEventListener('oneTapClick', (e: CustomEvent<ITapEventDetail>) => {
-        const { success, user } = e.detail;
+      document.addEventListener(
+        'oneTapClick',
+        (e: CustomEvent<ITapEventDetail>) => {
+          const { success, user } = e.detail;
 
-        if (!success) return rej('OneTap error!');
+          if (!success) return rej('OneTap error!');
 
-        return res(user);
-      });
+          return res(user);
+        },
+      );
     });
   };
 
-  const showGoogleButton = async (buttonParent: HTMLElement, cb?: () => void) => {
+  const showGoogleButton = async (
+    buttonParent: HTMLElement,
+    cb?: () => void,
+  ) => {
     if (!google) await init();
 
     google.accounts.id.renderButton(buttonParent, {

@@ -5,7 +5,7 @@ import { IAccountSearch, IUser, IUserDataForm, IUserRegister } from 'interfaces'
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router';
 import { googleAuth } from 'integrations';
-import { omit, toLower } from 'lodash';
+import { toLower } from 'lodash';
 
 const handler = axios.create({
   baseURL: process.env.ACCOUNT_API,

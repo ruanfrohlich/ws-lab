@@ -64,6 +64,9 @@ export const User = () => {
 
   if (!user) return;
 
+  console.log(user);
+  
+
   const itsMe = user.username === loggedUser?.username;
   const friends = user.friends.filter((f) => f.status === 'accepted');
   const myFriend = loggedUser?.friends.find(
@@ -287,6 +290,8 @@ export const User = () => {
 
               <Grid container spacing={2}>
                 {friends.map((friend) => {
+                  console.log(friend);
+                  
                   const getStatusColor = () => {
                     switch (friend.activityStatus) {
                       case 'away':
