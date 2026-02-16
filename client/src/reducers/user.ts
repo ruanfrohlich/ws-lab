@@ -1,4 +1,9 @@
-import { IFriends, IUserAction, IUserContext } from 'interfaces';
+import {
+  IFriends,
+  IUserAction,
+  IUserContext,
+  TFriendActivityStatus,
+} from 'interfaces';
 
 /**
  * Reducer para gerenciamento do estado global do usuário
@@ -25,13 +30,15 @@ export const userReducer = (
     case 'updateFriendActivity': {
       const { user } = state;
 
+      console.log('Atualizando status amigo');
+
       if (user) {
         const updatedFriends = user.friends.reduce(
           (acc: IFriends[], curr: IFriends) => {
-            if (curr.user.uuid === action.payload?.uuid) {
+            if (curr.user.id === action.payload?.id) {
               acc.push({
                 ...curr,
-                activityStatus: 'online',
+                activityStatus: action.payload?.status || 'offline',
               });
             } else {
               acc.push(curr);

@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useReducer } from 'react';
-import { ISocketData } from 'interfaces';
+import { ISocketData, TFriendActivityStatus } from 'interfaces';
 import { WebsocketContext, WebsocketDispatchContext } from 'contexts/websocket';
 import { useUser, useUserDispatch } from 'contexts';
 import { websocketReducer } from 'reducers';
@@ -66,7 +66,8 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
         userDispatch({
           type: 'updateFriendActivity',
           payload: {
-            uuid: data.content.uuid,
+            id: data.content.id,
+            status: data.content.status as TFriendActivityStatus,
           },
         });
       }

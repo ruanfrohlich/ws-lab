@@ -61,6 +61,8 @@ export const WebsocketEvents = async (
         try {
           const message = JSON.parse(data.toString()) as IIncomingData;
 
+          console.log(message);
+
           if (message.type === 'updateActivityStatus') {
             console.log('Sending activity status update.');
             const { friends } = user;
@@ -73,7 +75,8 @@ export const WebsocketEvents = async (
                   sendMessage([connections.get(key)], {
                     type: 'updateActivityStatus',
                     content: {
-                      uuid: user.uuid,
+                      id: user.id,
+                      status: message.content.status,
                     },
                   });
                 }

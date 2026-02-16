@@ -19,14 +19,18 @@ import {
   Group,
   Edit,
   Logout,
+  Call,
+  Block,
+  Message,
 } from '@mui/icons-material';
 import { useUser } from 'contexts';
 import { configProvider, formatDate, translateActivityStatus } from 'utils';
 import { useEffect, useState } from 'react';
-import { IUser } from 'interfaces';
+import { IFriends, IUser } from 'interfaces';
 import { useNavigate, useParams } from 'react-router';
 import { useServices } from 'hooks';
 import { EditUserDataModal, LogoutModal } from 'components/modals';
+import { AppHelmet } from 'components';
 
 export const User = () => {
   const [user, setUser] = useState<Omit<IUser, 'uuid'>>();
@@ -60,18 +64,28 @@ export const User = () => {
 
   useEffect(() => {
     fetchUser();
-  }, [username]);
+  }, [username, loggedUser]);
 
   if (!user) return;
-
-  console.log(user);
-  
 
   const itsMe = user.username === loggedUser?.username;
   const friends = user.friends.filter((f) => f.status === 'accepted');
   const myFriend = loggedUser?.friends.find(
     (friend) => friend.user?.id === user.id,
   );
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'away':
+        return 'warning';
+      case 'busy':
+        return 'error';
+      case 'online':
+        return 'success';
+      default:
+        return 'default';
+    }
+  };
 
   const handleEditModal = () => {
     setEditModal(!editModal);
@@ -83,6 +97,8 @@ export const User = () => {
 
   return (
     <Box sx={{ maxWidth: '1200px', margin: '0 auto', padding: 2 }}>
+      <AppHelmet title={user.name} description='' />
+
       {/* EditModal */}
       <EditUserDataModal open={editModal} closeModal={handleEditModal} />
 
@@ -191,6 +207,38 @@ export const User = () => {
                 </Button>
               </Box>
             )}
+            {myFriend && (
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                {myFriend.activityStatus !== 'offline' && (
+                  <Button
+                    variant='outlined'
+                    startIcon={<Call />}
+                    size='small'
+                    onClick={handleEditModal}
+                  >
+                    Ligar
+                  </Button>
+                )}
+                <Button
+                  variant='outlined'
+                  startIcon={<Message />}
+                  size='small'
+                  color='info'
+                  onClick={handleEditModal}
+                >
+                  Mensagem
+                </Button>
+                <Button
+                  variant='outlined'
+                  startIcon={<Block />}
+                  size='small'
+                  color='error'
+                  onClick={handleLogout}
+                >
+                  Desfazer amizade
+                </Button>
+              </Box>
+            )}
           </Box>
         </Box>
       </Paper>
@@ -290,21 +338,6 @@ export const User = () => {
 
               <Grid container spacing={2}>
                 {friends.map((friend) => {
-                  console.log(friend);
-                  
-                  const getStatusColor = () => {
-                    switch (friend.activityStatus) {
-                      case 'away':
-                        return 'warning';
-                      case 'busy':
-                        return 'error';
-                      case 'online':
-                        return 'success';
-                      default:
-                        return 'default';
-                    }
-                  };
-
                   return (
                     <Grid item xs={12} sm={6} md={4} key={friend.id}>
                       <Card
@@ -351,16 +384,20 @@ export const User = () => {
                                 @{friend.user.username}
                               </Typography>
                             </Box>
-                            <Chip
-                              label={friend.activityStatus}
-                              color={getStatusColor()}
-                              size='small'
-                              sx={{
-                                fontSize: '0.6rem',
-                                height: 20,
-                                textTransform: 'capitalize',
-                              }}
-                            />
+                            {friend.user.id !== loggedUser?.id && (
+                              <Chip
+                                label={translateActivityStatus(
+                                  friend.activityStatus,
+                                )}
+                                color={getStatusColor(friend.activityStatus)}
+                                size='small'
+                                sx={{
+                                  fontSize: '0.6rem',
+                                  height: 20,
+                                  textTransform: 'capitalize',
+                                }}
+                              />
+                            )}
                           </Box>
                         </CardContent>
                       </Card>

@@ -31,6 +31,7 @@ export interface IUserContext {
   user?: IUser | null;
   logged?: boolean;
   errors?: string[] | null;
+  status?: TFriendActivityStatus;
 }
 
 export type TUserActions =
