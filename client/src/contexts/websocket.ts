@@ -10,6 +10,8 @@ export const WebsocketDispatchContext = createContext<
   ActionDispatch<[action: IWebsocketAction]>
 >(() => initialState);
 
+WebsocketContext.displayName = 'Websocket';
+
 export function useWebsocket() {
   return useContext(WebsocketContext);
 }

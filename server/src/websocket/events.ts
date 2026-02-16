@@ -5,9 +5,7 @@ import { IIncomingData, IReturnData } from '../interfaces';
 import { WebSocket } from 'ws';
 import { parse } from 'cookie';
 
-const connections: {
-  [key: string]: WebSocket;
-} = {};
+const connections = new Map();
 
 /**
  * Envia uma mensagem para múltiplos clientes WebSocket
@@ -55,7 +53,7 @@ export const WebsocketEvents = async (
     const user = await getUserByUUID(clientUUID, FriendsModel.Model);
 
     if (user) {
-      connections[user.uuid] = ws;
+      connections.set(user.id, ws);
 
       log('Connection accepted, client: ' + user.username);
 
@@ -65,15 +63,14 @@ export const WebsocketEvents = async (
 
           if (message.type === 'updateActivityStatus') {
             console.log('Sending activity status update.');
+            const { friends } = user;
 
-            Object.keys(connections).map((uuid) => {
-              const { friends } = user;
-
+            for (const key of connections.keys()) {
               friends.forEach((friend, i) => {
-                if (friend.user.uuid === uuid) {
+                if (friend.user.id === key) {
                   console.log(i + 1, 'amigos conectados');
 
-                  sendMessage([connections[uuid]], {
+                  sendMessage([connections.get(key)], {
                     type: 'updateActivityStatus',
                     content: {
                       uuid: user.uuid,
@@ -81,7 +78,7 @@ export const WebsocketEvents = async (
                   });
                 }
               });
-            });
+            }
           }
         } catch (e) {
           console.log(e);
@@ -99,7 +96,7 @@ export const WebsocketEvents = async (
       ws.on('close', function () {
         log(`Client ${user.username} disconnected`);
 
-        delete connections[user.uuid];
+        connections.delete(user.id);
 
         log(`Connected clients: ${JSON.stringify(Object.keys(connections))}`);
       });

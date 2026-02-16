@@ -1,5 +1,5 @@
 export interface ISocketData {
-  type: 'chatMessage' | 'updateActivityStatus' | 'error';
+  type: string;
   content: {
     [key: string]: unknown;
   };

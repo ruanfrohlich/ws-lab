@@ -1,28 +1,8 @@
 import { ReactNode, useEffect, useReducer } from 'react';
-import { ISocketData, IWebsocketAction, IWebsocketContext } from 'interfaces';
+import { ISocketData } from 'interfaces';
 import { WebsocketContext, WebsocketDispatchContext } from 'contexts/websocket';
 import { useUser, useUserDispatch } from 'contexts';
-
-const websocketReducer = (
-  websocket: IWebsocketContext,
-  action: IWebsocketAction,
-): IWebsocketContext => {
-  switch (action.type) {
-    case 'updateWSState': {
-      if (action.payload) {
-        return {
-          ...websocket,
-          ...action.payload,
-        };
-      }
-
-      return websocket;
-    }
-    default: {
-      throw Error('Unknown action: ' + action.type);
-    }
-  }
-};
+import { websocketReducer } from 'reducers';
 
 export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
   const { logged } = useUser();
@@ -30,8 +10,8 @@ export const WebsocketProvider = ({ children }: { children: ReactNode }) => {
   const [websocket, dispatch] = useReducer(websocketReducer, {
     connected: false,
   });
-  let retryCount = 0;
   const maxRetries = 3;
+  let retryCount = 0;
   let connected = false;
 
   const webSocketHandler = () => {
