@@ -155,6 +155,26 @@ export const User = () => {
 
             {/* User Info */}
             <Box sx={{ flex: 1, mb: 1 }}>
+              {myFriend && !itsMe && (
+                <Chip
+                  label={translateActivityStatus(myFriend.activityStatus)}
+                  color={(() => {
+                    switch (myFriend.activityStatus) {
+                      case 'online': {
+                        return 'success';
+                      }
+                      case 'away': {
+                        return 'warning';
+                      }
+                      case 'busy': {
+                        return 'error';
+                      }
+                    }
+                  })()}
+                  size='small'
+                  sx={{ fontWeight: 'medium' }}
+                />
+              )}
               <Typography
                 variant='h4'
                 component='h1'
@@ -214,6 +234,7 @@ export const User = () => {
                     variant='outlined'
                     startIcon={<Call />}
                     size='small'
+                    color='success'
                     onClick={handleEditModal}
                   >
                     Ligar
@@ -279,36 +300,6 @@ export const User = () => {
               </Box>
             </CardContent>
           </Card>
-
-          {/* Activity Status */}
-          {myFriend && !itsMe && (
-            <Card elevation={2}>
-              <CardContent>
-                <Typography variant='h6' gutterBottom>
-                  Status
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Chip
-                  label={translateActivityStatus(myFriend.activityStatus)}
-                  color={(() => {
-                    switch (myFriend.activityStatus) {
-                      case 'online': {
-                        return 'success';
-                      }
-                      case 'away': {
-                        return 'warning';
-                      }
-                      case 'busy': {
-                        return 'error';
-                      }
-                    }
-                  })()}
-                  size='small'
-                  sx={{ fontWeight: 'medium' }}
-                />
-              </CardContent>
-            </Card>
-          )}
         </Grid>
 
         {/* Right Column - Friends List */}
