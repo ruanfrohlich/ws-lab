@@ -6,7 +6,8 @@
     {
       "label": "Dev client",
       "type": "shell",
-      "command": "yarn run dev:client",
+      "command": "bash",
+      "args": ["-i", "-c", "yarn run dev:client"],
       "presentation": {
         "reveal": "always",
         "panel": "shared",
@@ -17,7 +18,8 @@
     {
       "label": "Dev server",
       "type": "shell",
-      "command": "yarn run dev:server",
+      "command": "bash",
+      "args": ["-i", "-c", "yarn run dev:server"],
       "presentation": {
         "reveal": "always",
         "panel": "shared",
