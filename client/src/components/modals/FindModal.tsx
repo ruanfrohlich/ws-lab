@@ -8,7 +8,10 @@ import { AppLink } from '../AppLink';
 import { debounce, isEmpty } from 'lodash';
 import { useServices } from 'hooks';
 
-export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
+export const FindModal = ({
+  onClose,
+  isOpen,
+}: Pick<IBaseModalProps, 'onClose' | 'isOpen'>) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [term, setTerm] = useState<string>('');
   const [results, setResults] = useState<IAccountSearch>();
@@ -47,7 +50,7 @@ export const FindModal = ({ onClose }: Pick<IBaseModalProps, 'onClose'>) => {
   }, [results]);
 
   return (
-    <BaseModal canClose={false} closeFocus {...{ onClose }}>
+    <BaseModal canClose={false} closeFocus {...{ onClose, isOpen }}>
       <Box
         sx={{
           minWidth: '400px',

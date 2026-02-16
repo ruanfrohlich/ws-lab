@@ -94,13 +94,16 @@ export const Header = () => {
           ...actions.filter((el) => el.value !== 'join' && el.value !== 'user'),
           {
             label: 'Meu Perfil',
-            value: `user/${user?.username}`,
             icon: <Person />,
+            value: `user/${user?.username}`,
           },
           {
             label: 'Pequisar',
             icon: <Search />,
-            onClick: () => setFindModal(true),
+            onClick: () => {
+              console.log('abrindo modal');
+              setFindModal(true);
+            },
           },
         ];
       });
@@ -124,7 +127,7 @@ export const Header = () => {
 
   return (
     <Fragment>
-      {findModal && <FindModal onClose={() => setFindModal(false)} />}
+      {findModal && <FindModal isOpen onClose={() => setFindModal(false)} />}
       <Box
         component='header'
         ref={headerRef}
