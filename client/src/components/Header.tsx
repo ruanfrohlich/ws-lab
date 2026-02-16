@@ -100,10 +100,7 @@ export const Header = () => {
           {
             label: 'Pequisar',
             icon: <Search />,
-            onClick: () => {
-              console.log('abrindo modal');
-              setFindModal(true);
-            },
+            onClick: () => setFindModal(true),
           },
         ];
       });

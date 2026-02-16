@@ -10,7 +10,6 @@ export default (props: IBaseModalProps) => {
   const checkFocus = (event: MouseEvent) => {
     const modalInner = modalBody.current;
     const clickedEl = event.target as HTMLDivElement;
-    console.log('checando focus, clicked: ', clickedEl);
 
     if (modalInner) {
       const isInner = !!clickedEl.closest(`.${modalInner.classList[1]}`);
